@@ -1,0 +1,29 @@
+# Full-size QLoRA dialogue fine-tune: HuggingFaceTB/SmolLM3-3B (Apache-2.0 and
+# ungated, so no access request stands between a reader and a reproduction) in
+# 4-bit NF4, trained on the instruction pairs of the Peskov train split.
+# WSL2/CUDA only (load_in_4bit requires bitsandbytes; docs/setup.md). Preprocess
+# the train split first:
+#   uv run python scripts/preprocess_peskov.py --input data/peskov/train.jsonl \
+#     --out data/peskov_instructions/train.jsonl
+# then, inside WSL2 (uv sync --group finetune):
+#   uv run python scripts/train_dialogue_lora.py \
+#     --config src/entente/negotiation/finetune/configs/base.yaml
+base_model: HuggingFaceTB/SmolLM3-3B
+load_in_4bit: true
+lora:
+  r: 16
+  alpha: 32
+  dropout: 0.05
+  target_modules: [q_proj, v_proj]
+optim:
+  lr: 2.0e-4
+  warmup_steps: 50
+  max_steps: 1000
+  batch_size: 8
+  max_seq_length: 256
+data_path: data/peskov_instructions/train.jsonl
+seed: 0
+out_dir: checkpoints/dialogue_lora
+run_name: dialogue_lora
+device: auto
+log_every: 20

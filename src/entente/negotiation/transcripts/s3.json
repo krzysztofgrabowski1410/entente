@@ -1,0 +1,44 @@
+{
+  "ally": "ITALY",
+  "incoming_message": "PROPOSAL from AUSTRIA to ITALY for S1901M: AUSTRIA orders [A VIE - GAL, A BUD - SER, F TRI - ALB]; ITALY orders [F NAP - ION, A ROM - APU, A VEN H]. Nothing but the Balkans from me this year -- go ahead and develop south.",
+  "note": "Deceptive: AUSTRIA's announced move (index 0, peaceful Balkans) does NOT match its actual scripted move (index 1, repositioning toward the Italian border). Demonstrates that conditioning on an untruthful proposal can mislead prediction.",
+  "parsed_intent": {
+    "ally": "ITALY",
+    "ally_action": [
+      "F NAP - ION",
+      "A ROM - APU",
+      "A VEN H"
+    ],
+    "phase": "S1901M",
+    "proposer": "AUSTRIA",
+    "proposer_action": [
+      "A VIE - GAL",
+      "A BUD - SER",
+      "F TRI - ALB"
+    ],
+    "rationale": "Nothing but the Balkans from me this year -- go ahead and develop south."
+  },
+  "phase": "S1901M",
+  "prediction": {
+    "baseline_mean_strategy": [
+      0.30215608208026223,
+      0.3956878358394756,
+      0.30215608208026223
+    ],
+    "baseline_probability_of_true_move": 0.3956878358394756,
+    "conditioned_mean_strategy": [
+      0.6135481127524098,
+      0.2190968882503048,
+      0.16735499899728537
+    ],
+    "conditioned_probability_of_true_move": 0.2190968882503048,
+    "true_move_index": 1
+  },
+  "proposer": "AUSTRIA",
+  "regenerated_message": {
+    "provider": "stub",
+    "text": "PROPOSAL from AUSTRIA to ITALY for S1901M: AUSTRIA orders [A VIE - GAL, A BUD - SER, F TRI - ALB]; ITALY orders [F NAP - ION, A ROM - APU, A VEN H]. Nothing but the Balkans from me this year -- go ahead and develop south."
+  },
+  "scenario": "s3",
+  "self_power": "RUSSIA"
+}

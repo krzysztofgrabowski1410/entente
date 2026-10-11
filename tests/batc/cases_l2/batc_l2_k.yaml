@@ -1,0 +1,100 @@
+# BATC-L2 section K -- transferable knowledge facts (rulebook "Fleets",
+# "Teleri", "Dwarves (Naugrim)", "Feanorian Powers").
+section: "BATC-L2 K. Knowledge facts"
+cases:
+  - id: BATC-L2.K.1
+    title: fleet-building granted, a fleet build succeeds at a coastal owned center
+    start:
+      phase: S25M
+      units:
+        MEN: ["A ELA"]
+      ownership: {VIN: MEN}
+    script:
+      - phase: S25M
+        grants: [[TELERI, MEN, fleet-building]]
+      - phase: F25M
+      - phase: W25A
+        orders:
+          MEN: ["Build F VIN"]
+    expect:
+      resolutions: {"Build F VIN": succeeds}
+      fleet_knowledge: [MEN, TELERI]
+      units:
+        MEN: ["A ELA", "A ERI", "A ERI", "F VIN"]
+
+  - id: BATC-L2.K.2
+    title: without the knowledge the same fleet build fails
+    start:
+      phase: S25M
+      units:
+        MEN: ["A ELA"]
+      ownership: {VIN: MEN}
+    script:
+      - phase: S25M
+      - phase: F25M
+      - phase: W25A
+        orders:
+          MEN: ["Build F VIN"]
+    expect:
+      resolutions: {"Build F VIN": fails}
+      fleet_knowledge: [TELERI]
+
+  - id: BATC-L2.K.3
+    title: Morgoth can never receive the fleet-building knowledge
+    script:
+      - phase: S25M
+        grants_refused: [[TELERI, MORGOTH, fleet-building]]
+    expect:
+      fleet_knowledge: [TELERI]
+
+  - id: BATC-L2.K.4
+    title: the Feanorians learn only from non-elvish powers — the chain works
+    script:
+      - phase: S25M
+        grants_refused: [[TELERI, FEANORIANS, fleet-building]]
+      - phase: F25M
+        grants:
+          - [TELERI, MEN, fleet-building]
+          - [MEN, FEANORIANS, fleet-building]
+    expect:
+      fleet_knowledge: [FEANORIANS, MEN, TELERI]
+
+  - id: BATC-L2.K.5
+    title: the Naugrim hold the knowledge to pass it forward but cannot use it
+    start:
+      phase: S25M
+      units:
+        NAUGRIM: ["A BRI"]
+    script:
+      - phase: S25M
+        grants:
+          - [TELERI, NAUGRIM, fleet-building]
+          - [NAUGRIM, MEN, fleet-building]
+      - phase: F25M
+        orders:
+          NAUGRIM: ["A BRI TFM F"]
+    expect:
+      resolutions: {"A BRI TFM F": fails}
+      fleet_knowledge: [MEN, NAUGRIM, TELERI]
+      units:
+        NAUGRIM: ["A BRI"]
+
+  - id: BATC-L2.K.6
+    title: a dwarven fleet build fails even with the knowledge held
+    start:
+      phase: S25M
+      units:
+        NAUGRIM: ["A ELA"]
+      ownership: {VIN: NAUGRIM}
+      l2:
+        fleet_knowledge: [TELERI, NAUGRIM]
+    script:
+      - phase: S25M
+      - phase: F25M
+      - phase: W25A
+        orders:
+          NAUGRIM: ["Build F VIN", "Build A NOG"]
+    expect:
+      resolutions:
+        "Build F VIN": fails
+        "Build A NOG": succeeds

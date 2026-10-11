@@ -1,0 +1,736 @@
+# BATC section B -- Areas: multi-power stacking, capacity-6 admission by
+# descending strength class, tie-overflow, vacancy, boxes, Angband.
+# Rulebook: "Areas", "Stopping a Unit from entering an Area",
+# "Provinces off the map".
+# B.22 is the odd one out: the rules give its position no consistent outcome,
+# and the case pins what the adjudicator's backup policy does with it -- not
+# a ruling of the rulebook.
+section: "BATC B. Area capacity and admission"
+ruleset: beleriand
+cases:
+  - id: BATC.B.1
+    title: several powers enter one area side by side
+    # Areas hold up to six units of different powers; nothing bounces while
+    # everyone fits -- the anti-bounce contrast with capacity-1 provinces.
+    # (The NAR-TAL and IVR-TAL barriers penalize only the outbound
+    # TAL->NAR / TAL->IVR crossings -- barriers are directional -- so these
+    # entries are full.)
+    phase: S25M
+    units:
+      FINROD: ["A NAR", "A IVR"]
+      DORIATH: ["A FOB"]
+    orders:
+      FINROD: ["A NAR - TAL", "A IVR - TAL"]
+      DORIATH: ["A FOB - TAL"]
+    expect:
+      resolutions:
+        "A NAR - TAL": succeeds
+        "A IVR - TAL": succeeds
+        "A FOB - TAL": succeeds
+      units:
+        FINROD: ["A TAL", "A TAL"]
+        DORIATH: ["A TAL"]
+
+  - id: BATC.B.2
+    title: the stronger class takes the last slot
+    # Five stayers, one slot: the strength-2 entrant is admitted, the
+    # strength-1 class does not fit (rulebook: "the stronger ones have
+    # higher priority in entering"). Both approaches enter TAL in the free
+    # direction (the barrier table penalizes TAL->NAR / TAL->IVR, not
+    # these), so the classes are a whole 2 and 1.
+    phase: S25M
+    units:
+      MORGOTH: ["A TAL", "A TAL", "A TAL"]
+      DORIATH: ["A TAL", "A TAL"]
+      FINROD: ["2A NAR", "A IVR"]
+    orders:
+      FINROD: ["2A NAR - TAL", "A IVR - TAL"]
+    expect:
+      resolutions:
+        "2A NAR - TAL": succeeds
+        "A IVR - TAL": fails
+      units:
+        FINROD: ["2A TAL", "A IVR"]
+
+  - id: BATC.B.3
+    title: a tied class that does not fit wholly bounces wholly
+    # Five stayers, one slot, two strength-1 entrants: "If some Units of the
+    # same Strength don't fit into the limit of 6, then all Units of this
+    # Strength will fail to Move" -- the slot stays empty. (Full-strength
+    # entries: the NAR-TAL / IVR-TAL penalties point outbound.)
+    phase: S25M
+    units:
+      MORGOTH: ["A TAL", "A TAL", "A TAL"]
+      DORIATH: ["A TAL", "A TAL"]
+      FINROD: ["A NAR", "A IVR"]
+    orders:
+      FINROD: ["A NAR - TAL", "A IVR - TAL"]
+    expect:
+      resolutions:
+        "A NAR - TAL": fails
+        "A IVR - TAL": fails
+      units:
+        FINROD: ["A NAR", "A IVR"]
+
+  - id: BATC.B.4
+    title: an overflowing strong class stops admission for everyone weaker
+    # Three slots, four double armies, one single: the doubles' class (4)
+    # does not wholly fit, so it bounces AND admission stops -- the single
+    # bounces too, although three slots remain (the reading consistent
+    # with the classic rule that a standoff blocks weaker entrants). Every
+    # approach here enters TAL in the free direction, so the doubles' class
+    # value is a whole 2. (The third double stands in FSI: FSI-TAL is an
+    # edge of the board, FOS-TAL is not.)
+    phase: S25M
+    units:
+      MORGOTH: ["A TAL", "A TAL", "A TAL"]
+      FINROD: ["2A NAR", "2A IVR", "2A FSI"]
+      DORIATH: ["2A FOB", "A NWB"]
+    orders:
+      FINROD: ["2A NAR - TAL", "2A IVR - TAL", "2A FSI - TAL"]
+      DORIATH: ["2A FOB - TAL", "A NWB - TAL"]
+    expect:
+      resolutions:
+        "2A NAR - TAL": fails
+        "2A IVR - TAL": fails
+        "2A FSI - TAL": fails
+        "2A FOB - TAL": fails
+        "A NWB - TAL": fails
+      units:
+        FINROD: ["2A NAR", "2A IVR", "2A FSI"]
+        DORIATH: ["2A FOB", "A NWB"]
+
+  - id: BATC.B.5
+    title: a leaver frees the slot for an entrant
+    # Full area; one occupant departs and the entrant takes its slot --
+    # the vacancy dependency across a capacity boundary. The departure
+    # crosses TAL->NAR, a penalized direction (1 x 1/2 = 1/2) -- an
+    # uncontested entry admits at any positive strength, so the halving
+    # touches the arithmetic, not the vacancy logic.
+    phase: S25M
+    units:
+      MORGOTH: ["A TAL", "A TAL", "A TAL", "A TAL", "A TAL"]
+      FINROD: ["A TAL", "A NWB"]
+    orders:
+      FINROD: ["A TAL - NAR", "A NWB - TAL"]
+    expect:
+      resolutions:
+        "A TAL - NAR": succeeds
+        "A NWB - TAL": succeeds
+      units:
+        FINROD: ["A NAR", "A TAL"]
+
+  - id: BATC.B.6
+    title: a rotation through two full areas succeeds
+    # Both areas are full and each entrant needs the other's departure --
+    # the full-Area vacancy cycle commits to all-succeed
+    # (docs/adjudication.tex Sec. 5.2). (SOS/TID is the board's adjacent
+    # Area pair; SEB-TID is not an edge.)
+    phase: S25M
+    units:
+      MORGOTH: ["A SOS", "A SOS", "A SOS", "A SOS", "A SOS"]
+      OSSIRIAND: ["A TID", "A TID", "A TID", "A TID", "A TID"]
+      DORIATH: ["A SOS", "A TID"]
+    orders:
+      DORIATH: ["A SOS - TID", "A TID - SOS"]
+    expect:
+      resolutions:
+        "A SOS - TID": succeeds
+        "A TID - SOS": succeeds
+      units:
+        DORIATH: ["A TID", "A SOS"]
+
+  - id: BATC.B.7
+    title: opposing moves between areas are two independent entries
+    # No head-to-head across Areas (docs/adjudication.tex Sec. 4.1: Areas
+    # are not displacement-governed): the "swap" simply happens. (SOS/TID
+    # is the adjacent Area pair, as in B.6.)
+    phase: S25M
+    units:
+      MORGOTH: ["A SOS"]
+      OSSIRIAND: ["A TID"]
+    orders:
+      MORGOTH: ["A SOS - TID"]
+      OSSIRIAND: ["A TID - SOS"]
+    expect:
+      resolutions:
+        "A SOS - TID": succeeds
+        "A TID - SOS": succeeds
+      units:
+        MORGOTH: ["A TID"]
+        OSSIRIAND: ["A SOS"]
+
+  - id: BATC.B.8
+    title: an off-map box bounces like a classic province
+    # Capacity 1 by data: the classic standoff, no special-casing --
+    # the internal degeneracy check on one map (docs/adjudication.tex
+    # Sec. 4.3).
+    phase: S25M
+    units:
+      FINGOLFIN: ["A HIT"]
+      MORGOTH: ["A NLA"]
+    orders:
+      FINGOLFIN: ["A HIT - NLA-HIT"]
+      MORGOTH: ["A NLA - NLA-HIT"]
+    expect:
+      resolutions:
+        "A HIT - NLA-HIT": fails
+        "A NLA - NLA-HIT": fails
+
+  - id: BATC.B.9
+    title: only the Morgoth unit may re-enter Angband
+    # Rulebook "Provinces off the map": Angband admits only Morgoth's
+    # units, and entry from the board is forbidden outright -- "no Unit may
+    # enter it from the board" -- except for his strength-3 specials, so the
+    # Layer-1 static entry ban reserves entry to strength-3 units; other
+    # orders into it are illegal and become Hold.
+    phase: S25M
+    units:
+      MORGOTH: ["3A ANF", "A ANF"]
+      FINROD: ["A ANF"]
+    orders:
+      MORGOTH: ["3A ANF - ANG", "A ANF - ANG"]
+      FINROD: ["A ANF - ANG"]
+    expect:
+      resolutions:
+        "3A ANF - ANG": succeeds
+        "A ANF - ANG": fails
+      units:
+        MORGOTH: ["3A ANG", "A ANF"]
+        FINROD: ["A ANF"]
+
+  - id: BATC.B.10
+    title: leaving Angband is always allowed
+    phase: S25M
+    units:
+      MORGOTH: ["A ANG", "A ANG"]
+    orders:
+      MORGOTH: ["A ANG - ANF"]
+    expect:
+      resolutions:
+        "A ANG - ANF": succeeds
+      units:
+        MORGOTH: ["A ANF", "A ANG"]
+
+  - id: BATC.B.11
+    title: a full-area rotation survives a bounced entrant and its dislodger
+    # The residue-scope guard: the backup policy's seed set must be the
+    # genuine residue, so the enumerator first commits every status shared
+    # by all stable labelings of a component and re-enumerates only the
+    # disagreement set. ANF->LAD is a penalized crossing, so the LAD-bound
+    # singles travel at 1/2 and the giant at 3/2; the three entries into ANF
+    # (from LAD, ANG and EIT) all ride free directions at their whole 1.
+    # FINROD's entry into full ANF fails in every stable labeling: the two
+    # bounced 1/2-strength LAD-movers stay, so at most two slots free and
+    # the entrant class of three never fits; the 3A then dislodges FINROD
+    # out of LAD at 3/2 > 1, nulling its prevent at ANF
+    # (docs/adjudication.tex Sec. 4.2). What remains is a genuine vacancy
+    # 2-cycle ANF<->EIT with "A ANG - ANF" riding the second freed slot -
+    # two stable labelings, settled by the Sec. 5.2 pure-cycle policy: the
+    # rotation succeeds. Re-seeding the unanimously-failing orders SUCCEEDS
+    # as well would let the poisoned downgrade cascade unravel the live
+    # cycle to all-fail.
+    # (The capacity-1 pocket is LAD: Ladros lies between Anfauglith and
+    # Aeluin, and AEL-ANF is not an edge of the board.)
+    phase: S25M
+    units:
+      FINROD: ["A LAD"]
+      MORGOTH: ["A ANF", "A ANF", "A ANF", "A ANF", "A ANF", "3A ANF",
+                "A ANG", "A ANG", "A EIT"]
+    orders:
+      FINROD: ["A LAD - ANF"]
+      MORGOTH: ["A ANF H", "A ANF H", "A ANF - EIT", "A ANF - LAD",
+                "A ANF - LAD", "3A ANF - LAD", "A ANG H", "A ANG - ANF",
+                "A EIT - ANF"]
+    expect:
+      resolutions:
+        "A LAD - ANF": fails
+        "A ANF - EIT": succeeds
+        "A ANF - LAD": fails
+        "3A ANF - LAD": succeeds
+        "A ANG - ANF": succeeds
+        "A EIT - ANF": succeeds
+      dislodged: ["FINROD A LAD"]
+      units:
+        FINROD: []
+        MORGOTH: ["A ANF", "A ANF", "A ANF", "A ANF", "A ANF", "A ANF",
+                  "3A LAD", "A EIT", "A ANG"]
+
+  - id: BATC.B.12
+    title: dislodges on a leaving victim cannot conjure the slots they need
+    # The residue-selection guard: a component with a unique stable labeling
+    # is committed, never handed to a backup policy. GONDOLIN's army leaves
+    # for EIT while two MORGOTH Dislodges name it from ANG and EIT and two
+    # plain moves enter from ANG. GONDOLIN's Move and the EIT Dislodge clash
+    # head-to-head ("Dislodge Order") and tie, 1 against 1: "a tie fails
+    # both", and the victim remains. The EIT Dislodge has lost its clash, so
+    # it takes part in nothing else. The ANG Dislodge alone attacks the
+    # victim, whose Move failed and which defends with its own Strength, 1:
+    # attack 1 does not exceed it, and the Dislodge fails. Anfauglith keeps
+    # four units and two free slots, and the two plain ANG moves take them --
+    # the one stable labeling. The enumerator hands the whole component to
+    # the selection; the residue step recomputes the Sec. 5.1 selection
+    # exactly (common.resolve_residue, shared by both engines), so a backup
+    # policy never sees a component with a unique stable labeling.
+    phase: S25M
+    units:
+      MORGOTH: ["A ANF", "A ANF", "A ANF", "A ANG", "A ANG", "3A ANG",
+                "A EIT"]
+      GONDOLIN: ["A ANF"]
+    orders:
+      MORGOTH: ["A ANF H", "A ANF H", "A ANF H", "A ANG - ANF",
+                "A ANG DIS GONDOLIN A ANF", "3A(M) ANG - ANF",
+                "A EIT DIS GONDOLIN A ANF"]
+      GONDOLIN: ["A ANF - EIT"]
+    expect:
+      resolutions:
+        "A ANF - EIT": fails
+        "A ANG - ANF": succeeds
+        "A ANG DIS GONDOLIN A ANF": fails
+        "3A(M) ANG - ANF": succeeds
+        "A EIT DIS GONDOLIN A ANF": fails
+      dislodged: []
+      units:
+        MORGOTH: ["A ANF", "A ANF", "A ANF", "A ANF", "3A ANF", "A ANG",
+                  "A EIT"]
+        GONDOLIN: ["A ANF"]
+
+  - id: BATC.B.13
+    title: a unit supports its Area-mate's move out (fungible twins)
+    # Stacked units may support each other (rulebook "Barring order": a
+    # Unit can Support a Unit of its own Area): a subject reference never
+    # means the supporter itself, so the bare "A ANF" binds the twin that
+    # moves -- the supporter's own occurrence neither captures the reference
+    # nor makes it ambiguous. Reading the fungible twin AS the supporter by
+    # value-equality would turn every such support into a Hold.
+    phase: S25M
+    units:
+      MORGOTH: ["A ANF", "A ANF"]
+    orders:
+      MORGOTH: ["A ANF - LOT", "A ANF S A ANF - LOT"]
+    expect:
+      resolutions:
+        "A ANF - LOT": succeeds
+        "A ANF S A ANF - LOT": succeeds
+      units:
+        MORGOTH: ["A LOT", "A ANF"]
+
+  - id: BATC.B.14
+    title: a co-located support delivers its strength (non-fungible stack)
+    # The delivery half of B.13: the 2A supports its Area-mate's attack on
+    # Dorthonion (no ANF->DNN barrier), so the attack lands at 1 + 2 = 3
+    # against a hold of 1 and dislodges -- unsupported it would bounce.
+    # The strength-less subject spec "A ANF" sits beside a 2A in the same
+    # Area yet stays unambiguous, because the supporter is excluded before
+    # the 4.C.5/4.C.6 ambiguity rules apply.
+    phase: S25M
+    units:
+      DORIATH: ["2A ANF", "A ANF"]
+      MORGOTH: ["A DNN"]
+    orders:
+      DORIATH: ["A ANF - DNN", "2A ANF S DORIATH A ANF - DNN"]
+    expect:
+      resolutions:
+        "A ANF - DNN": succeeds
+        "2A ANF S DORIATH A ANF - DNN": succeeds
+      dislodged: ["MORGOTH A DNN"]
+      units:
+        DORIATH: ["A DNN", "2A ANF"]
+        MORGOTH: []
+
+  - id: BATC.B.15
+    title: the reference binds the twin that received the subject order
+    # Twins rule 1 (rulebook "Indistinguishable Units (twins)"): "All
+    # Supports given to identically-worded Orders of twins attach to a
+    # single one of those Orders" -- a support is FOR an order, so a holder
+    # written earlier in the sheet cannot capture it. (Binding the
+    # canonically first occurrence regardless of its order would void the
+    # support on this exact sheet -- hold listed before the move.)
+    phase: S25M
+    units:
+      MORGOTH: ["A ANF", "A ANF", "A ANF"]
+    orders:
+      MORGOTH: ["A ANF H", "A ANF - LOT", "A ANF S A ANF - LOT"]
+    expect:
+      resolutions:
+        "A ANF H": succeeds
+        "A ANF - LOT": succeeds
+        "A ANF S A ANF - LOT": succeeds
+      units:
+        MORGOTH: ["A ANF", "A ANF", "A LOT"]
+
+  - id: BATC.B.16
+    title: concentration carries through to delivery
+    # B.15's tables half: the strength tables replay the same rule-1
+    # concentration, so the 2A's support binds the mover -- not the hold
+    # written first -- and DELIVERS: 1 + 2 = 3 dislodges Dorthonion's holder.
+    # Without the matching preference in _subject_record the support would
+    # bind the holder's record, match nothing, and the attack would bounce
+    # at 1 vs 1.
+    phase: S25M
+    units:
+      DORIATH: ["2A ANF", "A ANF", "A ANF"]
+      MORGOTH: ["A DNN"]
+    orders:
+      DORIATH: ["A ANF H", "A ANF - DNN", "2A ANF S DORIATH A ANF - DNN"]
+    expect:
+      resolutions:
+        "A ANF H": succeeds
+        "A ANF - DNN": succeeds
+        "2A ANF S DORIATH A ANF - DNN": succeeds
+      dislodged: ["MORGOTH A DNN"]
+      units:
+        DORIATH: ["A DNN", "A ANF", "2A ANF"]
+        MORGOTH: []
+
+  - id: BATC.B.17
+    title: an Area-mate of the victim supports the Dislodge against it
+    # The rulebook lets a Unit Support any Order which targets the Area in
+    # which it itself stands. Doriath's second army stands beside the victim,
+    # does not reach NEB (a unit never reaches its own province) and is no
+    # Area-mate of the dislodger, yet its support delivers: 1 + 1 = 2 against
+    # a hold of 1. Without the Area clause of the reach rule the support would
+    # be void for targeting the supporter's own province, and the Dislodge
+    # would bounce at 1 vs 1.
+    phase: S25M
+    units:
+      DORIATH: ["A FOR", "A NEB"]
+      MORGOTH: ["A NEB"]
+    orders:
+      DORIATH: ["A FOR DIS MORGOTH A NEB", "A NEB S DORIATH A FOR DIS MORGOTH A NEB"]
+      MORGOTH: ["A NEB H"]
+    expect:
+      resolutions:
+        "A FOR DIS MORGOTH A NEB": succeeds
+        "A NEB S DORIATH A FOR DIS MORGOTH A NEB": succeeds
+        "A NEB H": fails
+      dislodged: ["MORGOTH A NEB"]
+      units:
+        DORIATH: ["A NEB", "A NEB"]
+        MORGOTH: []
+
+  - id: BATC.B.18
+    title: a unit in the Area supports the Move entering it, over a Bar
+    # The second shape aimed at an Area, against the Bar it has to beat: the
+    # support raises the Move's prevent to 2 over a Bar of 1, so the entry
+    # goes through. Were the support void -- the reach rule alone, with no Area
+    # clause -- prevent 1 would not exceed the Bar's 1 and the Move would be
+    # barred.
+    phase: S25M
+    units:
+      DORIATH: ["A FOR", "A NEB"]
+      MORGOTH: ["A NEB"]
+    orders:
+      DORIATH: ["A FOR - NEB", "A NEB S DORIATH A FOR - NEB"]
+      MORGOTH: ["A NEB BAR DORIATH A FOR - NEB"]
+    expect:
+      resolutions:
+        "A FOR - NEB": succeeds
+        "A NEB S DORIATH A FOR - NEB": succeeds
+        "A NEB BAR DORIATH A FOR - NEB": fails
+      dislodged: []
+      units:
+        DORIATH: ["A NEB", "A NEB"]
+        MORGOTH: ["A NEB"]
+
+  - id: BATC.B.19
+    title: a unit cannot help dislodge itself
+    # The support is legal now -- its target is the supporter's own Area --
+    # but the role filter leaves out supports given by the defender's own
+    # power, and here supporter and defender are the same unit. The attack
+    # stays at 1 against a hold of 1 and nobody moves. Counting it would let
+    # a power dislodge its own unit through a third party's order.
+    phase: S25M
+    units:
+      MEN: ["A NEB"]
+      DORIATH: ["A FOR"]
+    orders:
+      DORIATH: ["A FOR DIS MEN A NEB"]
+      MEN: ["A NEB S DORIATH A FOR DIS MEN A NEB"]
+    expect:
+      resolutions:
+        "A FOR DIS MEN A NEB": fails
+        "A NEB S DORIATH A FOR DIS MEN A NEB": fails
+      dislodged: []
+      units:
+        DORIATH: ["A FOR"]
+        MEN: ["A NEB"]
+
+  - id: BATC.B.20
+    title: an attack from outside cuts a support given inside the Area
+    # Support cutting reads the supporter's province, not its subject's: the
+    # Dislodge written from Thargelion attacks the supporter and cuts it,
+    # dropping the Move's prevent back to 1 so the Bar holds. The cut
+    # attacker itself fails -- the supporter's hold of 1 is not beaten -- and
+    # cutting needs no success.
+    phase: S25M
+    units:
+      DORIATH: ["A FOR", "A NEB"]
+      MORGOTH: ["A NEB", "A THA"]
+    orders:
+      DORIATH: ["A FOR - NEB", "A NEB S DORIATH A FOR - NEB"]
+      MORGOTH: ["A NEB BAR DORIATH A FOR - NEB", "A THA DIS DORIATH A NEB"]
+    expect:
+      resolutions:
+        "A FOR - NEB": fails
+        "A NEB S DORIATH A FOR - NEB": fails
+        "A NEB BAR DORIATH A FOR - NEB": succeeds
+        "A THA DIS DORIATH A NEB": fails
+      dislodged: []
+      units:
+        DORIATH: ["A FOR", "A NEB"]
+        MORGOTH: ["A NEB", "A THA"]
+
+  - id: BATC.B.21
+    title: a capacity-one province keeps the classic reach rule
+    # Dorthonion holds one unit, so it is no Area and nothing about it is
+    # supportable from inside: the classic rule that a unit supports only
+    # where it could have gone survives untouched wherever there is no Area
+    # to stand in. This is the Beleriand twin of DATC 6.D.34, and it is what
+    # keeps the standard column -- every province capacity 1 -- unmoved.
+    phase: S25M
+    units:
+      DORIATH: ["A DNN", "A ANF"]
+    orders:
+      DORIATH: ["A DNN S DORIATH A ANF - DNN", "A ANF - DNN"]
+    expect:
+      resolutions:
+        "A DNN S DORIATH A ANF - DNN": fails
+        "A ANF - DNN": fails
+      dislodged: []
+      units:
+        DORIATH: ["A ANF", "A DNN"]
+
+  - id: BATC.B.22
+    title: a position with no consistent outcome - nothing moves
+    # THE EXPECTED OUTCOME IS NOT A RULING OF THE RULEBOOK. The rules give
+    # this position no consistent outcome at all, and the case pins what the
+    # adjudicator's backup policy then does, so that it cannot change
+    # unnoticed (docs/adjudication.tex Sec. 5.2 and Sec. 8.4).
+    # Anfauglith is full: six Morgoth armies. GONDOLIN's Dislodge from RIV
+    # names the twin that is moving to the Fen of Serech and has FINROD's
+    # Support: Strength 1 + 1 = 2. GONDOLIN's army in the Fen moves into
+    # Rivil's Well. A 3A waits in Angband for a slot. (The victim moves away
+    # from its attacker, not against it, so no head-to-head clash arises:
+    # C.14 is the same knot with the victim moving into RIV, and there the
+    # clash decides it.)
+    # Suppose the Dislodge fails. Then A RIV stays, the Fen army cannot enter
+    # it, the Fen stays occupied and the victim's Move fails against it. The
+    # victim stays, and a Unit whose Move failed defends with its own Strength
+    # alone, 1; 2 is more than 1 and no Bar or rival stands in the way: the
+    # Dislodge succeeds. Contradiction.
+    # Suppose it succeeds. Then RIV is left empty, the Fen army enters it,
+    # and the victim enters the Fen, so the Dislodge finds its victim gone and
+    # is a plain entry into an Area with one free slot. "Where Moves compete
+    # for the space, the Strength of the Move decides": the 3A (3) enters
+    # first and nothing is left for the Dislodge (2): it fails. Contradiction.
+    # The all-succeed policy seeds all four orders as succeeding and takes
+    # back what the rules refute: the Dislodge, then the Fen army's Move, then
+    # the victim's, then the 3A's. Nothing moves. The Support's row succeeds:
+    # it was given, it was not cut and its giver stands.
+    # (An engine test holds the same knot with the dislodger in DNN and the
+    # rotation through LAD, and the three controls -- without the 3A, with a
+    # free slot, without the Support -- each of which has exactly one
+    # consistent outcome.)
+    phase: S25M
+    units:
+      FINROD: ["A DNN"]
+      GONDOLIN: ["A RIV", "A FSE"]
+      MORGOTH: ["A ANF", "A ANF", "A ANF", "A ANF", "A ANF", "A ANF",
+                "3A ANG"]
+    orders:
+      FINROD: ["A DNN S A RIV DIS MORGOTH A ANF - FSE"]
+      GONDOLIN: ["A RIV DIS MORGOTH A ANF - FSE", "A FSE - RIV"]
+      MORGOTH: ["A ANF - FSE", "A ANF H", "A ANF H", "A ANF H", "A ANF H",
+                "A ANF H", "3A(M) ANG - ANF"]
+    expect:
+      resolutions:
+        "A RIV DIS MORGOTH A ANF - FSE": fails
+        "A FSE - RIV": fails
+        "A ANF - FSE": fails
+        "3A(M) ANG - ANF": fails
+        "A DNN S A RIV DIS MORGOTH A ANF - FSE": succeeds
+        "A ANF H": succeeds
+      dislodged: []
+      units:
+        FINROD: ["A DNN"]
+        GONDOLIN: ["A RIV", "A FSE"]
+        MORGOTH: ["A ANF", "A ANF", "A ANF", "A ANF", "A ANF", "A ANF",
+                  "3A ANG"]
+
+  - id: BATC.B.23
+    title: what the rules settle on their own is settled before the backup policy
+    # THE EXPECTED OUTCOME OF B.22'S KNOT IS NOT A RULING OF THE RULEBOOK
+    # (see B.22); what this case pins is the order around it.
+    # B.22's knot, with one of the holding Morgoth armies replaced by a 2A
+    # moving into Ladros (halved to 1 by the crossing), FINGOLFIN's 2A in
+    # Ladros dislodging it, and a FEANORIANS army moving into Ladros. The
+    # 2A and the Dislodge clash head-to-head ("Dislodge Order"): 2 beats 1,
+    # the 2A is dislodged and FINGOLFIN's 2A takes its slot in Anfauglith.
+    # Ladros is left empty, the dislodged 2A has no effect there, and the
+    # Feanorian army enters -- whatever the knot does. The knot has no
+    # consistent outcome, and its backup policy is given only the knot's
+    # four orders: nothing in it moves.
+    phase: S25M
+    units:
+      FINROD: ["A DNN"]
+      GONDOLIN: ["A RIV", "A FSE"]
+      MORGOTH: ["A ANF", "A ANF", "A ANF", "A ANF", "A ANF", "2A ANF", "3A ANG"]
+      FINGOLFIN: ["2A LAD"]
+      FEANORIANS: ["A AEL"]
+    orders:
+      FINROD: ["A DNN S A RIV DIS MORGOTH A ANF - FSE"]
+      GONDOLIN: ["A RIV DIS MORGOTH A ANF - FSE", "A FSE - RIV"]
+      MORGOTH: ["A ANF - FSE", "A ANF H", "A ANF H", "A ANF H", "A ANF H",
+                "2A ANF - LAD", "3A(M) ANG - ANF"]
+      FINGOLFIN: ["2A LAD DIS MORGOTH 2A ANF"]
+      FEANORIANS: ["A AEL - LAD"]
+    expect:
+      resolutions:
+        "2A LAD DIS MORGOTH 2A ANF": succeeds
+        "2A ANF - LAD": fails
+        "A AEL - LAD": succeeds
+        "A RIV DIS MORGOTH A ANF - FSE": fails
+        "A FSE - RIV": fails
+        "A ANF - FSE": fails
+        "3A(M) ANG - ANF": fails
+      dislodged: ["MORGOTH 2A ANF"]
+      units:
+        FINROD: ["A DNN"]
+        GONDOLIN: ["A RIV", "A FSE"]
+        MORGOTH: ["A ANF", "A ANF", "A ANF", "A ANF", "A ANF", "3A ANG"]
+        FINGOLFIN: ["2A ANF"]
+        FEANORIANS: ["A LAD"]
+
+  - id: BATC.B.24
+    title: a dislodge that loses its clash stands in nobody's way
+    # Rulebook ("Dislodge Order"): "A Dislodge that loses its clash fails,
+    # and it does not stand in the way of the other Units entering the Area."
+    # MORGOTH's Dislodge from Anfauglith names the army moving out of
+    # Lothlann into Anfauglith, so the two clash head-to-head. The army has
+    # FEANORIANS' Support: 2 against 1, the Dislodge loses and fails. The
+    # army wins the clash but finds Anfauglith full (six MORGOTH armies) and
+    # fails too, so it stays: Lothlann keeps five units and one free slot.
+    # The beaten Dislodge takes no part in the entry into Lothlann, so
+    # DORIATH's army from Aeluin is the only Move competing for the slot
+    # and enters.
+    phase: S25M
+    units:
+      MORGOTH: ["A ANF", "A ANF", "A ANF", "A ANF", "A ANF", "A ANF"]
+      FEANORIANS: ["A LOT", "A LOT", "A LOT", "A LOT", "A LOT"]
+      DORIATH: ["A AEL"]
+    orders:
+      MORGOTH: ["A ANF DIS FEANORIANS A LOT - ANF", "A ANF H", "A ANF H",
+                "A ANF H", "A ANF H", "A ANF H"]
+      FEANORIANS: ["A LOT - ANF", "A LOT S A LOT - ANF", "A LOT H", "A LOT H",
+                   "A LOT H"]
+      DORIATH: ["A AEL - LOT"]
+    expect:
+      resolutions:
+        "A ANF DIS FEANORIANS A LOT - ANF": fails
+        "A LOT - ANF": fails
+        "A LOT S A LOT - ANF": succeeds
+        "A AEL - LOT": succeeds
+      dislodged: []
+      units:
+        MORGOTH: ["A ANF", "A ANF", "A ANF", "A ANF", "A ANF", "A ANF"]
+        FEANORIANS: ["A LOT", "A LOT", "A LOT", "A LOT", "A LOT"]
+        DORIATH: ["A LOT"]
+
+  - id: BATC.B.25
+    title: a dislodge that ties its clash stands in nobody's way either
+    # B.24 without the Support: the Dislodge and the army it names clash at
+    # 1 against 1, and "a tie fails both". A Dislodge that ties its clash has
+    # not won it, so it has lost it, and it does not stand in the way of the
+    # units entering Lothlann. The army stays, Lothlann keeps one free slot,
+    # and DORIATH's army takes it.
+    phase: S25M
+    units:
+      MORGOTH: ["A ANF", "A ANF", "A ANF", "A ANF", "A ANF", "A ANF"]
+      FEANORIANS: ["A LOT", "A LOT", "A LOT", "A LOT", "A LOT"]
+      DORIATH: ["A AEL"]
+    orders:
+      MORGOTH: ["A ANF DIS FEANORIANS A LOT - ANF", "A ANF H", "A ANF H",
+                "A ANF H", "A ANF H", "A ANF H"]
+      FEANORIANS: ["A LOT - ANF", "A LOT H", "A LOT H", "A LOT H", "A LOT H"]
+      DORIATH: ["A AEL - LOT"]
+    expect:
+      resolutions:
+        "A ANF DIS FEANORIANS A LOT - ANF": fails
+        "A LOT - ANF": fails
+        "A AEL - LOT": succeeds
+      dislodged: []
+      units:
+        MORGOTH: ["A ANF", "A ANF", "A ANF", "A ANF", "A ANF", "A ANF"]
+        FEANORIANS: ["A LOT", "A LOT", "A LOT", "A LOT", "A LOT"]
+        DORIATH: ["A LOT"]
+
+  - id: BATC.B.26
+    title: a stronger dislodge beaten in its clash keeps no weaker unit out
+    # MORGOTH's 2A in Anfauglith orders a Dislodge of the FEANORIAN 2A moving
+    # out of Lothlann into Anfauglith. The 2A has a Support: 3 against 2, it wins
+    # the clash and enters Anfauglith, where only the Dislodge's own unit
+    # stands (entry into an Area dislodges nobody). MORGOTH's Dislodge fails;
+    # its 2A stays in Anfauglith, not dislodged. Lothlann keeps five units
+    # and one free slot. The beaten Dislodge, though stronger than DORIATH's
+    # army from Ladros, does not stand in the way of the units entering the
+    # Area: DORIATH's army is the only Move competing for the slot and enters.
+    phase: S25M
+    units:
+      MORGOTH: ["2A ANF"]
+      FEANORIANS: ["2A LOT", "A LOT", "A LOT", "A LOT", "A LOT", "A LOT"]
+      DORIATH: ["A LAD"]
+    orders:
+      MORGOTH: ["2A ANF DIS FEANORIANS 2A LOT - ANF"]
+      FEANORIANS: ["2A LOT - ANF", "A LOT S 2A LOT - ANF", "A LOT H", "A LOT H",
+                   "A LOT H", "A LOT H"]
+      DORIATH: ["A LAD - LOT"]
+    expect:
+      resolutions:
+        "2A ANF DIS FEANORIANS 2A LOT - ANF": fails
+        "2A LOT - ANF": succeeds
+        "A LOT S 2A LOT - ANF": succeeds
+        "A LAD - LOT": succeeds
+      dislodged: []
+      units:
+        MORGOTH: ["2A ANF"]
+        FEANORIANS: ["2A ANF", "A LOT", "A LOT", "A LOT", "A LOT", "A LOT"]
+        DORIATH: ["A LOT"]
+
+  - id: BATC.B.27
+    title: a dislodge beaten in its clash stands off no other dislodge of its victim
+    # MORGOTH's 2A leaves Anfauglith for Lothlann with two Supports, 4.
+    # FINGOLFIN's army in Lothlann names it in a Dislodge with two FINROD
+    # Supports, 3: the two clash head-to-head and the 2A wins. Lothlann is
+    # full (FINGOLFIN's army and five FINROD armies, none leaving), so the
+    # 2A bounces and stays, defending with its own Strength alone, 2.
+    # MEN's 2A in Eithel Sirion names the same 2A in a Dislodge with a
+    # Support from the Fen of Serech, 3. A Dislodge beaten in its clash
+    # fails, and the clash is the only contest it takes part in: FINGOLFIN's
+    # Dislodge does not stand MEN's off. MEN's Dislodge beats the 2A's 2 at 3
+    # and dislodges it, and MEN's 2A takes its slot in Anfauglith.
+    phase: S25M
+    units:
+      MORGOTH: ["2A ANF", "A ANF", "A ANF"]
+      FINGOLFIN: ["A LOT"]
+      FINROD: ["A LOT", "A LOT", "A LOT", "A LOT", "A LOT"]
+      MEN: ["2A EIT", "A FSE"]
+    orders:
+      MORGOTH: ["2A ANF - LOT", "A ANF S 2A ANF - LOT", "A ANF S 2A ANF - LOT"]
+      FINGOLFIN: ["A LOT DIS MORGOTH 2A ANF"]
+      FINROD: ["A LOT S FINGOLFIN A LOT DIS MORGOTH 2A ANF",
+               "A LOT S FINGOLFIN A LOT DIS MORGOTH 2A ANF",
+               "A LOT H", "A LOT H", "A LOT H"]
+      MEN: ["2A EIT DIS MORGOTH 2A ANF", "A FSE S 2A EIT DIS MORGOTH 2A ANF"]
+    expect:
+      resolutions:
+        "2A ANF - LOT": fails
+        "A LOT DIS MORGOTH 2A ANF": fails
+        "2A EIT DIS MORGOTH 2A ANF": succeeds
+        "A FSE S 2A EIT DIS MORGOTH 2A ANF": succeeds
+      dislodged: ["MORGOTH 2A ANF"]
+      units:
+        MORGOTH: ["A ANF", "A ANF"]
+        FINGOLFIN: ["A LOT"]
+        FINROD: ["A LOT", "A LOT", "A LOT", "A LOT", "A LOT"]
+        MEN: ["2A ANF", "A FSE"]

@@ -1,0 +1,23 @@
+# Citation metadata (https://citation-file-format.github.io/).
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+type: software
+title: "entente: a ruleset-generalized Diplomacy engine and AI research project"
+abstract: >-
+  A from-scratch Diplomacy engine generalizing adjudication to a
+  ruleset-parameterized stable-labeling calculus (certified against the DATC
+  and an original Beleriand variant test suite), plus game-theoretic agents
+  and KL-regularized (piKL) search built on top of it.
+authors:
+  - family-names: Grabowski
+    given-names: Krzysztof
+license: MIT
+repository-code: "https://github.com/krzysztofgrabowski1410/entente"
+version: 0.0.1
+date-released: "2026-10-11"
+keywords:
+  - diplomacy
+  - board-game
+  - adjudication
+  - game-theory
+  - reinforcement-learning

@@ -1,0 +1,512 @@
+# DATC section 6.H — Retreating.
+# Hand-encoded from the DATC v3.3 document (docs/references/, git-ignored;
+# live copy: webdiplomacy.net/datc.php). Case ids follow the DATC numbering;
+# and 4.A.5 choice B governs the dislodger-origin exception: a unit may
+# retreat to its dislodger's origin only if the dislodger came by convoy. No
+# other engine's test encodings were consulted.
+#
+# Each case adjudicates its movement phase (asserting the document's
+# per-order annotations), then the retreat stage on that PhaseResult.
+# The document's "illegal" retreat annotations map to fails, like movement
+# an illegal retreat exerts no contest (6.H.10).
+section: 6.H Retreating
+ruleset: standard
+cases:
+  - id: 6.H.1
+    title: no supports during retreat
+    phase: S1901M
+    units:
+      AUSTRIA: [F TRI, A SER]
+      TURKEY: [F GRE]
+      ITALY: [A VEN, A TYR, F ION, F AEG]
+    orders:
+      AUSTRIA: [F TRI H, A SER H]
+      TURKEY: [F GRE H]
+      ITALY: [A VEN S A TYR - TRI, A TYR - TRI, F ION - GRE, F AEG S F ION - GRE]
+    retreats:
+      AUSTRIA: [F TRI - ALB, A SER S F TRI - ALB]
+      TURKEY: [F GRE - ALB]
+    expect:
+      resolutions:
+        A TYR - TRI: succeeds
+        F ION - GRE: succeeds
+        A VEN S A TYR - TRI: succeeds
+        F AEG S F ION - GRE: succeeds
+        F TRI H: fails
+        F GRE H: fails
+      dislodged: [AUSTRIA F TRI, TURKEY F GRE]
+      retreat_resolutions:
+        # The Serbian support is not a retreat order (illegal); both fleets
+        # then contest Albania and disband.
+        F TRI - ALB: fails
+        A SER S F TRI - ALB: fails
+        F GRE - ALB: fails
+      disbanded: [AUSTRIA F TRI, TURKEY F GRE]
+      units:
+        AUSTRIA: [A SER]
+        TURKEY: []
+        ITALY: [A VEN, A TRI, F GRE, F AEG]
+
+  - id: 6.H.2
+    title: no supports from retreating unit
+    phase: S1901M
+    units:
+      ENGLAND: [A LVP, F YOR, F NWY]
+      GERMANY: [A KIE, A RUH]
+      RUSSIA: [F EDI, A SWE, A FIN, F HOL]
+    orders:
+      ENGLAND: [A LVP - EDI, F YOR S A LVP - EDI, F NWY H]
+      GERMANY: [A KIE S A RUH - HOL, A RUH - HOL]
+      RUSSIA: [F EDI H, A SWE S A FIN - NWY, A FIN - NWY, F HOL H]
+    retreats:
+      ENGLAND: [F NWY - NTH]
+      RUSSIA: [F EDI - NTH, F HOL S F EDI - NTH]
+    expect:
+      resolutions:
+        A LVP - EDI: succeeds
+        A RUH - HOL: succeeds
+        A FIN - NWY: succeeds
+      dislodged: [ENGLAND F NWY, RUSSIA F EDI, RUSSIA F HOL]
+      retreat_resolutions:
+        # A dislodged unit may receive an order but never a support order:
+        # F HOL's claim is illegal and it disbands; the two legal retreats
+        # contest the North Sea and disband too.
+        F NWY - NTH: fails
+        F EDI - NTH: fails
+        F HOL S F EDI - NTH: fails
+      disbanded: [ENGLAND F NWY, RUSSIA F EDI, RUSSIA F HOL]
+      units:
+        ENGLAND: [A EDI, F YOR]
+        GERMANY: [A KIE, A HOL]
+        RUSSIA: [A NWY, A SWE]
+
+  - id: 6.H.3
+    title: no convoy during retreat
+    phase: S1901M
+    units:
+      ENGLAND: [F NTH, A HOL]
+      GERMANY: [F KIE, A RUH]
+    orders:
+      ENGLAND: [F NTH H, A HOL H]
+      GERMANY: [F KIE S A RUH - HOL, A RUH - HOL]
+    retreats:
+      ENGLAND: [A HOL - YOR, F NTH C A HOL - YOR]
+    expect:
+      resolutions:
+        A RUH - HOL: succeeds
+        A HOL H: fails
+      dislodged: [ENGLAND A HOL]
+      retreat_resolutions:
+        # Holland-Yorkshire needs a convoy; there are none during retreats.
+        A HOL - YOR: fails
+        F NTH C A HOL - YOR: fails
+      disbanded: [ENGLAND A HOL]
+      units:
+        ENGLAND: [F NTH]
+        GERMANY: [F KIE, A HOL]
+
+  - id: 6.H.4
+    title: no other moves during retreat
+    phase: S1901M
+    units:
+      ENGLAND: [F NTH, A HOL]
+      GERMANY: [F KIE, A RUH]
+    orders:
+      ENGLAND: [F NTH H, A HOL H]
+      GERMANY: [F KIE S A RUH - HOL, A RUH - HOL]
+    retreats:
+      ENGLAND: [A HOL - BEL, F NTH - NWG]
+    expect:
+      resolutions:
+        A RUH - HOL: succeeds
+      dislodged: [ENGLAND A HOL]
+      retreat_resolutions:
+        # Only dislodged units act in the retreat phase.
+        A HOL - BEL: succeeds
+        F NTH - NWG: fails
+      disbanded: []
+      units:
+        ENGLAND: [F NTH, A BEL]
+        GERMANY: [F KIE, A HOL]
+
+  - id: 6.H.5
+    title: a unit may not retreat to the province from which it is attacked
+    phase: S1901M
+    units:
+      RUSSIA: [F CON, F BLA]
+      TURKEY: [F ANK]
+    orders:
+      RUSSIA: [F CON S F BLA - ANK, F BLA - ANK]
+      TURKEY: [F ANK H]
+    retreats:
+      TURKEY: [F ANK - BLA]
+    expect:
+      resolutions:
+        F BLA - ANK: succeeds
+      dislodged: [TURKEY F ANK]
+      retreat_resolutions:
+        F ANK - BLA: fails
+      disbanded: [TURKEY F ANK]
+      units:
+        RUSSIA: [F CON, F ANK]
+        TURKEY: []
+
+  - id: 6.H.6
+    title: unit may not retreat to a contested province
+    phase: S1901M
+    units:
+      AUSTRIA: [A BUD, A TRI]
+      GERMANY: [A MUN, A SIL]
+      ITALY: [A VIE]
+    orders:
+      AUSTRIA: [A BUD S A TRI - VIE, A TRI - VIE]
+      GERMANY: [A MUN - BOH, A SIL - BOH]
+      ITALY: [A VIE H]
+    retreats:
+      ITALY: [A VIE - BOH]
+    expect:
+      resolutions:
+        A TRI - VIE: succeeds
+        A MUN - BOH: fails
+        A SIL - BOH: fails
+      dislodged: [ITALY A VIE]
+      retreat_resolutions:
+        # The Munich/Silesia standoff embattles Bohemia.
+        A VIE - BOH: fails
+      disbanded: [ITALY A VIE]
+      units:
+        AUSTRIA: [A BUD, A VIE]
+        GERMANY: [A MUN, A SIL]
+        ITALY: []
+
+  - id: 6.H.7
+    title: multiple retreat to same province will disband units
+    phase: S1901M
+    units:
+      AUSTRIA: [A BUD, A TRI]
+      GERMANY: [A MUN, A SIL]
+      ITALY: [A VIE, A BOH]
+    orders:
+      AUSTRIA: [A BUD S A TRI - VIE, A TRI - VIE]
+      GERMANY: [A MUN S A SIL - BOH, A SIL - BOH]
+      ITALY: [A VIE H, A BOH H]
+    retreats:
+      ITALY: [A BOH - TYR, A VIE - TYR]
+    expect:
+      resolutions:
+        A TRI - VIE: succeeds
+        A SIL - BOH: succeeds
+      dislodged: [ITALY A VIE, ITALY A BOH]
+      retreat_resolutions:
+        A BOH - TYR: fails
+        A VIE - TYR: fails
+      disbanded: [ITALY A VIE, ITALY A BOH]
+      units:
+        AUSTRIA: [A BUD, A VIE]
+        GERMANY: [A MUN, A BOH]
+        ITALY: []
+
+  - id: 6.H.8
+    title: triple retreat to same province will disband units
+    phase: S1901M
+    units:
+      ENGLAND: [A LVP, F YOR, F NWY]
+      GERMANY: [A KIE, A RUH]
+      RUSSIA: [F EDI, A SWE, A FIN, F HOL]
+    orders:
+      ENGLAND: [A LVP - EDI, F YOR S A LVP - EDI, F NWY H]
+      GERMANY: [A KIE S A RUH - HOL, A RUH - HOL]
+      RUSSIA: [F EDI H, A SWE S A FIN - NWY, A FIN - NWY, F HOL H]
+    retreats:
+      ENGLAND: [F NWY - NTH]
+      RUSSIA: [F EDI - NTH, F HOL - NTH]
+    expect:
+      resolutions:
+        A LVP - EDI: succeeds
+        A RUH - HOL: succeeds
+        A FIN - NWY: succeeds
+      dislodged: [ENGLAND F NWY, RUSSIA F EDI, RUSSIA F HOL]
+      retreat_resolutions:
+        F NWY - NTH: fails
+        F EDI - NTH: fails
+        F HOL - NTH: fails
+      disbanded: [ENGLAND F NWY, RUSSIA F EDI, RUSSIA F HOL]
+      units:
+        ENGLAND: [A EDI, F YOR]
+        GERMANY: [A KIE, A HOL]
+        RUSSIA: [A NWY, A SWE]
+
+  - id: 6.H.9
+    title: dislodged unit will not make attackers province contested
+    phase: S1901M
+    units:
+      ENGLAND: [F HEL, F DEN]
+      GERMANY: [A BER, F KIE, A SIL]
+      RUSSIA: [A PRU]
+    orders:
+      ENGLAND: [F HEL - KIE, F DEN S F HEL - KIE]
+      GERMANY: [A BER - PRU, F KIE H, A SIL S A BER - PRU]
+      RUSSIA: [A PRU - BER]
+    retreats:
+      GERMANY: [F KIE - BER]
+      RUSSIA: [Disband A PRU]
+    expect:
+      resolutions:
+        F HEL - KIE: succeeds
+        A BER - PRU: succeeds
+        A PRU - BER: fails
+      dislodged: [GERMANY F KIE, RUSSIA A PRU]
+      retreat_resolutions:
+        # Berlin's lone beaten entrant was dislodged by the overland attack
+        # out of Berlin (4.A.7-b nulling): the province is open — "an army
+        # can follow".
+        F KIE - BER: succeeds
+        Disband A PRU: succeeds
+      disbanded: [RUSSIA A PRU]
+      units:
+        ENGLAND: [F KIE, F DEN]
+        GERMANY: [A PRU, F BER, A SIL]
+        RUSSIA: []
+
+  - id: 6.H.10
+    title: retreating unit cannot bounce in attackers province
+    phase: S1901M
+    units:
+      ENGLAND: [A KIE]
+      GERMANY: [A BER, A MUN, A PRU]
+      RUSSIA: [A WAR, A SIL]
+    orders:
+      ENGLAND: [A KIE H]
+      GERMANY: [A BER - KIE, A MUN S A BER - KIE, A PRU H]
+      RUSSIA: [A WAR - PRU, A SIL S A WAR - PRU]
+    retreats:
+      ENGLAND: [A KIE - BER]
+      GERMANY: [A PRU - BER]
+    expect:
+      resolutions:
+        A BER - KIE: succeeds
+        A WAR - PRU: succeeds
+      dislodged: [ENGLAND A KIE, GERMANY A PRU]
+      retreat_resolutions:
+        # England's retreat to its attacker's origin is illegal, so it
+        # cannot bounce the German retreat into Berlin.
+        A KIE - BER: fails
+        A PRU - BER: succeeds
+      disbanded: [ENGLAND A KIE]
+      units:
+        ENGLAND: []
+        GERMANY: [A KIE, A MUN, A BER]
+        RUSSIA: [A PRU, A SIL]
+
+  - id: 6.H.11
+    title: retreat when dislodged by adjacent convoy
+    phase: S1901M
+    units:
+      FRANCE: [A GAS, A BUR, F MAO, F WES, F LYO]
+      ITALY: [A MAR]
+    orders:
+      FRANCE:
+        - A GAS - MAR via convoy
+        - A BUR S A GAS - MAR
+        - F MAO C A GAS - MAR
+        - F WES C A GAS - MAR
+        - F LYO C A GAS - MAR
+      ITALY: [A MAR H]
+    retreats:
+      ITALY: [A MAR - GAS]
+    expect:
+      resolutions:
+        A GAS - MAR via convoy: succeeds
+        A BUR S A GAS - MAR: succeeds
+        # The single chain MAO-WES-LYO is the used route (route-used
+        # convoy-order semantics).
+        F MAO C A GAS - MAR: succeeds
+        F WES C A GAS - MAR: succeeds
+        F LYO C A GAS - MAR: succeeds
+      dislodged: [ITALY A MAR]
+      retreat_resolutions:
+        # 4.A.5 choice B: the dislodger came by convoy, so its origin is a
+        # legal retreat destination.
+        A MAR - GAS: succeeds
+      disbanded: []
+      units:
+        FRANCE: [A MAR, A BUR, F MAO, F WES, F LYO]
+        ITALY: [A GAS]
+
+  - id: 6.H.12
+    title: retreat when dislodged by adjacent convoy while trying to do the same
+    phase: S1901M
+    units:
+      ENGLAND: [A LVP, F IRI, F ENG, F NTH]
+      FRANCE: [F BRE, F MAO]
+      RUSSIA: [A EDI, F NWG, F NAO, A CLY]
+    orders:
+      ENGLAND:
+        - A LVP - EDI via convoy
+        - F IRI C A LVP - EDI
+        - F ENG C A LVP - EDI
+        - F NTH C A LVP - EDI
+      FRANCE: [F BRE - ENG, F MAO S F BRE - ENG]
+      RUSSIA:
+        - A EDI - LVP via convoy
+        - F NWG C A EDI - LVP
+        - F NAO C A EDI - LVP
+        - A CLY S A EDI - LVP
+    retreats:
+      ENGLAND: [A LVP - EDI, Disband F ENG]
+    expect:
+      resolutions:
+        # England's chain IRI-ENG-NTH breaks with the English Channel; no
+        # route is used, so all three convoy orders fail (route-used
+        # semantics). Russia's convoy goes through.
+        A LVP - EDI via convoy: fails
+        F IRI C A LVP - EDI: fails
+        F ENG C A LVP - EDI: fails
+        F NTH C A LVP - EDI: fails
+        F BRE - ENG: succeeds
+        A EDI - LVP via convoy: succeeds
+        F NWG C A EDI - LVP: succeeds
+        F NAO C A EDI - LVP: succeeds
+        A CLY S A EDI - LVP: succeeds
+      dislodged: [ENGLAND A LVP, ENGLAND F ENG]
+      retreat_resolutions:
+        # The dislodger arrived by convoy: Edinburgh is open (4.A.5-b), and
+        # its own failed convoyed move never embattled it.
+        A LVP - EDI: succeeds
+        Disband F ENG: succeeds
+      disbanded: [ENGLAND F ENG]
+      units:
+        ENGLAND: [A EDI, F IRI, F NTH]
+        FRANCE: [F ENG, F MAO]
+        RUSSIA: [A LVP, F NWG, F NAO, A CLY]
+
+  - id: 6.H.13
+    title: no retreat with convoy in movement phase
+    phase: S1901M
+    units:
+      ENGLAND: [A PIC, F ENG]
+      FRANCE: [A PAR, A BRE]
+    orders:
+      ENGLAND: [A PIC H, F ENG C A PIC - LON]
+      FRANCE: [A PAR - PIC, A BRE S A PAR - PIC]
+    retreats:
+      ENGLAND: [A PIC - LON]
+    expect:
+      resolutions:
+        A PIC H: fails
+        # The cargo's written order is a hold — the convoy claim is invalid.
+        F ENG C A PIC - LON: fails
+        A PAR - PIC: succeeds
+      dislodged: [ENGLAND A PIC]
+      retreat_resolutions:
+        # Picardy-London is not army-adjacent and retreats never convoy.
+        A PIC - LON: fails
+      disbanded: [ENGLAND A PIC]
+      units:
+        ENGLAND: [F ENG]
+        FRANCE: [A PIC, A BRE]
+
+  - id: 6.H.14
+    title: no retreat with support in movement phase
+    phase: S1901M
+    units:
+      ENGLAND: [A PIC, F ENG]
+      FRANCE: [A PAR, A BRE, A BUR]
+      GERMANY: [A MUN, A MAR]
+    orders:
+      ENGLAND: [A PIC H, F ENG S A PIC - BEL]
+      FRANCE: [A PAR - PIC, A BRE S A PAR - PIC, A BUR H]
+      GERMANY: [A MUN S A MAR - BUR, A MAR - BUR]
+    retreats:
+      ENGLAND: [A PIC - BEL]
+      FRANCE: [A BUR - BEL]
+    expect:
+      resolutions:
+        A PIC H: fails
+        # The subject holds, so the support-move claim is invalid.
+        F ENG S A PIC - BEL: fails
+        A PAR - PIC: succeeds
+        A MAR - BUR: succeeds
+      dislodged: [ENGLAND A PIC, FRANCE A BUR]
+      retreat_resolutions:
+        # The movement-phase support gives no strength in the retreat
+        # contest: both retreats to Belgium bounce and disband.
+        A PIC - BEL: fails
+        A BUR - BEL: fails
+      disbanded: [ENGLAND A PIC, FRANCE A BUR]
+      units:
+        ENGLAND: [F ENG]
+        FRANCE: [A PIC, A BRE]
+        GERMANY: [A MUN, A BUR]
+
+  - id: 6.H.15
+    title: no coastal crawl in retreat
+    phase: S1901M
+    units:
+      TURKEY: [F CON]
+      RUSSIA: [F BUL/EC, F BLA]
+    orders:
+      TURKEY: [F CON H]
+      RUSSIA: [F BUL/EC - CON, F BLA S F BUL/EC - CON]
+    retreats:
+      TURKEY: [F CON - BUL/SC]
+    expect:
+      resolutions:
+        F BUL/EC - CON: succeeds
+      dislodged: [TURKEY F CON]
+      retreat_resolutions:
+        # The dislodger-origin ban is per province: the other coast of
+        # Bulgaria is no escape.
+        F CON - BUL/SC: fails
+      disbanded: [TURKEY F CON]
+      units:
+        TURKEY: []
+        RUSSIA: [F CON, F BLA]
+
+  - id: 6.H.16
+    title: no coastal crawl escape from portugal
+    phase: S1901M
+    units:
+      ENGLAND: [F POR]
+      FRANCE: [F SPA/SC, F MAO]
+    orders:
+      ENGLAND: [F POR H]
+      FRANCE: [F SPA/SC - POR, F MAO S F SPA/SC - POR]
+    # No retreat is possible (Mid-Atlantic occupied; Spain is the attacker's
+    # origin, both coasts): the fleet is destroyed with no decision to make.
+    retreats: {}
+    expect:
+      resolutions:
+        F POR H: fails
+        F SPA/SC - POR: succeeds
+      dislodged: [ENGLAND F POR]
+      retreat_resolutions: {}
+      disbanded: [ENGLAND F POR]
+      units:
+        ENGLAND: []
+        FRANCE: [F POR, F MAO]
+
+  - id: 6.H.17
+    title: contested for both coasts
+    phase: S1901M
+    units:
+      FRANCE: [F MAO, F GAS, F WES]
+      ITALY: [F TUN, F TYS]
+    orders:
+      FRANCE: [F MAO - SPA/NC, F GAS - SPA/NC, F WES H]
+      ITALY: [F TUN S F TYS - WES, F TYS - WES]
+    retreats:
+      FRANCE: [F WES - SPA/SC]
+    expect:
+      resolutions:
+        F MAO - SPA/NC: fails
+        F GAS - SPA/NC: fails
+        F TYS - WES: succeeds
+      dislodged: [FRANCE F WES]
+      retreat_resolutions:
+        # The standoff on the north coast embattles the whole province.
+        F WES - SPA/SC: fails
+      disbanded: [FRANCE F WES]
+      units:
+        FRANCE: [F MAO, F GAS]
+        ITALY: [F TUN, F WES]

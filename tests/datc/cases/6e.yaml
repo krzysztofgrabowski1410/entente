@@ -1,0 +1,293 @@
+# DATC section 6.E — Head-to-head battles and beleaguered garrison.
+# Hand-encoded from the DATC v3.3 document (docs/references/, git-ignored).
+section: 6.E Head-to-head battles and beleaguered garrison
+ruleset: standard
+cases:
+  - id: 6.E.1
+    title: dislodged unit has no effect on attackers province
+    phase: S1901M
+    units:
+      GERMANY: [A BER, F KIE, A SIL]
+      RUSSIA: [A PRU]
+    orders:
+      GERMANY: [A BER - PRU, F KIE - BER, A SIL S A BER - PRU]
+      RUSSIA: [A PRU - BER]
+    expect:
+      resolutions:
+        A BER - PRU: succeeds
+        F KIE - BER: succeeds
+        A SIL S A BER - PRU: succeeds
+        A PRU - BER: fails
+      dislodged: [RUSSIA A PRU]
+      units:
+        GERMANY: [A PRU, F BER, A SIL]
+
+  - id: 6.E.2
+    title: no self dislodgement in head-to-head battle
+    phase: S1901M
+    units:
+      GERMANY: [A BER, F KIE, A MUN]
+    orders:
+      GERMANY: [A BER - KIE, F KIE - BER, A MUN S A BER - KIE]
+    expect:
+      resolutions:
+        A BER - KIE: fails
+        F KIE - BER: fails
+        A MUN S A BER - KIE: succeeds
+
+  - id: 6.E.3
+    title: no help in dislodging own unit
+    phase: S1901M
+    units:
+      GERMANY: [A BER, A MUN]
+      ENGLAND: [F KIE]
+    orders:
+      GERMANY: [A BER - KIE, A MUN S F KIE - BER]
+      ENGLAND: [F KIE - BER]
+    expect:
+      resolutions:
+        A BER - KIE: fails
+        A MUN S F KIE - BER: succeeds
+        F KIE - BER: fails
+
+  - id: 6.E.4
+    title: non-dislodged loser still has effect
+    phase: S1901M
+    units:
+      GERMANY: [F HOL, F HEL, F SKA]
+      FRANCE: [F NTH, F BEL]
+      ENGLAND: [F EDI, F YOR, F NWG]
+      AUSTRIA: [A KIE, A RUH]
+    orders:
+      GERMANY: [F HOL - NTH, F HEL S F HOL - NTH, F SKA S F HOL - NTH]
+      FRANCE: [F NTH - HOL, F BEL S F NTH - HOL]
+      ENGLAND: [F EDI S F NWG - NTH, F YOR S F NWG - NTH, F NWG - NTH]
+      AUSTRIA: [A KIE S A RUH - HOL, A RUH - HOL]
+    expect:
+      resolutions:
+        F HOL - NTH: fails
+        F HEL S F HOL - NTH: succeeds
+        F SKA S F HOL - NTH: succeeds
+        F NTH - HOL: fails
+        F BEL S F NTH - HOL: succeeds
+        F EDI S F NWG - NTH: succeeds
+        F YOR S F NWG - NTH: succeeds
+        F NWG - NTH: fails
+        A KIE S A RUH - HOL: succeeds
+        A RUH - HOL: fails
+
+  - id: 6.E.5
+    title: loser dislodged by another army still has effect
+    phase: S1901M
+    units:
+      GERMANY: [F HOL, F HEL, F SKA]
+      FRANCE: [F NTH, F BEL]
+      ENGLAND: [F EDI, F YOR, F NWG, F LON]
+      AUSTRIA: [A KIE, A RUH]
+    orders:
+      GERMANY: [F HOL - NTH, F HEL S F HOL - NTH, F SKA S F HOL - NTH]
+      FRANCE: [F NTH - HOL, F BEL S F NTH - HOL]
+      ENGLAND: [F EDI S F NWG - NTH, F YOR S F NWG - NTH, F NWG - NTH, F LON S F NWG - NTH]
+      AUSTRIA: [A KIE S A RUH - HOL, A RUH - HOL]
+    expect:
+      resolutions:
+        F HOL - NTH: fails
+        F NTH - HOL: fails
+        F NWG - NTH: succeeds
+        F LON S F NWG - NTH: succeeds
+        A RUH - HOL: fails
+      dislodged: [FRANCE F NTH]
+      units:
+        ENGLAND: [F NTH, F EDI, F YOR, F LON]
+        GERMANY: [F HOL, F HEL, F SKA]
+
+  - id: 6.E.6
+    title: not dislodge because of own support still has effect
+    phase: S1901M
+    units:
+      GERMANY: [F HOL, F HEL]
+      FRANCE: [F NTH, F BEL, F ENG]
+      AUSTRIA: [A KIE, A RUH]
+    orders:
+      GERMANY: [F HOL - NTH, F HEL S F HOL - NTH]
+      FRANCE: [F NTH - HOL, F BEL S F NTH - HOL, F ENG S F HOL - NTH]
+      AUSTRIA: [A KIE S A RUH - HOL, A RUH - HOL]
+    expect:
+      resolutions:
+        F HOL - NTH: fails
+        F NTH - HOL: fails
+        F ENG S F HOL - NTH: succeeds
+        A RUH - HOL: fails
+
+  - id: 6.E.7
+    title: no self dislodgement with beleaguered garrison
+    phase: S1901M
+    units:
+      ENGLAND: [F NTH, F YOR]
+      GERMANY: [F HOL, F HEL]
+      RUSSIA: [F SKA, F NWY]
+    orders:
+      ENGLAND: [F NTH H, F YOR S F NWY - NTH]
+      GERMANY: [F HOL S F HEL - NTH, F HEL - NTH]
+      RUSSIA: [F SKA S F NWY - NTH, F NWY - NTH]
+    expect:
+      resolutions:
+        F NTH H: succeeds
+        F YOR S F NWY - NTH: succeeds
+        F HEL - NTH: fails
+        F NWY - NTH: fails
+
+  - id: 6.E.8
+    title: no self dislodgement with beleaguered garrison and head-to-head battle
+    phase: S1901M
+    units:
+      ENGLAND: [F NTH, F YOR]
+      GERMANY: [F HOL, F HEL]
+      RUSSIA: [F SKA, F NWY]
+    orders:
+      ENGLAND: [F NTH - NWY, F YOR S F NWY - NTH]
+      GERMANY: [F HOL S F HEL - NTH, F HEL - NTH]
+      RUSSIA: [F SKA S F NWY - NTH, F NWY - NTH]
+    expect:
+      resolutions:
+        F NTH - NWY: fails
+        F YOR S F NWY - NTH: succeeds
+        F HEL - NTH: fails
+        F NWY - NTH: fails
+
+  - id: 6.E.9
+    title: almost self dislodgement with beleaguered garrison
+    phase: S1901M
+    units:
+      ENGLAND: [F NTH, F YOR]
+      GERMANY: [F HOL, F HEL]
+      RUSSIA: [F SKA, F NWY]
+    orders:
+      ENGLAND: [F NTH - NWG, F YOR S F NWY - NTH]
+      GERMANY: [F HOL S F HEL - NTH, F HEL - NTH]
+      RUSSIA: [F SKA S F NWY - NTH, F NWY - NTH]
+    expect:
+      resolutions:
+        F NTH - NWG: succeeds
+        F HEL - NTH: fails
+        F NWY - NTH: succeeds
+      units:
+        ENGLAND: [F NWG, F YOR]
+        RUSSIA: [F NTH, F SKA]
+        GERMANY: [F HOL, F HEL]
+
+  - id: 6.E.10
+    title: almost circular movement with no self dislodgement with beleaguered garrison
+    phase: S1901M
+    units:
+      ENGLAND: [F NTH, F YOR]
+      GERMANY: [F HOL, F HEL, F DEN]
+      RUSSIA: [F SKA, F NWY]
+    orders:
+      ENGLAND: [F NTH - DEN, F YOR S F NWY - NTH]
+      GERMANY: [F HOL S F HEL - NTH, F HEL - NTH, F DEN - HEL]
+      RUSSIA: [F SKA S F NWY - NTH, F NWY - NTH]
+    expect:
+      resolutions:
+        F NTH - DEN: fails
+        F HEL - NTH: fails
+        F DEN - HEL: fails
+        F NWY - NTH: fails
+
+  - id: 6.E.11
+    title: no self dislodgement with beleaguered garrison unit swap with adjacent convoying and two coasts
+    phase: S1901M
+    units:
+      FRANCE: [A SPA, F MAO, F LYO]
+      GERMANY: [A MAR, A GAS]
+      ITALY: [F POR, F WES]
+    orders:
+      FRANCE: [A SPA - POR via convoy, F MAO C A SPA - POR, F LYO S F POR - SPA/NC]
+      GERMANY: [A MAR S A GAS - SPA, A GAS - SPA]
+      ITALY: [F POR - SPA/NC, F WES S F POR - SPA/NC]
+    expect:
+      resolutions:
+        A SPA - POR via convoy: succeeds
+        F MAO C A SPA - POR: succeeds
+        F LYO S F POR - SPA/NC: succeeds
+        A MAR S A GAS - SPA: succeeds
+        A GAS - SPA: fails
+        F POR - SPA/NC: succeeds
+        F WES S F POR - SPA/NC: succeeds
+      units:
+        FRANCE: [A POR, F MAO, F LYO]
+        ITALY: [F SPA/NC, F WES]
+        GERMANY: [A MAR, A GAS]
+
+  - id: 6.E.12
+    title: support on attack on own unit can be used for other means
+    phase: S1901M
+    units:
+      AUSTRIA: [A BUD, A SER]
+      ITALY: [A VIE]
+      RUSSIA: [A GAL, A RUM]
+    orders:
+      AUSTRIA: [A BUD - RUM, A SER S A VIE - BUD]
+      ITALY: [A VIE - BUD]
+      RUSSIA: [A GAL - BUD, A RUM S A GAL - BUD]
+    expect:
+      resolutions:
+        A BUD - RUM: fails
+        A SER S A VIE - BUD: succeeds
+        A VIE - BUD: fails
+        A GAL - BUD: fails
+        A RUM S A GAL - BUD: succeeds
+
+  - id: 6.E.13
+    title: three way beleaguered garrison
+    phase: S1901M
+    units:
+      ENGLAND: [F EDI, F YOR]
+      FRANCE: [F BEL, F ENG]
+      GERMANY: [F NTH]
+      RUSSIA: [F NWG, F NWY]
+    orders:
+      ENGLAND: [F EDI S F YOR - NTH, F YOR - NTH]
+      FRANCE: [F BEL - NTH, F ENG S F BEL - NTH]
+      GERMANY: [F NTH H]
+      RUSSIA: [F NWG - NTH, F NWY S F NWG - NTH]
+    expect:
+      resolutions:
+        F YOR - NTH: fails
+        F BEL - NTH: fails
+        F NTH H: succeeds
+        F NWG - NTH: fails
+
+  - id: 6.E.14
+    title: illegal head-to-head battle can still defend
+    phase: S1901M
+    units:
+      ENGLAND: [A LVP]
+      RUSSIA: [F EDI]
+    orders:
+      ENGLAND: [A LVP - EDI]
+      RUSSIA: [F EDI - LVP]
+    expect:
+      resolutions:
+        A LVP - EDI: fails
+        F EDI - LVP: fails
+
+  - id: 6.E.15
+    title: the friendly head-to-head battle
+    phase: S1901M
+    units:
+      ENGLAND: [F HOL, A RUH]
+      FRANCE: [A KIE, A MUN, A SIL]
+      GERMANY: [A BER, F DEN, F HEL]
+      RUSSIA: [F BAL, A PRU]
+    orders:
+      ENGLAND: [F HOL S A RUH - KIE, A RUH - KIE]
+      FRANCE: [A KIE - BER, A MUN S A KIE - BER, A SIL S A KIE - BER]
+      GERMANY: [A BER - KIE, F DEN S A BER - KIE, F HEL S A BER - KIE]
+      RUSSIA: [F BAL S A PRU - BER, A PRU - BER]
+    expect:
+      resolutions:
+        A RUH - KIE: fails
+        A KIE - BER: fails
+        A BER - KIE: fails
+        A PRU - BER: fails

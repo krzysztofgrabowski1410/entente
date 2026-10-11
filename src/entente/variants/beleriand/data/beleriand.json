@@ -1,0 +1,1545 @@
+{
+  "army_adjacency": {
+    "A-U": [
+      "AND",
+      "FOR",
+      "FOS",
+      "FSI",
+      "GOS",
+      "NEB"
+    ],
+    "AEL": [
+      "DNN",
+      "EGO",
+      "HID",
+      "HIG",
+      "LAD",
+      "LOT"
+    ],
+    "AER": [
+      "GVA",
+      "MOS",
+      "NEB",
+      "NOS",
+      "RAM",
+      "SEB"
+    ],
+    "AND": [
+      "A-U",
+      "GOS",
+      "NEB",
+      "RAM",
+      "SEB"
+    ],
+    "ANF": [
+      "ANG",
+      "DNN",
+      "EIT",
+      "FSE",
+      "HIT-ANF",
+      "LAD",
+      "LOT",
+      "NEW",
+      "RIV"
+    ],
+    "ANG": [
+      "ANF"
+    ],
+    "ARV": [
+      "MSI",
+      "N-T",
+      "SWB"
+    ],
+    "BEL": [
+      "DOL",
+      "ELA",
+      "NEL",
+      "NOG",
+      "THA"
+    ],
+    "BNI": [
+      "BRI",
+      "EGL",
+      "NFA"
+    ],
+    "BRI": [
+      "BNI",
+      "NFA"
+    ],
+    "CBB": [
+      "TID",
+      "WTD"
+    ],
+    "CNI": [
+      "DLN",
+      "ELO",
+      "HIT",
+      "NEV"
+    ],
+    "DDI": [
+      "EGO",
+      "FON",
+      "FOR",
+      "HID",
+      "NAN"
+    ],
+    "DIM": [
+      "FOB",
+      "FON",
+      "GON",
+      "NAN",
+      "POA",
+      "TAL"
+    ],
+    "DLN": [
+      "CNI",
+      "HIT",
+      "IVR",
+      "MIT",
+      "NEV",
+      "SEW"
+    ],
+    "DNN": [
+      "AEL",
+      "ANF",
+      "EGO",
+      "LAD",
+      "POA",
+      "RIV"
+    ],
+    "DOL": [
+      "BEL",
+      "NOG",
+      "NOS",
+      "THA"
+    ],
+    "EGL": [
+      "BNI",
+      "NFA",
+      "SFA"
+    ],
+    "EGO": [
+      "AEL",
+      "DDI",
+      "DNN",
+      "HID",
+      "NAN",
+      "POA"
+    ],
+    "EIT": [
+      "ANF",
+      "FSE",
+      "NEW"
+    ],
+    "ELA": [
+      "BEL",
+      "ERI",
+      "LOT-ELA",
+      "NEL",
+      "NOG",
+      "SEL"
+    ],
+    "ELO": [
+      "CNI",
+      "HIT",
+      "LAM",
+      "NEV",
+      "NLA"
+    ],
+    "ERI": [
+      "ELA"
+    ],
+    "EST": [
+      "FOR",
+      "GEL",
+      "HID",
+      "NEB"
+    ],
+    "ETD": [
+      "GVA",
+      "MOS",
+      "SEB",
+      "SOS",
+      "TID",
+      "WTD"
+    ],
+    "FOB": [
+      "DIM",
+      "FON",
+      "FSI",
+      "TAL"
+    ],
+    "FON": [
+      "DDI",
+      "DIM",
+      "FOB",
+      "FOR",
+      "FSI",
+      "MEN",
+      "NAN"
+    ],
+    "FOR": [
+      "A-U",
+      "DDI",
+      "EST",
+      "FON",
+      "FSI",
+      "HID",
+      "MEN",
+      "NEB"
+    ],
+    "FOS": [
+      "A-U",
+      "FSI",
+      "GOS",
+      "N-T",
+      "SEB"
+    ],
+    "FSE": [
+      "ANF",
+      "EIT",
+      "GON",
+      "NEW",
+      "RIV",
+      "TOL"
+    ],
+    "FSI": [
+      "A-U",
+      "FOB",
+      "FON",
+      "FOR",
+      "FOS",
+      "N-T",
+      "TAL"
+    ],
+    "GEL": [
+      "EST",
+      "HID",
+      "HIG",
+      "MMA",
+      "NEB",
+      "THA"
+    ],
+    "GON": [
+      "DIM",
+      "FSE",
+      "POA",
+      "RIV",
+      "TAL",
+      "TOL"
+    ],
+    "GOS": [
+      "A-U",
+      "AND",
+      "FOS",
+      "SEB"
+    ],
+    "GVA": [
+      "AER",
+      "ETD",
+      "MOS",
+      "SEB"
+    ],
+    "HEL": [
+      "MMA",
+      "NEL",
+      "THA"
+    ],
+    "HID": [
+      "AEL",
+      "DDI",
+      "EGO",
+      "EST",
+      "FOR",
+      "GEL",
+      "HIG"
+    ],
+    "HIG": [
+      "AEL",
+      "GEL",
+      "HID",
+      "LOT",
+      "MMA"
+    ],
+    "HIT": [
+      "CNI",
+      "DLN",
+      "ELO",
+      "HIT-ANF",
+      "MIT",
+      "NEW",
+      "NLA-HIT"
+    ],
+    "HIT-ANF": [
+      "ANF",
+      "HIT"
+    ],
+    "IOB": [],
+    "IVR": [
+      "DLN",
+      "NEV",
+      "NWB",
+      "SEW",
+      "TAL"
+    ],
+    "LAD": [
+      "AEL",
+      "ANF",
+      "DNN",
+      "LOT"
+    ],
+    "LAM": [
+      "ELO",
+      "NLA"
+    ],
+    "LOT": [
+      "AEL",
+      "ANF",
+      "HIG",
+      "LAD",
+      "LOT-ELA",
+      "MMA",
+      "NEL"
+    ],
+    "LOT-ELA": [
+      "ELA",
+      "LOT"
+    ],
+    "MEN": [
+      "FON",
+      "FOR"
+    ],
+    "MIT": [
+      "DLN",
+      "HIT",
+      "NEW",
+      "SEW"
+    ],
+    "MMA": [
+      "GEL",
+      "HEL",
+      "HIG",
+      "LOT",
+      "NEL",
+      "THA"
+    ],
+    "MOS": [
+      "AER",
+      "ETD",
+      "GVA",
+      "NOS",
+      "SEL",
+      "SOS",
+      "TGA"
+    ],
+    "MSI": [
+      "ARV",
+      "N-T",
+      "SEB",
+      "WTD"
+    ],
+    "N-T": [
+      "ARV",
+      "FOS",
+      "FSI",
+      "MSI",
+      "NAR",
+      "SEB",
+      "SWB",
+      "TAL"
+    ],
+    "NAN": [
+      "DDI",
+      "DIM",
+      "EGO",
+      "FON",
+      "POA"
+    ],
+    "NAR": [
+      "N-T",
+      "RON",
+      "SWB",
+      "TAL"
+    ],
+    "NEB": [
+      "A-U",
+      "AER",
+      "AND",
+      "EST",
+      "FOR",
+      "GEL",
+      "NOS",
+      "RAM",
+      "THA"
+    ],
+    "NEL": [
+      "BEL",
+      "ELA",
+      "HEL",
+      "LOT",
+      "MMA",
+      "THA"
+    ],
+    "NEV": [
+      "CNI",
+      "DLN",
+      "ELO",
+      "IVR",
+      "NFA",
+      "NWB",
+      "VIN"
+    ],
+    "NEW": [
+      "ANF",
+      "EIT",
+      "FSE",
+      "HIT",
+      "MIT",
+      "SEW",
+      "TOL"
+    ],
+    "NFA": [
+      "BNI",
+      "BRI",
+      "EGL",
+      "NEV",
+      "NWB",
+      "SFA",
+      "VIN"
+    ],
+    "NLA": [
+      "ELO",
+      "LAM",
+      "NLA-HIT"
+    ],
+    "NLA-HIT": [
+      "HIT",
+      "NLA"
+    ],
+    "NOG": [
+      "BEL",
+      "DOL",
+      "ELA",
+      "NOS",
+      "SEL"
+    ],
+    "NOS": [
+      "AER",
+      "DOL",
+      "MOS",
+      "NEB",
+      "NOG",
+      "SEL",
+      "THA"
+    ],
+    "NWB": [
+      "IVR",
+      "NEV",
+      "NFA",
+      "RON",
+      "SFA",
+      "TAL"
+    ],
+    "POA": [
+      "DIM",
+      "DNN",
+      "EGO",
+      "GON",
+      "NAN",
+      "RIV"
+    ],
+    "RAM": [
+      "AER",
+      "AND",
+      "NEB",
+      "SEB"
+    ],
+    "RIV": [
+      "ANF",
+      "DNN",
+      "FSE",
+      "GON",
+      "POA"
+    ],
+    "RON": [
+      "NAR",
+      "NWB",
+      "SFA",
+      "SWB",
+      "TAL"
+    ],
+    "SEB": [
+      "AER",
+      "AND",
+      "ETD",
+      "FOS",
+      "GOS",
+      "GVA",
+      "MSI",
+      "N-T",
+      "RAM",
+      "WTD"
+    ],
+    "SEL": [
+      "ELA",
+      "MOS",
+      "NOG",
+      "NOS",
+      "SOS"
+    ],
+    "SEW": [
+      "DLN",
+      "IVR",
+      "MIT",
+      "NEW",
+      "TAL",
+      "TOL"
+    ],
+    "SFA": [
+      "EGL",
+      "NFA",
+      "NWB",
+      "RON",
+      "SWB"
+    ],
+    "SOS": [
+      "ETD",
+      "MOS",
+      "SEL",
+      "TGA",
+      "TID"
+    ],
+    "SWB": [
+      "ARV",
+      "N-T",
+      "NAR",
+      "RON",
+      "SFA"
+    ],
+    "TAL": [
+      "DIM",
+      "FOB",
+      "FSI",
+      "GON",
+      "IVR",
+      "N-T",
+      "NAR",
+      "NWB",
+      "RON",
+      "SEW",
+      "TOL"
+    ],
+    "TGA": [
+      "MOS",
+      "SOS"
+    ],
+    "THA": [
+      "BEL",
+      "DOL",
+      "GEL",
+      "HEL",
+      "MMA",
+      "NEB",
+      "NEL",
+      "NOS"
+    ],
+    "TID": [
+      "CBB",
+      "ETD",
+      "SOS",
+      "WTD"
+    ],
+    "TOL": [
+      "FSE",
+      "GON",
+      "NEW",
+      "SEW",
+      "TAL"
+    ],
+    "VIN": [
+      "NEV",
+      "NFA"
+    ],
+    "WTD": [
+      "CBB",
+      "ETD",
+      "MSI",
+      "SEB",
+      "TID"
+    ]
+  },
+  "default_capacity": 1,
+  "fleet_adjacency": {
+    "ARV": [
+      "BOB",
+      "MSI",
+      "SBE",
+      "SWB"
+    ],
+    "BNI": [
+      "BRI",
+      "EGL",
+      "NBE",
+      "SBE"
+    ],
+    "BOB": [
+      "ARV",
+      "CBB",
+      "IOB",
+      "MSI",
+      "SBE",
+      "WTD"
+    ],
+    "BRI": [
+      "BNI",
+      "NBE",
+      "NFA"
+    ],
+    "CBB": [
+      "BOB",
+      "WTD"
+    ],
+    "EGL": [
+      "BNI",
+      "SBE",
+      "SFA"
+    ],
+    "ELO": [
+      "LAM",
+      "NBE",
+      "NEV"
+    ],
+    "IOB": [
+      "BOB",
+      "SBE"
+    ],
+    "LAM": [
+      "ELO",
+      "NBE",
+      "NLA"
+    ],
+    "MSI": [
+      "ARV",
+      "BOB",
+      "WTD"
+    ],
+    "NBE": [
+      "BNI",
+      "BRI",
+      "ELO",
+      "LAM",
+      "NEV",
+      "NFA",
+      "NLA",
+      "SBE",
+      "VIN"
+    ],
+    "NEV": [
+      "ELO",
+      "NBE",
+      "VIN"
+    ],
+    "NFA": [
+      "BRI",
+      "NBE",
+      "VIN"
+    ],
+    "NLA": [
+      "LAM",
+      "NBE"
+    ],
+    "SBE": [
+      "ARV",
+      "BNI",
+      "BOB",
+      "EGL",
+      "IOB",
+      "NBE",
+      "SFA",
+      "SWB"
+    ],
+    "SFA": [
+      "EGL",
+      "SBE",
+      "SWB"
+    ],
+    "SWB": [
+      "ARV",
+      "SBE",
+      "SFA"
+    ],
+    "VIN": [
+      "NBE",
+      "NEV",
+      "NFA"
+    ],
+    "WTD": [
+      "BOB",
+      "CBB",
+      "MSI"
+    ]
+  },
+  "home_centers": {
+    "DORIATH": [
+      "FON",
+      "FOR",
+      "MEN"
+    ],
+    "FEANORIANS": [
+      "MMA",
+      "HID",
+      "GEL",
+      "HEL",
+      "THA",
+      "HIG"
+    ],
+    "FINGOLFIN": [
+      "NEV",
+      "DLN",
+      "MIT"
+    ],
+    "FINROD": [
+      "NAR",
+      "RON",
+      "NWB",
+      "TOL",
+      "DNN",
+      "LAD"
+    ],
+    "GONDOLIN": [
+      "GON",
+      "RIV",
+      "DIM"
+    ],
+    "MEN": [
+      "ELA"
+    ],
+    "MORGOTH": [
+      "ANG",
+      "ANF"
+    ],
+    "NAUGRIM": [
+      "BEL",
+      "DOL",
+      "NOG"
+    ],
+    "OSSIRIAND": [
+      "TGA",
+      "SOS"
+    ],
+    "TELERI": [
+      "BRI",
+      "EGL",
+      "SFA"
+    ]
+  },
+  "mountain_barriers": [
+    [
+      "NLA",
+      "ELO"
+    ],
+    [
+      "LAM",
+      "ELO"
+    ],
+    [
+      "NBE",
+      "ELO"
+    ],
+    [
+      "NEV",
+      "ELO"
+    ],
+    [
+      "HIT",
+      "ELO"
+    ],
+    [
+      "HIT",
+      "CNI"
+    ],
+    [
+      "NEV",
+      "CNI"
+    ],
+    [
+      "DLN",
+      "CNI"
+    ],
+    [
+      "NBE",
+      "NEV"
+    ],
+    [
+      "NFA",
+      "NEV"
+    ],
+    [
+      "NWB",
+      "NEV"
+    ],
+    [
+      "ELO",
+      "NEV"
+    ],
+    [
+      "CNI",
+      "NEV"
+    ],
+    [
+      "DLN",
+      "NEV"
+    ],
+    [
+      "IVR",
+      "NEV"
+    ],
+    [
+      "NFA",
+      "VIN"
+    ],
+    [
+      "NBE",
+      "VIN"
+    ],
+    [
+      "NEV",
+      "IVR"
+    ],
+    [
+      "NWB",
+      "IVR"
+    ],
+    [
+      "TAL",
+      "IVR"
+    ],
+    [
+      "SEW",
+      "IVR"
+    ],
+    [
+      "DLN",
+      "IVR"
+    ],
+    [
+      "CNI",
+      "DLN"
+    ],
+    [
+      "HIT",
+      "NEW"
+    ],
+    [
+      "MIT",
+      "NEW"
+    ],
+    [
+      "TOL",
+      "NEW"
+    ],
+    [
+      "ANF",
+      "NEW"
+    ],
+    [
+      "EIT",
+      "NEW"
+    ],
+    [
+      "SEW",
+      "NEW"
+    ],
+    [
+      "FSE",
+      "NEW"
+    ],
+    [
+      "DLN",
+      "SEW"
+    ],
+    [
+      "IVR",
+      "SEW"
+    ],
+    [
+      "TAL",
+      "SEW"
+    ],
+    [
+      "MIT",
+      "SEW"
+    ],
+    [
+      "TOL",
+      "SEW"
+    ],
+    [
+      "NEW",
+      "SEW"
+    ],
+    [
+      "RON",
+      "NAR"
+    ],
+    [
+      "SWB",
+      "NAR"
+    ],
+    [
+      "N-T",
+      "NAR"
+    ],
+    [
+      "TAL",
+      "NAR"
+    ],
+    [
+      "TAL",
+      "N-T"
+    ],
+    [
+      "FSI",
+      "N-T"
+    ],
+    [
+      "FSI",
+      "FOS"
+    ],
+    [
+      "A-U",
+      "FOS"
+    ],
+    [
+      "A-U",
+      "GOS"
+    ],
+    [
+      "A-U",
+      "AND"
+    ],
+    [
+      "NEB",
+      "AND"
+    ],
+    [
+      "NEB",
+      "RAM"
+    ],
+    [
+      "NEB",
+      "AER"
+    ],
+    [
+      "TOL",
+      "GON"
+    ],
+    [
+      "FSE",
+      "GON"
+    ],
+    [
+      "RIV",
+      "GON"
+    ],
+    [
+      "POA",
+      "GON"
+    ],
+    [
+      "DIM",
+      "GON"
+    ],
+    [
+      "TAL",
+      "GON"
+    ],
+    [
+      "FSE",
+      "RIV"
+    ],
+    [
+      "ANF",
+      "RIV"
+    ],
+    [
+      "DNN",
+      "EGO"
+    ],
+    [
+      "AEL",
+      "EGO"
+    ],
+    [
+      "HID",
+      "EGO"
+    ],
+    [
+      "DDI",
+      "EGO"
+    ],
+    [
+      "NAN",
+      "EGO"
+    ],
+    [
+      "POA",
+      "EGO"
+    ],
+    [
+      "HID",
+      "AEL"
+    ],
+    [
+      "HIG",
+      "AEL"
+    ],
+    [
+      "LOT",
+      "AEL"
+    ],
+    [
+      "ANF",
+      "LAD"
+    ],
+    [
+      "LOT",
+      "HIG"
+    ],
+    [
+      "LOT",
+      "MMA"
+    ],
+    [
+      "MMA",
+      "HEL"
+    ],
+    [
+      "HEL",
+      "NEL"
+    ],
+    [
+      "THA",
+      "NEL"
+    ],
+    [
+      "BEL",
+      "NEL"
+    ],
+    [
+      "ELA",
+      "NEL"
+    ],
+    [
+      "LOT",
+      "NEL"
+    ],
+    [
+      "THA",
+      "BEL"
+    ],
+    [
+      "THA",
+      "DOL"
+    ],
+    [
+      "NOS",
+      "DOL"
+    ],
+    [
+      "NOS",
+      "NOG"
+    ],
+    [
+      "NOG",
+      "SEL"
+    ],
+    [
+      "ELA",
+      "SEL"
+    ],
+    [
+      "MOS",
+      "SEL"
+    ],
+    [
+      "SOS",
+      "SEL"
+    ],
+    [
+      "NOS",
+      "SEL"
+    ]
+  ],
+  "name": "beleriand",
+  "provenance": "Hand-transcribed from the project's own rulebook, BeleriandInstruction.docx. The rulebook carries no adjacency table or map image, so the province set, names and every textual geometry fact come from the rulebook (abbreviation table; Areas list; off-map box adjacencies; Ulmo's coastal-province list; Angband/Eriador clauses; the fortress list; every adjacency exercised by a rulebook example order, e.g. Gel-Hig, Tha-MMa, Hid-Hig, NLa-Lam, FoR-NEB, Est-NEB, NOs-NEB, FSi-FoR, FoB-Tal, MSi-SEB, And-SEB), and the remaining edges, terrain and neutral supply centers are an original reconstruction from the rulebook's literary source geography (Tolkien's First Age map of Beleriand). Ossiriand's starting units are absent from the rulebook and pinned as A(NOs), A(MOs), A(SOs). No other engine's data files were consulted or converted. The reconstructed army/fleet adjacency was subsequently corrected against the author's drawn board, and ELO/CNI terrain was reclassified. The mountain_barriers key holds ordered [from, to] pairs — 84 directed crossings over 78 undirected edges, an author ruling that deliberately diverges from the rulebook's symmetric 'Mountain Barriers' reading and supersedes the earlier 24-pair set.",
+  "provinces": {
+    "A-U": {
+      "name": "Aelin-Uial",
+      "terrain": "inland"
+    },
+    "AEL": {
+      "name": "Aeluin",
+      "terrain": "inland"
+    },
+    "AER": {
+      "name": "Amon Ereb",
+      "terrain": "inland"
+    },
+    "AND": {
+      "name": "Andram",
+      "terrain": "inland"
+    },
+    "ANF": {
+      "capacity": 6,
+      "name": "Anfauglith",
+      "supply_center": true,
+      "terrain": "inland"
+    },
+    "ANG": {
+      "capacity": null,
+      "name": "Angband",
+      "one_way": true,
+      "restricted_to": "MORGOTH",
+      "supply_center": 7,
+      "terrain": "inland"
+    },
+    "ARV": {
+      "name": "Arvenien",
+      "supply_center": true,
+      "terrain": "coastal"
+    },
+    "BEL": {
+      "fortress": true,
+      "name": "Belegost",
+      "supply_center": true,
+      "terrain": "inland"
+    },
+    "BNI": {
+      "name": "Barad Nimras",
+      "terrain": "coastal"
+    },
+    "BOB": {
+      "capacity": 6,
+      "name": "Bay of Balar",
+      "terrain": "sea"
+    },
+    "BRI": {
+      "name": "Brithombar",
+      "supply_center": true,
+      "terrain": "coastal"
+    },
+    "CBB": {
+      "name": "Coasts of the Bay of Balar",
+      "supply_center": true,
+      "terrain": "coastal"
+    },
+    "CNI": {
+      "name": "Cirith Ninnlach",
+      "terrain": "inland"
+    },
+    "DDI": {
+      "name": "Dor Dinen",
+      "terrain": "inland"
+    },
+    "DIM": {
+      "name": "Dimbar",
+      "supply_center": true,
+      "terrain": "inland"
+    },
+    "DLN": {
+      "name": "Dor-Lomin",
+      "supply_center": true,
+      "terrain": "inland"
+    },
+    "DNN": {
+      "name": "Dorthonion",
+      "supply_center": true,
+      "terrain": "inland"
+    },
+    "DOL": {
+      "name": "Mt. Dolmed",
+      "supply_center": true,
+      "terrain": "inland"
+    },
+    "EGL": {
+      "name": "Eglarest",
+      "supply_center": true,
+      "terrain": "coastal"
+    },
+    "EGO": {
+      "name": "Ered Gorgoroth",
+      "terrain": "inland"
+    },
+    "EIT": {
+      "name": "Eithel Sirion",
+      "supply_center": true,
+      "terrain": "inland"
+    },
+    "ELA": {
+      "capacity": 6,
+      "name": "Eastern Lands",
+      "supply_center": true,
+      "terrain": "inland"
+    },
+    "ELO": {
+      "name": "Ered Lomin",
+      "terrain": "coastal"
+    },
+    "ERI": {
+      "capacity": null,
+      "name": "Eriador",
+      "one_way": true,
+      "restricted_to": "MEN",
+      "terrain": "inland"
+    },
+    "EST": {
+      "name": "Estolad",
+      "terrain": "inland"
+    },
+    "ETD": {
+      "name": "Eastern Taur-im-Duinath",
+      "terrain": "inland"
+    },
+    "FOB": {
+      "name": "Forest of Brethil",
+      "terrain": "inland"
+    },
+    "FON": {
+      "name": "Forest of Neldoreth",
+      "supply_center": true,
+      "terrain": "inland"
+    },
+    "FOR": {
+      "name": "Forest of Region",
+      "supply_center": true,
+      "terrain": "inland"
+    },
+    "FOS": {
+      "name": "Falls of Sirion",
+      "terrain": "inland"
+    },
+    "FSE": {
+      "name": "Fen of Serech",
+      "terrain": "inland"
+    },
+    "FSI": {
+      "name": "Fen of Sirion",
+      "terrain": "inland"
+    },
+    "GEL": {
+      "name": "Gelion Headwaters",
+      "supply_center": true,
+      "terrain": "inland"
+    },
+    "GON": {
+      "fortress": true,
+      "name": "Gondolin",
+      "supply_center": true,
+      "terrain": "inland"
+    },
+    "GOS": {
+      "name": "Gates of Sirion",
+      "terrain": "inland"
+    },
+    "GVA": {
+      "name": "Gelion Vale",
+      "supply_center": true,
+      "terrain": "inland"
+    },
+    "HEL": {
+      "name": "Helevorn",
+      "supply_center": true,
+      "terrain": "inland"
+    },
+    "HID": {
+      "name": "Himlad",
+      "supply_center": true,
+      "terrain": "inland"
+    },
+    "HIG": {
+      "name": "Himring",
+      "supply_center": true,
+      "terrain": "inland"
+    },
+    "HIT": {
+      "capacity": 6,
+      "name": "Hithlum",
+      "terrain": "inland"
+    },
+    "HIT-ANF": {
+      "name": "Off-map box Hit-Anf",
+      "terrain": "inland"
+    },
+    "IOB": {
+      "name": "Isle of Balar",
+      "supply_center": true,
+      "terrain": "coastal"
+    },
+    "IVR": {
+      "name": "Ivrin",
+      "terrain": "inland"
+    },
+    "LAD": {
+      "name": "Ladros",
+      "supply_center": true,
+      "terrain": "inland"
+    },
+    "LAM": {
+      "name": "Lammoth",
+      "supply_center": true,
+      "terrain": "coastal"
+    },
+    "LOT": {
+      "capacity": 6,
+      "name": "Lothlann",
+      "terrain": "inland"
+    },
+    "LOT-ELA": {
+      "name": "Off-map box Lot-ELa",
+      "terrain": "inland"
+    },
+    "MEN": {
+      "fortress": true,
+      "name": "Menegroth",
+      "supply_center": true,
+      "terrain": "inland"
+    },
+    "MIT": {
+      "name": "Mithrim",
+      "supply_center": true,
+      "terrain": "inland"
+    },
+    "MMA": {
+      "name": "March of Maedhros",
+      "supply_center": true,
+      "terrain": "inland"
+    },
+    "MOS": {
+      "capacity": 6,
+      "name": "Middle Ossiriand",
+      "terrain": "inland"
+    },
+    "MSI": {
+      "name": "Mouths of Sirion",
+      "terrain": "coastal"
+    },
+    "N-T": {
+      "name": "Nan-Tethren",
+      "supply_center": true,
+      "terrain": "inland"
+    },
+    "NAN": {
+      "name": "Nan Dungortheb",
+      "terrain": "inland"
+    },
+    "NAR": {
+      "fortress": true,
+      "name": "Nargothrond",
+      "supply_center": true,
+      "terrain": "inland"
+    },
+    "NBE": {
+      "capacity": 6,
+      "name": "North Belegaer",
+      "terrain": "sea"
+    },
+    "NEB": {
+      "capacity": 6,
+      "name": "North East Beleriand",
+      "supply_center": true,
+      "terrain": "inland"
+    },
+    "NEL": {
+      "name": "Northern Ered Luin",
+      "terrain": "inland"
+    },
+    "NEV": {
+      "name": "Nevrast",
+      "supply_center": true,
+      "terrain": "coastal"
+    },
+    "NEW": {
+      "name": "Northern Ered Wethrim",
+      "terrain": "inland"
+    },
+    "NFA": {
+      "name": "Northern Falas",
+      "supply_center": true,
+      "terrain": "coastal"
+    },
+    "NLA": {
+      "name": "Northern Lammoth",
+      "terrain": "coastal"
+    },
+    "NLA-HIT": {
+      "name": "Off-map box NLa-Hit",
+      "terrain": "inland"
+    },
+    "NOG": {
+      "fortress": true,
+      "name": "Nogrod",
+      "supply_center": true,
+      "terrain": "inland"
+    },
+    "NOS": {
+      "name": "North Ossiriand",
+      "terrain": "inland"
+    },
+    "NWB": {
+      "name": "North West Beleriand",
+      "supply_center": true,
+      "terrain": "inland"
+    },
+    "POA": {
+      "name": "Pass of Anach",
+      "terrain": "inland"
+    },
+    "RAM": {
+      "name": "Ramdal",
+      "terrain": "inland"
+    },
+    "RIV": {
+      "name": "Rivil's Well",
+      "supply_center": true,
+      "terrain": "inland"
+    },
+    "RON": {
+      "name": "Realm of Nargothrond",
+      "supply_center": true,
+      "terrain": "inland"
+    },
+    "SBE": {
+      "capacity": 6,
+      "name": "South Belegaer",
+      "terrain": "sea"
+    },
+    "SEB": {
+      "capacity": 6,
+      "name": "South East Beleriand",
+      "terrain": "inland"
+    },
+    "SEL": {
+      "name": "Southern Ered Luin",
+      "terrain": "inland"
+    },
+    "SEW": {
+      "name": "Southern Ered Wethrim",
+      "terrain": "inland"
+    },
+    "SFA": {
+      "name": "South Falas",
+      "supply_center": true,
+      "terrain": "coastal"
+    },
+    "SOS": {
+      "capacity": 6,
+      "name": "South Ossiriand",
+      "supply_center": 2,
+      "terrain": "inland"
+    },
+    "SWB": {
+      "name": "South West Beleriand",
+      "terrain": "coastal"
+    },
+    "TAL": {
+      "capacity": 6,
+      "name": "Talath Dimen",
+      "supply_center": 2,
+      "terrain": "inland"
+    },
+    "TGA": {
+      "name": "Tol Galen",
+      "supply_center": true,
+      "terrain": "inland"
+    },
+    "THA": {
+      "name": "Thargelion",
+      "supply_center": true,
+      "terrain": "inland"
+    },
+    "TID": {
+      "capacity": 6,
+      "name": "Taur-im-Duinath",
+      "supply_center": 2,
+      "terrain": "inland"
+    },
+    "TOL": {
+      "fortress": true,
+      "name": "Tol Sirion",
+      "supply_center": true,
+      "terrain": "inland"
+    },
+    "VIN": {
+      "name": "Vinyamar",
+      "supply_center": true,
+      "terrain": "coastal"
+    },
+    "WTD": {
+      "name": "Western Taur-im-Duinath",
+      "terrain": "coastal"
+    }
+  },
+  "starting_units": {
+    "DORIATH": [
+      "A FON",
+      "A FOR",
+      "2A MEN"
+    ],
+    "FEANORIANS": [
+      "2A MMA",
+      "A HID",
+      "2A GEL",
+      "A HEL",
+      "A THA",
+      "A HIG"
+    ],
+    "FINGOLFIN": [
+      "A NEV",
+      "A DLN",
+      "2A MIT"
+    ],
+    "FINROD": [
+      "2A NAR",
+      "A RON",
+      "A NWB",
+      "A TOL",
+      "A DNN",
+      "A LAD"
+    ],
+    "GONDOLIN": [
+      "2A GON",
+      "A RIV",
+      "A DIM"
+    ],
+    "MEN": [
+      "A ELA"
+    ],
+    "MORGOTH": [
+      "A ANF",
+      "A ANF",
+      "A ANF",
+      "A ANF",
+      "A ANF",
+      "A ANF",
+      "A ANG",
+      "A ANG",
+      "3A ANG"
+    ],
+    "NAUGRIM": [
+      "A BEL",
+      "A DOL",
+      "A NOG"
+    ],
+    "OSSIRIAND": [
+      "A TGA",
+      "A SOS",
+      "A SOS"
+    ],
+    "TELERI": [
+      "A BRI",
+      "F EGL",
+      "2F SFA"
+    ]
+  }
+}

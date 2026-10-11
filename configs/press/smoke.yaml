@@ -1,0 +1,42 @@
+# Full-game press-vs-no-press SMOKE SCALE wiring check. The anchor is the
+# regenerable CPU smoke BC checkpoint, which these commands rebuild:
+#   uv run --group ml python -c "
+#     from entente.data.synthetic import synthesize_games, write_jsonl
+#     write_jsonl(synthesize_games(range(30), agent='random', teacher='greedy', max_year=1903), 'data/synth_smoke.jsonl')"
+#   uv run --group ml python -c "
+#     from entente.data.paquette import PaquetteJSONLSource
+#     from entente.data.preprocess import preprocess
+#     preprocess(PaquetteJSONLSource('data/synth_smoke.jsonl'), 'data/processed_synth', shard_size=100_000)"
+#   uv run --group ml python scripts/train_bc.py --config src/entente/training/configs/bc/smoke.yaml
+#
+# No SoS-delta claim is made at this scale: k=3 and N=16 candidates over a
+# smoke-trained anchor is evidence that the loop runs end to end, not a strength
+# result. The full-size run sets agent.checkpoint=checkpoints/bc/bc.pt with the
+# search knobs of configs/pikl/lambda_sweep.yaml and 105 games per condition,
+# clearing the search-agent floor in configs/tournament/README.md; its records are
+# docs/results/press_vs_no_press.jsonl.
+agent:
+  checkpoint: checkpoints/bc_smoke/bc_smoke.pt
+  device: cpu
+  fallback: greedy
+  seed: 0
+  search:
+    k: 3
+    attempts: 8
+    iterations: 16
+    lam: 1.0
+    eta:
+      mode: adaptive
+      scale: 3.3333333333333335
+    temperature: 0.5
+    top_p: 0.95
+    include_greedy: true
+    play: sample
+games: 5
+seed_start: 0
+subject_seat: FRANCE
+rotate_seats: false
+max_year: 1902
+ruleset: standard
+map_name: standard
+output: docs/results/press_vs_no_press_smoke.jsonl

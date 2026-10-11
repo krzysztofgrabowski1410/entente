@@ -1,0 +1,81 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          # pin to a matrix-covered interpreter so mypy runs on the same
+          # Python the tests do, not setup-uv's latest default (which drifts)
+          python-version: "3.12"
+      - run: uv sync --locked
+      - run: uv run ruff check .
+      - run: uv run ruff format --check .
+      - run: uv run mypy src
+
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python: ["3.11", "3.12"]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          python-version: ${{ matrix.python }}
+      - run: uv sync --locked
+      - run: uv run pytest --cov=entente --cov-report=term -q
+
+  # Conformance suite, isolated so its result is legible at a glance. Also
+  # publishes the "DATC n/n" badge (pass count pushed to a gist; one-time
+  # setup: docs/setup.md). The pytest step has no continue-on-error -- a
+  # regression must still fail the job -- but the badge steps run `always()`
+  # so the badge reflects the true count (including a failing run) instead
+  # of silently going stale, and no-op cleanly when GIST_SECRET isn't
+  # configured (e.g. before the one-time gist setup, or on a fork).
+  datc:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          # the conformance certificate runs on a matrix-covered interpreter,
+          # not setup-uv's drifting latest default
+          python-version: "3.12"
+      - run: uv sync --locked
+      - run: uv run pytest -m datc -q --junitxml=datc-results.xml
+      - name: Compute DATC badge fields
+        id: datc-badge
+        if: always()
+        run: uv run python scripts/datc_badge.py datc-results.xml >> "$GITHUB_OUTPUT"
+      # Only publish on a real push to main: a same-repo PR has the secret in
+      # scope and would otherwise overwrite the public badge with its own
+      # (possibly pre-fix) count before merge. The message guard skips a push
+      # when the compute step failed to emit one, rather than pushing an empty
+      # badge over a good one.
+      - name: Push DATC badge
+        if: >-
+          always() && github.event_name == 'push' && github.ref == 'refs/heads/main'
+          && env.GIST_SECRET != '' && steps.datc-badge.outputs.message != ''
+        uses: schneegans/dynamic-badges-action@v1.7.0
+        env:
+          GIST_SECRET: ${{ secrets.GIST_SECRET }}
+        with:
+          auth: ${{ secrets.GIST_SECRET }}
+          gistID: ${{ vars.DATC_GIST_ID }}
+          filename: datc-badge.json
+          label: DATC
+          message: ${{ steps.datc-badge.outputs.message }}
+          color: ${{ steps.datc-badge.outputs.color }}

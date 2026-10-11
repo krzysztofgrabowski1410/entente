@@ -1,0 +1,552 @@
+# BATC-L2 section V -- victory, defeat and the Valar (rulebook "Valar's
+# intervention", the "Morgoth" section's "Victory" and "Defeat", "Victory"),
+# including Morgoth's Oath of the Second (the two Oath paragraphs under
+# "Morgoth").
+#
+# The Oath cases reuse V.2's position: 32 hand-listed centers plus Morgoth's
+# home ANG (7) + ANF (1) is a weight of exactly 40, so the same board wins or
+# does not purely as a function of the bar the Oath price sets.
+section: "BATC-L2 V. Victory and the Valar"
+cases:
+  - id: BATC-L2.V.1
+    title: the Valar intervene after Autumn of Year 0 — net gain wins
+    # (NEB is a neutral SC; Doriath's one captured center is its net gain
+    # over home.)
+    start:
+      phase: S0M
+      units:
+        DORIATH: ["A FOR"]
+        FEANORIANS: ["A THA"]
+      ownership: {NEB: DORIATH}
+    script:
+      - phase: S0M
+      - phase: F0M
+    expect:
+      over: true
+      phase: F0R
+      winners: [DORIATH]
+      reason_contains: "Valar"
+      # Every Valar intervention defeats Morgoth (rulebook "Defeat"), so the
+      # plain year-0 countdown reports it too -- not only the sail path
+      # (V.3/V.4). No Morgoth unit is on this board; the flag records the
+      # intervention, not a unit death.
+      morgoth_defeated: true
+
+  - id: BATC-L2.V.2
+    title: Morgoth wins outright at forty supply centers
+    # (32 centers here plus his 8 home (Angband 7 + Anfauglith) make
+    # Morgoth's owned total exactly 40.)
+    start:
+      phase: S25M
+      units:
+        MORGOTH: ["3A ANG"]
+      # Anchored: the Oath cases below (V.7, V.9, V.10, V.14) turn on the bar
+      # alone, so they must stand on this exact board -- an alias keeps them
+      # provably identical instead of five hand-copied lists that could drift.
+      ownership: &morgoth_forty
+        BEL: MORGOTH
+        BRI: MORGOTH
+        DIM: MORGOTH
+        DLN: MORGOTH
+        DNN: MORGOTH
+        DOL: MORGOTH
+        EGL: MORGOTH
+        EIT: MORGOTH
+        ELA: MORGOTH
+        FON: MORGOTH
+        FOR: MORGOTH
+        GEL: MORGOTH
+        GON: MORGOTH
+        HEL: MORGOTH
+        HID: MORGOTH
+        HIG: MORGOTH
+        IOB: MORGOTH
+        LAD: MORGOTH
+        MEN: MORGOTH
+        MIT: MORGOTH
+        MMA: MORGOTH
+        NAR: MORGOTH
+        NEV: MORGOTH
+        NFA: MORGOTH
+        NOG: MORGOTH
+        NWB: MORGOTH
+        RIV: MORGOTH
+        SFA: MORGOTH
+        TGA: MORGOTH
+        THA: MORGOTH
+        TOL: MORGOTH
+        VIN: MORGOTH
+    script:
+      - phase: S25M
+      - phase: F25M
+    expect:
+      over: true
+      winners: [MORGOTH]
+      reason_contains: "victory at 40"
+      # No Oath was ever sworn, so the win leaves second place open and the
+      # bar is the bare forty (the whole Oath surface is inert until someone
+      # swears). The free pick that follows is BATC-L2.V.8.
+      second: null
+      oath: null
+      oaths_broken: 0
+      victory_bar: 40
+
+  - id: BATC-L2.V.3
+    title: the mannish fleet sails West — intervention at the season's end
+    start:
+      phase: S25M
+      units:
+        MEN: ["F NBE", "A ELA"]
+    script:
+      - phase: S25M
+        orders:
+          MEN: ["F NBE SAILS WEST"]
+    expect:
+      resolutions: {"F NBE SAILS WEST": succeeds}
+      over: true
+      phase: S25R
+      winners: [MEN]
+      morgoth_defeated: true
+      units:
+        MEN: ["A ELA"]
+
+  - id: BATC-L2.V.4
+    title: the sail beats the forty-center count — Morgoth is defeated regardless
+    start:
+      phase: S25M
+      units:
+        MORGOTH: ["3A ANG"]
+        MEN: ["F NBE"]
+      ownership:
+        AER: MORGOTH
+        BEL: MORGOTH
+        BRI: MORGOTH
+        DIM: MORGOTH
+        DLN: MORGOTH
+        DNN: MORGOTH
+        DOL: MORGOTH
+        EGL: MORGOTH
+        EIT: MORGOTH
+        ELA: MORGOTH
+        EST: MORGOTH
+        FON: MORGOTH
+        FOR: MORGOTH
+        GEL: MORGOTH
+        GON: MORGOTH
+        HEL: MORGOTH
+        HID: MORGOTH
+        HIG: MORGOTH
+        HIT: MORGOTH
+        IOB: MORGOTH
+        LAD: MORGOTH
+        MEN: MORGOTH
+        MIT: MORGOTH
+        MMA: MORGOTH
+        MOS: MORGOTH
+        MSI: MORGOTH
+        NAR: MORGOTH
+        NEL: MORGOTH
+        NEV: MORGOTH
+        NOG: MORGOTH
+        NOS: MORGOTH
+        NWB: MORGOTH
+    script:
+      - phase: S25M
+        orders:
+          MEN: ["F NBE SAILS WEST"]
+    expect:
+      over: true
+      morgoth_defeated: true
+      winners: [MEN]
+
+  - id: BATC-L2.V.5
+    title: the Morgoth unit's death defeats him — the game goes on in civil disorder
+    # (The dislodger stands in LAD: LAD reaches ANF on the board, HIG does
+    # not.)
+    # (Crossings: the dislodge's LAD->ANF and the RIV support's RIV->ANF both
+    # ride free directions -- the table penalizes ANF->LAD and ANF->RIV -- so
+    # the giant falls to a whole 2 + 1 + 1 = 4 > 3.)
+    start:
+      phase: S25M
+      units:
+        MORGOTH: ["3A ANF", "A ANG"]
+        FEANORIANS: ["2A LAD"]
+        MEN: ["A EIT", "A RIV"]
+    script:
+      - phase: S25M
+        orders:
+          FEANORIANS: ["2A LAD DIS MORGOTH 3A(M) ANF"]
+          MEN:
+            - "A EIT S 2A LAD DIS MORGOTH 3A(M) ANF"
+            - "A RIV S 2A LAD DIS MORGOTH 3A(M) ANF"
+      - phase: S25R
+        orders:
+          MORGOTH: ["Disband 3A(M) ANF"]
+      - phase: F25M
+        orders:
+          MORGOTH: ["A ANG - ANF"]
+    expect:
+      resolutions: {"A ANG - ANF": fails}
+      morgoth_defeated: true
+      over: false
+      units:
+        MORGOTH: ["A ANG"]
+        FEANORIANS: ["2A ANF"]
+
+  - id: BATC-L2.V.6
+    title: a net-gain tie breaks to the greater board — Feanorians win alone
+    # Rulebook "Victory": "If two or more Powers are equal in Supply Centres
+    # above their Home Supply Centres, Victory goes to the one which Owns the
+    # most Supply Centres in total". Feanorians, Doriath and Teleri all reach
+    # net +2 over their home endowment, but the Feanorians own 8 absolute
+    # centers (home 6 + ARV + CBB) to Doriath's and Teleri's 5 (home 3 + two
+    # neutrals each). Net gain stays the law; the tie breaks to the greatest
+    # absolute owned weight, so the Feanorians win alone (a net-gain-only law
+    # would return all three as joint winners).
+    start:
+      phase: S0M
+      units:
+        FEANORIANS: ["A THA"]
+        DORIATH: ["A FOR"]
+        TELERI: ["A BRI"]
+      ownership:
+        GEL: FEANORIANS
+        HEL: FEANORIANS
+        HID: FEANORIANS
+        HIG: FEANORIANS
+        MMA: FEANORIANS
+        THA: FEANORIANS
+        ARV: FEANORIANS
+        CBB: FEANORIANS
+        FON: DORIATH
+        FOR: DORIATH
+        MEN: DORIATH
+        EIT: DORIATH
+        GVA: DORIATH
+        BRI: TELERI
+        EGL: TELERI
+        SFA: TELERI
+        IOB: TELERI
+        LAM: TELERI
+    script:
+      - phase: S0M
+      - phase: F0M
+    expect:
+      over: true
+      phase: F0R
+      winners: [FEANORIANS]
+      reason_contains: "ties broken by total centers owned"
+      morgoth_defeated: true
+
+  # -- the Oath of the Second (rulebook "Morgoth", the two Oath paragraphs) --
+
+  - id: BATC-L2.V.7
+    title: an Oath standing at the win places second -- the free pick is closed
+    # "If an Oath stands when the game ends, the Power named by it gets second
+    # place." Same board as V.2: the Oath changes who is placed, never whether
+    # Morgoth wins. Swearing is instant and free -- no gate, no price -- so it
+    # rides the opening phase with nothing else. Once the win has bound second
+    # place the post-game pick is refused by name (the game is over, so no
+    # way to break the Oath remains).
+    start:
+      phase: S25M
+      units:
+        MORGOTH: ["3A ANG"]
+      ownership: *morgoth_forty
+    script:
+      - phase: S25M
+        swear: DORIATH
+      - phase: F25M
+    after:
+      second_refused: [MEN, TELERI]
+    expect:
+      over: true
+      winners: [MORGOTH]
+      reason_contains: "victory at 40"
+      second: DORIATH
+      oath: DORIATH
+      oath_year: 25
+      oaths_broken: 0
+      victory_bar: 40
+      # (The swearing itself emitted into the Spring record a phase earlier --
+      # BATC-L2.V.13 pins that line; `events` reads the last record only.)
+      events:
+        - "the Oath of the Second sworn to DORIATH in Year 25 binds -- DORIATH takes second place"
+
+  - id: BATC-L2.V.8
+    title: no Oath at the end -- Morgoth's free choice is exactly what it was
+    # The Oath is an option Morgoth takes, never a constraint he is born
+    # under. With none standing, "Morgoth chooses as above" and the post-game
+    # pick is the plain one -- any other power, once. This case exists to show
+    # that the Oath refusal in `validate_second` cannot fire when no Oath
+    # stood.
+    start:
+      phase: S25M
+      units:
+        MORGOTH: ["3A ANG"]
+      ownership: *morgoth_forty
+    script:
+      - phase: S25M
+      - phase: F25M
+    after:
+      second_refused: [MORGOTH]
+      second: TELERI
+    expect:
+      over: true
+      winners: [MORGOTH]
+      second: TELERI
+      oath: null
+      oaths_broken: 0
+
+  - id: BATC-L2.V.9
+    title: one broken Oath raises the bar -- forty centres no longer end the game
+    # "Each Oath Morgoth has broken raises the number of Supply Centres he must
+    # Own for victory by one, for the rest of the game: forty-one after the
+    # first." The identical board that wins in V.2 does not win here, and the
+    # only difference is the price: sworn in the Spring, broken in the Autumn
+    # before Morgoth places his orders, and the Autumn boundary that follows
+    # then measures the same forty centres against forty-one.
+    start:
+      phase: S25M
+      units:
+        MORGOTH: ["3A ANG"]
+      ownership: *morgoth_forty
+    script:
+      - phase: S25M
+        swear: DORIATH
+      - phase: F25M
+        break: true
+    expect:
+      over: false
+      oath: null
+      oath_year: null
+      oaths_broken: 1
+      oath_stabbed: false
+      victory_bar: 41
+      events:
+        - "Morgoth breaks the Oath of the Second to DORIATH (Year 25) -- victory now needs 41 supply centers"
+
+  - id: BATC-L2.V.10
+    title: the sharpest tooth -- forty in the final Autumn with one Oath broken loses
+    # The win check runs BEFORE the year-0 countdown, so a raised bar does not
+    # merely postpone the win: it drops Morgoth through to the Valar, who
+    # defeat him. And "An Oath has no effect if Morgoth does not win"
+    # (rulebook) -- the Oath he swore after the break binds nobody, so the
+    # power he courted is left unplaced with everyone else.
+    # Breaking an Oath can therefore lose Morgoth the game outright.
+    start:
+      phase: S0M
+      units:
+        MORGOTH: ["3A ANG"]
+      ownership: *morgoth_forty
+    script:
+      - phase: S0M
+        swear: DORIATH
+        adjudicate: false
+      - phase: S0M
+        break: true
+        swear: TELERI
+      - phase: F0M
+    expect:
+      over: true
+      phase: F0R
+      winners: [MEN]
+      reason_contains: "the Valar intervene"
+      morgoth_defeated: true
+      second: null
+      oath: TELERI
+      oath_year: 0
+      oaths_broken: 1
+      victory_bar: 41
+
+  - id: BATC-L2.V.11
+    title: both verbs are refused once Morgoth has placed his orders
+    # Rulebook: "An Oath is sworn or broken during a Phase, before Morgoth has
+    # placed his Orders for that Phase, and takes effect at once." Announced
+    # together with the orders, the news reaches a victim already committed and
+    # unable to react, which leaves the price as the only protection. Enforced
+    # as: refused while MORGOTH holds a sheet for the current phase -- and the
+    # very same act is allowed again the moment a fresh phase opens, which is
+    # what proves the gate is the sheet and not the Oath.
+    start:
+      phase: S25M
+      units:
+        MORGOTH: ["3A ANG"]
+        DORIATH: ["A FOR"]
+    script:
+      - phase: S25M
+        orders:
+          MORGOTH: ["3A(M) ANG H"]
+        adjudicate: false
+      - phase: S25M
+        swear_refused: [DORIATH]
+      - phase: F25M
+        swear: DORIATH
+        orders:
+          MORGOTH: ["3A(M) ANG H"]
+        adjudicate: false
+      - phase: F25M
+        break_refused: true
+    expect:
+      oath: DORIATH
+      oath_year: 25
+      oaths_broken: 0
+      victory_bar: 40
+
+  - id: BATC-L2.V.12
+    title: entering an Area beside Morgoth is coexistence -- the break is priced
+    # The rulebook's free break needs "a Move into a Province which is not an
+    # Area and in which a Unit of Morgoth stands". Anfauglith's capacity of 6
+    # saves the Feanorians exactly as it saves a unit attacked out of the
+    # Girdle: the move still SUCCEEDS, but arriving beside the giant displaces
+    # nothing, so it is not an attack. Morgoth may still break -- he simply
+    # pays, which is the whole instrument. (A reading without the capacity
+    # qualifier would free him on this same script: oath_stabbed, oaths_broken
+    # 0, victory_bar 40, and the stab event.)
+    start:
+      phase: S25M
+      units:
+        MORGOTH: ["3A ANF"]
+        FEANORIANS: ["2A LAD"]
+    script:
+      - phase: S25M
+        swear: FEANORIANS
+        orders:
+          FEANORIANS: ["2A LAD - ANF"]
+      - phase: F25M
+        break: true
+        adjudicate: false
+    expect:
+      resolutions: {"2A LAD - ANF": succeeds}
+      oath: null
+      oath_stabbed: false
+      oaths_broken: 1
+      victory_bar: 41
+      events:
+        - "Morgoth breaks the Oath of the Second to FEANORIANS (Year 25) -- victory now needs 41 supply centers"
+
+  - id: BATC-L2.V.13
+    title: one Oath at a time, never to Morgoth, never broken when none stands
+    # Three refusals from the rulebook: nothing to break; Morgoth may not name
+    # himself; and "Morgoth may stand under only one Oath at a time", so
+    # swearing over a standing Oath is refused and he must break first,
+    # visibly. MEN holds no unit on this board and is refused for the standing
+    # Oath alone -- being absent is never a reason ("An Oath binds whether or
+    # not the Power named by it still has Units on the map").
+    start:
+      phase: S25M
+      units:
+        MORGOTH: ["3A ANG"]
+        DORIATH: ["A FOR"]
+    script:
+      - phase: S25M
+        break_refused: true
+        swear_refused: [MORGOTH]
+        swear: DORIATH
+        adjudicate: false
+      - phase: S25M
+        swear_refused: [MEN, DORIATH]
+    expect:
+      oath: DORIATH
+      oath_year: 25
+      oaths_broken: 0
+      events:
+        - "Morgoth swears the Oath of the Second to DORIATH (Year 25)"
+
+  - id: BATC-L2.V.14
+    title: an Oath binds a Power with no Units on the map
+    # "An Oath binds whether or not the Power named by it still has Units on
+    # the map" (rulebook). The Teleri hold nothing here and
+    # own nothing -- they are placed second all the same, which is the point of
+    # the instrument: it is worth something to a power that cannot win.
+    start:
+      phase: S25M
+      units:
+        MORGOTH: ["3A ANG"]
+      ownership: *morgoth_forty
+    script:
+      - phase: S25M
+        swear: TELERI
+      - phase: F25M
+    expect:
+      over: true
+      winners: [MORGOTH]
+      second: TELERI
+      oath: TELERI
+      oath_year: 25
+      units:
+        TELERI: []
+
+  - id: BATC-L2.V.15
+    title: a bounced move into an ordinary province is an implicit dislodge -- free
+    # The other side of V.12, and the reason the rule names the implicit
+    # dislodge rather than the successful one: "a Move into a Province
+    # which is not an Area and in which a Unit of Morgoth stands ... whether or
+    # not the Order succeeded" (rulebook "Victory"). Dor-Lomin has capacity 1,
+    # so Fingolfin's army cannot arrive beside the defender the way Anfauglith
+    # allows -- it can only push him out, which makes writing the order an
+    # attack. Morgoth holds and the attack BOUNCES; the exemption fires anyway,
+    # because it reads the written order and never its outcome. That the
+    # counter and the bar stay put is the whole difference from V.12.
+    start:
+      phase: S25M
+      units:
+        MORGOTH: ["A DLN"]
+        FINGOLFIN: ["A MIT"]
+    script:
+      - phase: S25M
+        swear: FINGOLFIN
+        orders:
+          MORGOTH: ["A DLN H"]
+          FINGOLFIN: ["A MIT - DLN"]
+      - phase: F25M
+        break: true
+        adjudicate: false
+    expect:
+      resolutions: {"A MIT - DLN": fails}
+      oath: null
+      oath_stabbed: true
+      oaths_broken: 0
+      victory_bar: 40
+      events:
+        - "FINGOLFIN attacks Morgoth in DLN -- the Oath of the Second may now be broken at no price"
+        - "Morgoth breaks the Oath of the Second to FINGOLFIN (Year 25) -- at no price (FINGOLFIN had attacked him)"
+
+  - id: BATC-L2.V.16
+    title: a supported Dislodge in an Area frees him -- both surviving widths at once
+    # The two dimensions in which the stab predicate outruns the Girdle
+    # attack-grant, in one order. (1) "or has Supported such an Order":
+    # Gondolin writes no attack of its own, only the support, and the Girdle
+    # grant would count that for nothing. (2) The capacity gate governs the
+    # Move branch ONLY -- "or a Dislodge of a Unit of Morgoth" is unqualified
+    # -- so naming the giant as
+    # victim reaches him inside Anfauglith, where V.12's move cannot. The
+    # attack also FAILS (two strength against the giant's three) and still
+    # frees him, which pins "whether or not the Order succeeded" on the
+    # Dislodge branch too. Finrod is not the sworn power and earns nothing.
+    start:
+      phase: S25M
+      units:
+        MORGOTH: ["3A ANF"]
+        FINROD: ["A DNN"]
+        GONDOLIN: ["A RIV"]
+    script:
+      - phase: S25M
+        swear: GONDOLIN
+        orders:
+          FINROD: ["A DNN DIS MORGOTH 3A(M) ANF"]
+          GONDOLIN: ["A RIV S A DNN DIS MORGOTH 3A(M) ANF"]
+      - phase: F25M
+        break: true
+        adjudicate: false
+    expect:
+      resolutions:
+        "A DNN DIS MORGOTH 3A(M) ANF": fails
+        "A RIV S A DNN DIS MORGOTH 3A(M) ANF": succeeds
+      oath: null
+      oath_stabbed: true
+      oaths_broken: 0
+      victory_bar: 40
+      events:
+        - "GONDOLIN attacks Morgoth in ANF -- the Oath of the Second may now be broken at no price"
+        - "Morgoth breaks the Oath of the Second to GONDOLIN (Year 25) -- at no price (GONDOLIN had attacked him)"

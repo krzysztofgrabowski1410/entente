@@ -1,0 +1,621 @@
+# DATC section 6.D — Supports and dislodges.
+# Hand-encoded from the DATC v3.3 document (docs/references/, git-ignored).
+# 6.D.35 writes the supported unit as "F Armenia" although Armenia holds an
+# army and marks the support given — subject references therefore resolve by
+# province, with the written kind advisory on this map (4.C.2 choice b).
+section: 6.D Supports and dislodges
+ruleset: standard
+cases:
+  - id: 6.D.1
+    title: supported hold can prevent dislodgement
+    phase: S1901M
+    units:
+      AUSTRIA: [F ADR, A TRI]
+      ITALY: [A VEN, A TYR]
+    orders:
+      AUSTRIA: [F ADR S A TRI - VEN, A TRI - VEN]
+      ITALY: [A VEN H, A TYR S A VEN]
+    expect:
+      resolutions:
+        F ADR S A TRI - VEN: succeeds
+        A TRI - VEN: fails
+        A VEN H: succeeds
+        A TYR S A VEN: succeeds
+
+  - id: 6.D.2
+    title: a move cuts support on hold
+    phase: S1901M
+    units:
+      AUSTRIA: [F ADR, A TRI, A VIE]
+      ITALY: [A VEN, A TYR]
+    orders:
+      AUSTRIA: [F ADR S A TRI - VEN, A TRI - VEN, A VIE - TYR]
+      ITALY: [A VEN H, A TYR S A VEN]
+    expect:
+      resolutions:
+        F ADR S A TRI - VEN: succeeds
+        A TRI - VEN: succeeds
+        A VIE - TYR: fails
+        A VEN H: fails
+        A TYR S A VEN: fails
+      dislodged: [ITALY A VEN]
+
+  - id: 6.D.3
+    title: a move cuts support on move
+    phase: S1901M
+    units:
+      AUSTRIA: [F ADR, A TRI]
+      ITALY: [A VEN, F ION]
+    orders:
+      AUSTRIA: [F ADR S A TRI - VEN, A TRI - VEN]
+      ITALY: [A VEN H, F ION - ADR]
+    expect:
+      resolutions:
+        F ADR S A TRI - VEN: fails
+        A TRI - VEN: fails
+        A VEN H: succeeds
+        F ION - ADR: fails
+
+  - id: 6.D.4
+    title: support to hold on unit supporting a hold allowed
+    phase: S1901M
+    units:
+      GERMANY: [A BER, F KIE]
+      RUSSIA: [F BAL, A PRU]
+    orders:
+      GERMANY: [A BER S F KIE, F KIE S A BER]
+      RUSSIA: [F BAL S A PRU - BER, A PRU - BER]
+    expect:
+      resolutions:
+        A BER S F KIE: fails
+        F KIE S A BER: succeeds
+        F BAL S A PRU - BER: succeeds
+        A PRU - BER: fails
+
+  - id: 6.D.5
+    title: support to hold on unit supporting a move allowed
+    phase: S1901M
+    units:
+      GERMANY: [A BER, F KIE, A MUN]
+      RUSSIA: [F BAL, A PRU]
+    orders:
+      GERMANY: [A BER S A MUN - SIL, F KIE S A BER, A MUN - SIL]
+      RUSSIA: [F BAL S A PRU - BER, A PRU - BER]
+    expect:
+      resolutions:
+        A BER S A MUN - SIL: fails
+        F KIE S A BER: succeeds
+        A MUN - SIL: succeeds
+        F BAL S A PRU - BER: succeeds
+        A PRU - BER: fails
+
+  - id: 6.D.6
+    title: support to hold on convoying unit allowed
+    phase: S1901M
+    units:
+      GERMANY: [A BER, F BAL, F PRU]
+      RUSSIA: [F LVN, F BOT]
+    orders:
+      GERMANY: [A BER - SWE, F BAL C A BER - SWE, F PRU S F BAL]
+      RUSSIA: [F LVN - BAL, F BOT S F LVN - BAL]
+    expect:
+      resolutions:
+        A BER - SWE: succeeds
+        F BAL C A BER - SWE: succeeds
+        F PRU S F BAL: succeeds
+        F LVN - BAL: fails
+        F BOT S F LVN - BAL: succeeds
+
+  - id: 6.D.7
+    title: support to hold on moving unit not allowed
+    phase: S1901M
+    units:
+      GERMANY: [F BAL, F PRU]
+      RUSSIA: [F LVN, F BOT, A FIN]
+    orders:
+      GERMANY: [F BAL - SWE, F PRU S F BAL]
+      RUSSIA: [F LVN - BAL, F BOT S F LVN - BAL, A FIN - SWE]
+    expect:
+      resolutions:
+        F BAL - SWE: fails
+        F PRU S F BAL: fails
+        F LVN - BAL: succeeds
+        F BOT S F LVN - BAL: succeeds
+        A FIN - SWE: fails
+      dislodged: [GERMANY F BAL]
+
+  - id: 6.D.8
+    title: failed convoy cannot receive hold support
+    phase: S1901M
+    units:
+      AUSTRIA: [F ION, A SER, A ALB]
+      TURKEY: [A GRE, A BUL]
+    orders:
+      AUSTRIA: [F ION H, A SER S A ALB - GRE, A ALB - GRE]
+      TURKEY: [A GRE - NAP, A BUL S A GRE]
+    expect:
+      resolutions:
+        F ION H: succeeds
+        A SER S A ALB - GRE: succeeds
+        A ALB - GRE: succeeds
+        A GRE - NAP: fails
+        A BUL S A GRE: fails
+      dislodged: [TURKEY A GRE]
+
+  - id: 6.D.9
+    title: support to move on holding unit not allowed
+    phase: S1901M
+    units:
+      ITALY: [A VEN, A TYR]
+      AUSTRIA: [A ALB, A TRI]
+    orders:
+      ITALY: [A VEN - TRI, A TYR S A VEN - TRI]
+      AUSTRIA: [A ALB S A TRI - SER, A TRI H]
+    expect:
+      resolutions:
+        A VEN - TRI: succeeds
+        A TYR S A VEN - TRI: succeeds
+        A ALB S A TRI - SER: fails
+        A TRI H: fails
+      dislodged: [AUSTRIA A TRI]
+
+  - id: 6.D.10
+    title: self dislodgment prohibited
+    phase: S1901M
+    units:
+      GERMANY: [A BER, F KIE, A MUN]
+    orders:
+      GERMANY: [A BER H, F KIE - BER, A MUN S F KIE - BER]
+    expect:
+      resolutions:
+        A BER H: succeeds
+        F KIE - BER: fails
+        A MUN S F KIE - BER: succeeds
+
+  - id: 6.D.11
+    title: no self dislodgment of returning unit
+    phase: S1901M
+    units:
+      GERMANY: [A BER, F KIE, A MUN]
+      RUSSIA: [A WAR]
+    orders:
+      GERMANY: [A BER - PRU, F KIE - BER, A MUN S F KIE - BER]
+      RUSSIA: [A WAR - PRU]
+    expect:
+      resolutions:
+        A BER - PRU: fails
+        F KIE - BER: fails
+        A MUN S F KIE - BER: succeeds
+        A WAR - PRU: fails
+
+  - id: 6.D.12
+    title: supporting a foreign unit to dislodge own unit prohibited
+    phase: S1901M
+    units:
+      AUSTRIA: [F TRI, A VIE]
+      ITALY: [A VEN]
+    orders:
+      AUSTRIA: [F TRI H, A VIE S A VEN - TRI]
+      ITALY: [A VEN - TRI]
+    expect:
+      resolutions:
+        F TRI H: succeeds
+        A VIE S A VEN - TRI: succeeds
+        A VEN - TRI: fails
+
+  - id: 6.D.13
+    title: supporting a foreign unit to dislodge a returning own unit prohibited
+    phase: S1901M
+    units:
+      AUSTRIA: [F TRI, A VIE]
+      ITALY: [A VEN, F APU]
+    orders:
+      AUSTRIA: [F TRI - ADR, A VIE S A VEN - TRI]
+      ITALY: [A VEN - TRI, F APU - ADR]
+    expect:
+      resolutions:
+        F TRI - ADR: fails
+        A VIE S A VEN - TRI: succeeds
+        A VEN - TRI: fails
+        F APU - ADR: fails
+
+  - id: 6.D.14
+    title: supporting a foreign unit is not enough to prevent dislodgement
+    phase: S1901M
+    units:
+      AUSTRIA: [F TRI, A VIE]
+      ITALY: [A VEN, A TYR, F ADR]
+    orders:
+      AUSTRIA: [F TRI H, A VIE S A VEN - TRI]
+      ITALY: [A VEN - TRI, A TYR S A VEN - TRI, F ADR S A VEN - TRI]
+    expect:
+      resolutions:
+        F TRI H: fails
+        A VIE S A VEN - TRI: succeeds
+        A VEN - TRI: succeeds
+        A TYR S A VEN - TRI: succeeds
+        F ADR S A VEN - TRI: succeeds
+      dislodged: [AUSTRIA F TRI]
+
+  - id: 6.D.15
+    title: defender cannot cut support for attack on itself
+    phase: S1901M
+    units:
+      RUSSIA: [F CON, F BLA]
+      TURKEY: [F ANK]
+    orders:
+      RUSSIA: [F CON S F BLA - ANK, F BLA - ANK]
+      TURKEY: [F ANK - CON]
+    expect:
+      resolutions:
+        F CON S F BLA - ANK: succeeds
+        F BLA - ANK: succeeds
+        F ANK - CON: fails
+      dislodged: [TURKEY F ANK]
+
+  - id: 6.D.16
+    title: convoying a unit dislodging a unit of same power is allowed
+    phase: S1901M
+    units:
+      ENGLAND: [A LON, F NTH]
+      FRANCE: [F ENG, A BEL]
+    orders:
+      ENGLAND: [A LON H, F NTH C A BEL - LON]
+      FRANCE: [F ENG S A BEL - LON, A BEL - LON]
+    expect:
+      resolutions:
+        A LON H: fails
+        F NTH C A BEL - LON: succeeds
+        F ENG S A BEL - LON: succeeds
+        A BEL - LON: succeeds
+      dislodged: [ENGLAND A LON]
+
+  - id: 6.D.17
+    title: dislodgement cuts supports
+    phase: S1901M
+    units:
+      RUSSIA: [F CON, F BLA]
+      TURKEY: [F ANK, A SMY, A ARM]
+    orders:
+      RUSSIA: [F CON S F BLA - ANK, F BLA - ANK]
+      TURKEY: [F ANK - CON, A SMY S F ANK - CON, A ARM - ANK]
+    expect:
+      resolutions:
+        F CON S F BLA - ANK: fails
+        F BLA - ANK: fails
+        F ANK - CON: succeeds
+        A SMY S F ANK - CON: succeeds
+        A ARM - ANK: fails
+      dislodged: [RUSSIA F CON]
+
+  - id: 6.D.18
+    title: a surviving unit will sustain support
+    phase: S1901M
+    units:
+      RUSSIA: [F CON, F BLA, A BUL]
+      TURKEY: [F ANK, A SMY, A ARM]
+    orders:
+      RUSSIA: [F CON S F BLA - ANK, F BLA - ANK, A BUL S F CON]
+      TURKEY: [F ANK - CON, A SMY S F ANK - CON, A ARM - ANK]
+    expect:
+      resolutions:
+        F CON S F BLA - ANK: succeeds
+        F BLA - ANK: succeeds
+        A BUL S F CON: succeeds
+        F ANK - CON: fails
+        A SMY S F ANK - CON: succeeds
+        A ARM - ANK: fails
+      dislodged: [TURKEY F ANK]
+
+  - id: 6.D.19
+    title: even when surviving is in alternative way
+    phase: S1901M
+    units:
+      RUSSIA: [F CON, F BLA, A SMY]
+      TURKEY: [F ANK]
+    orders:
+      RUSSIA: [F CON S F BLA - ANK, F BLA - ANK, A SMY S F ANK - CON]
+      TURKEY: [F ANK - CON]
+    expect:
+      resolutions:
+        F CON S F BLA - ANK: succeeds
+        F BLA - ANK: succeeds
+        A SMY S F ANK - CON: succeeds
+        F ANK - CON: fails
+      dislodged: [TURKEY F ANK]
+
+  - id: 6.D.20
+    title: unit cannot cut support of its own country
+    phase: S1901M
+    units:
+      ENGLAND: [F LON, F NTH, A YOR]
+      FRANCE: [F ENG]
+    orders:
+      ENGLAND: [F LON S F NTH - ENG, F NTH - ENG, A YOR - LON]
+      FRANCE: [F ENG H]
+    expect:
+      resolutions:
+        F LON S F NTH - ENG: succeeds
+        F NTH - ENG: succeeds
+        A YOR - LON: fails
+        F ENG H: fails
+      dislodged: [FRANCE F ENG]
+
+  - id: 6.D.21
+    title: dislodging does not cancel a support cut
+    phase: S1901M
+    units:
+      AUSTRIA: [F TRI]
+      ITALY: [A VEN, A TYR]
+      GERMANY: [A MUN]
+      RUSSIA: [A SIL, A BER]
+    orders:
+      AUSTRIA: [F TRI H]
+      ITALY: [A VEN - TRI, A TYR S A VEN - TRI]
+      GERMANY: [A MUN - TYR]
+      RUSSIA: [A SIL - MUN, A BER S A SIL - MUN]
+    expect:
+      resolutions:
+        F TRI H: succeeds
+        A VEN - TRI: fails
+        A TYR S A VEN - TRI: fails
+        A MUN - TYR: fails
+        A SIL - MUN: succeeds
+        A BER S A SIL - MUN: succeeds
+      dislodged: [GERMANY A MUN]
+
+  - id: 6.D.22
+    title: impossible fleet move cannot be supported
+    phase: S1901M
+    units:
+      GERMANY: [F KIE, A BUR]
+      RUSSIA: [A MUN, A BER]
+    orders:
+      GERMANY: [F KIE - MUN, A BUR S F KIE - MUN]
+      RUSSIA: [A MUN - KIE, A BER S A MUN - KIE]
+    expect:
+      resolutions:
+        F KIE - MUN: fails
+        A BUR S F KIE - MUN: fails
+        A MUN - KIE: succeeds
+        A BER S A MUN - KIE: succeeds
+      dislodged: [GERMANY F KIE]
+
+  - id: 6.D.23
+    title: impossible coast move cannot be supported
+    phase: S1901M
+    units:
+      ITALY: [F LYO, F WES]
+      FRANCE: [F SPA/NC, F MAR]
+    orders:
+      ITALY: [F LYO - SPA/SC, F WES S F LYO - SPA/SC]
+      FRANCE: [F SPA/NC - LYO, F MAR S F SPA/NC - LYO]
+    expect:
+      resolutions:
+        F LYO - SPA/SC: succeeds
+        F WES S F LYO - SPA/SC: succeeds
+        F SPA/NC - LYO: fails
+        F MAR S F SPA/NC - LYO: fails
+      dislodged: [FRANCE F SPA/NC]
+
+  - id: 6.D.24
+    title: impossible army move cannot be supported
+    phase: S1901M
+    units:
+      FRANCE: [A MAR, F SPA/SC]
+      ITALY: [F LYO]
+      TURKEY: [F TYS, F WES]
+    orders:
+      FRANCE: [A MAR - LYO, F SPA/SC S A MAR - LYO]
+      ITALY: [F LYO H]
+      TURKEY: [F TYS S F WES - LYO, F WES - LYO]
+    expect:
+      resolutions:
+        A MAR - LYO: fails
+        F SPA/SC S A MAR - LYO: fails
+        F LYO H: fails
+        F TYS S F WES - LYO: succeeds
+        F WES - LYO: succeeds
+      dislodged: [ITALY F LYO]
+
+  - id: 6.D.25
+    title: invalid hold support can be supported
+    phase: S1901M
+    units:
+      GERMANY: [A BER, F KIE]
+      RUSSIA: [F BAL, A PRU]
+    orders:
+      GERMANY: [A BER S A PRU, F KIE S A BER]
+      RUSSIA: [F BAL S A PRU - BER, A PRU - BER]
+    expect:
+      resolutions:
+        A BER S A PRU: fails
+        F KIE S A BER: succeeds
+        F BAL S A PRU - BER: succeeds
+        A PRU - BER: fails
+
+  - id: 6.D.26
+    title: invalid move support can be supported
+    phase: S1901M
+    units:
+      GERMANY: [A BER, F KIE]
+      RUSSIA: [F BAL, A PRU]
+    orders:
+      GERMANY: [A BER S A PRU - SIL, F KIE S A BER]
+      RUSSIA: [F BAL S A PRU - BER, A PRU - BER]
+    expect:
+      resolutions:
+        A BER S A PRU - SIL: fails
+        F KIE S A BER: succeeds
+        F BAL S A PRU - BER: succeeds
+        A PRU - BER: fails
+
+  - id: 6.D.27
+    title: invalid convoy can be supported
+    phase: S1901M
+    units:
+      ENGLAND: [F SWE, F DEN]
+      GERMANY: [A BER]
+      RUSSIA: [F BAL, F PRU]
+    orders:
+      ENGLAND: [F SWE - BAL, F DEN S F SWE - BAL]
+      GERMANY: [A BER H]
+      RUSSIA: [F BAL C A BER - LVN, F PRU S F BAL]
+    expect:
+      resolutions:
+        F SWE - BAL: fails
+        F DEN S F SWE - BAL: succeeds
+        A BER H: succeeds
+        F BAL C A BER - LVN: fails
+        F PRU S F BAL: succeeds
+
+  - id: 6.D.28
+    title: impossible move and support
+    phase: S1901M
+    units:
+      AUSTRIA: [A BUD]
+      RUSSIA: [F RUM]
+      TURKEY: [F BLA, A BUL]
+    orders:
+      AUSTRIA: [A BUD S F RUM]
+      RUSSIA: [F RUM - HOL]
+      TURKEY: [F BLA - RUM, A BUL S F BLA - RUM]
+    expect:
+      resolutions:
+        A BUD S F RUM: succeeds
+        F RUM - HOL: fails
+        F BLA - RUM: fails
+        A BUL S F BLA - RUM: succeeds
+
+  - id: 6.D.29
+    title: move to impossible coast and support
+    phase: S1901M
+    units:
+      AUSTRIA: [A BUD]
+      RUSSIA: [F RUM]
+      TURKEY: [F BLA, A BUL]
+    orders:
+      AUSTRIA: [A BUD S F RUM]
+      RUSSIA: [F RUM - BUL/SC]
+      TURKEY: [F BLA - RUM, A BUL S F BLA - RUM]
+    expect:
+      resolutions:
+        A BUD S F RUM: succeeds
+        F RUM - BUL/SC: fails
+        F BLA - RUM: fails
+        A BUL S F BLA - RUM: succeeds
+
+  - id: 6.D.30
+    title: move order without coast specification and receiving support
+    phase: S1901M
+    units:
+      ITALY: [F AEG]
+      RUSSIA: [F CON]
+      TURKEY: [F BLA, A BUL]
+    orders:
+      ITALY: [F AEG S F CON]
+      RUSSIA: [F CON - BUL]
+      TURKEY: [F BLA - CON, A BUL S F BLA - CON]
+    expect:
+      resolutions:
+        F AEG S F CON: succeeds
+        F CON - BUL: fails
+        F BLA - CON: fails
+        A BUL S F BLA - CON: succeeds
+
+  - id: 6.D.31
+    title: a tricky impossible support
+    phase: S1901M
+    units:
+      AUSTRIA: [A RUM]
+      TURKEY: [F BLA]
+    orders:
+      AUSTRIA: [A RUM - ARM]
+      TURKEY: [F BLA S A RUM - ARM]
+    expect:
+      resolutions:
+        A RUM - ARM: fails
+        F BLA S A RUM - ARM: fails
+
+  - id: 6.D.32
+    title: a missing fleet
+    phase: S1901M
+    units:
+      ENGLAND: [F EDI, A LVP]
+      FRANCE: [F LON]
+      GERMANY: [A YOR]
+    orders:
+      ENGLAND: [F EDI S A LVP - YOR, A LVP - YOR]
+      FRANCE: [F LON S A YOR]
+      GERMANY: [A YOR - HOL]
+    expect:
+      resolutions:
+        F EDI S A LVP - YOR: succeeds
+        A LVP - YOR: fails
+        F LON S A YOR: succeeds
+        A YOR - HOL: fails
+
+  - id: 6.D.33
+    title: unwanted support allowed
+    phase: S1901M
+    units:
+      AUSTRIA: [A SER, A VIE]
+      RUSSIA: [A GAL]
+      TURKEY: [A BUL]
+    orders:
+      AUSTRIA: [A SER - BUD, A VIE - BUD]
+      RUSSIA: [A GAL S A SER - BUD]
+      TURKEY: [A BUL - SER]
+    expect:
+      resolutions:
+        A SER - BUD: succeeds
+        A VIE - BUD: fails
+        A GAL S A SER - BUD: succeeds
+        A BUL - SER: succeeds
+      units:
+        AUSTRIA: [A BUD, A VIE]
+        TURKEY: [A SER]
+        RUSSIA: [A GAL]
+
+  - id: 6.D.34
+    title: support targeting own province not allowed
+    phase: S1901M
+    units:
+      GERMANY: [A BER, A SIL, F BAL]
+      ITALY: [A PRU]
+      RUSSIA: [A WAR, A LVN]
+    orders:
+      GERMANY: [A BER - PRU, A SIL S A BER - PRU, F BAL S A BER - PRU]
+      ITALY: [A PRU S A LVN - PRU]
+      RUSSIA: [A WAR S A LVN - PRU, A LVN - PRU]
+    expect:
+      resolutions:
+        A BER - PRU: succeeds
+        A SIL S A BER - PRU: succeeds
+        F BAL S A BER - PRU: succeeds
+        A PRU S A LVN - PRU: fails
+        A WAR S A LVN - PRU: succeeds
+        A LVN - PRU: fails
+      dislodged: [ITALY A PRU]
+
+  - id: 6.D.35
+    title: dislodgement cuts supports allowing enemy to advance
+    phase: S1901M
+    units:
+      RUSSIA: [F BLA, F CON]
+      TURKEY: [F ANK, F AEG, A ARM, A SMY]
+    orders:
+      RUSSIA: [F BLA - ANK, F CON S F BLA - ANK]
+      TURKEY: [F ANK - CON, F AEG S F ANK - CON, A ARM - ANK, A SMY S F ARM - ANK]
+    expect:
+      resolutions:
+        F BLA - ANK: fails
+        F CON S F BLA - ANK: fails
+        F ANK - CON: succeeds
+        F AEG S F ANK - CON: succeeds
+        A ARM - ANK: succeeds
+        A SMY S F ARM - ANK: succeeds
+      dislodged: [RUSSIA F CON]
+      units:
+        TURKEY: [F CON, F AEG, A ANK, A SMY]
+        RUSSIA: [F BLA]

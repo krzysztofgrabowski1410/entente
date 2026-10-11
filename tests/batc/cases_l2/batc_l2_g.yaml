@@ -1,0 +1,117 @@
+# BATC-L2 section G -- Glaurung's arrival and the one-way provinces
+# (rulebook "Glaurung Unit and Devastation", "Provinces off the map").
+# Entry into Angband and Eriador from the board is forbidden outright ("the
+# passage is one-way: Units may leave Angband, but no Unit may enter it from
+# the board - not even a Morgoth's Unit that has never left it"), the sole
+# exception being Morgoth's strength-3 specials, which may always enter
+# Angband; Eriador grants none. The rule keeps no per-unit "never-left"
+# provenance, so G.2/G.5 refuse a twin that never left.
+section: "BATC-L2 G. Glaurung and the one-way provinces"
+cases:
+  - id: BATC-L2.G.1
+    title: Glaurung appears in Angband at the boundary after Autumn 21
+    start:
+      phase: S21M
+      units:
+        MORGOTH: ["A ANF"]
+    script:
+      - phase: S21M
+      - phase: F21M
+      - phase: W21A
+    expect:
+      events: ["Glaurung arrives in Angband (available Spring 20)"]
+      units:
+        MORGOTH: ["A ANF", "3A ANG"]
+      phase: S20M
+
+  - id: BATC-L2.G.2
+    title: Angband refuses ordinary units, period — both A ANF twins are barred
+    # There is no never-left exception: neither ordinary army may enter,
+    # whether or not it ever stood in Angband.
+    start:
+      phase: S25M
+      units:
+        MORGOTH: ["A ANF", "A ANF"]
+    script:
+      - phase: S25M
+        orders:
+          MORGOTH:
+            - "A ANF - ANG"
+            - "A ANF - ANG"
+    expect:
+      resolutions: {"A ANF - ANG": fails}
+      units:
+        MORGOTH: ["A ANF", "A ANF"]
+
+  - id: BATC-L2.G.3
+    title: Morgoth's strength-3 unit always enters Angband
+    start:
+      phase: S25M
+      units:
+        MORGOTH: ["3A ANF"]
+    script:
+      - phase: S25M
+        orders:
+          MORGOTH: ["3A(M) ANF - ANG"]
+    expect:
+      resolutions: {"3A(M) ANF - ANG": succeeds}
+      units:
+        MORGOTH: ["3A ANG"]
+
+  - id: BATC-L2.G.4
+    title: Eriador refuses entry from the board — even a unit that just left it
+    # The ban keys on nothing but the destination: nothing enters Eriador
+    # from the board at all, a unit that just left it included.
+    start:
+      phase: S24M
+      units:
+        MEN: ["A ERI"]
+    script:
+      - phase: S24M
+        orders:
+          MEN: ["A ERI - ELA"]
+      - phase: F24M
+        orders:
+          MEN: ["A ELA - ERI"]
+    expect:
+      resolutions: {"A ELA - ERI": fails}
+      units:
+        MEN: ["A ELA"]
+
+  - id: BATC-L2.G.5
+    title: no unit enters Eriador from the board — the starting ELA army included
+    # A mannish army that never left Eriador is still barred from entering
+    # it: there is no never-left exception.
+    start:
+      phase: S25M
+      units:
+        MEN: ["A ELA"]
+    script:
+      - phase: S25M
+        orders:
+          MEN: ["A ELA - ERI"]
+    expect:
+      resolutions: {"A ELA - ERI": fails}
+      units:
+        MEN: ["A ELA"]
+
+  - id: BATC-L2.G.6
+    title: Angband admits the strength-3 special but bars the ordinary garrison
+    # Movement-flavour contrast in one adjudication: the 3A enters Angband,
+    # the co-located ordinary army is barred and holds in Anfauglith.
+    start:
+      phase: S25M
+      units:
+        MORGOTH: ["A ANF", "3A ANF"]
+    script:
+      - phase: S25M
+        orders:
+          MORGOTH:
+            - "A ANF - ANG"
+            - "3A(M) ANF - ANG"
+    expect:
+      resolutions:
+        "A ANF - ANG": fails
+        "3A(M) ANF - ANG": succeeds
+      units:
+        MORGOTH: ["3A ANG", "A ANF"]

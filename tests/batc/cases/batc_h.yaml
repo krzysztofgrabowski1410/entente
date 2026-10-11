@@ -1,0 +1,204 @@
+# BATC section H -- DIRECTIONAL mountain barriers.
+# These cases certify the rulebook's "Mountain Barriers" rule: "Mountain
+# Barriers are directional: a crossing marked on the map is halved only in
+# the marked direction". The penalty is the 84-directed-pair table in
+# beleriand.json (78 undirected edges; 6 of them penalized both ways), it
+# binds fleet moves and convoyed landings too, and the crossing direction
+# is origin -> _crossing_target(order) (supporter -> subject target for
+# supports) -- except a CONVOYED move, whose toll reads the disembark
+# crossing, last convoying sea -> landing province, instead of its origin
+# edge ("A Convoyed Army does not pay for the Province it left - it pays
+# for its disembarking"; H.5/H.7 vs H.8). Which sea is the last one is the
+# convoy's to say: the move is halved iff the chains its own convoy orders
+# form end in at least one sea and every such sea is marked into the landing
+# province. Each tolled coast of this map touches one sea only, so every
+# convoy below has one possible last sea and the rule is the rulebook's
+# letter; a coast with a marked and a free sea exists on no shipped map, and
+# the engine tests exercise one on a synthetic map. Under a symmetric
+# reading several verdicts below flip, and each comment shows both readings'
+# arithmetic.
+section: "BATC H. Directional mountain barriers"
+ruleset: beleriand
+cases:
+  - id: BATC.H.1
+    title: descending out of the range is free — the discriminating move
+    # DLN->SEW is penalized (BATC.E.1) but the reverse SEW->DLN is not in
+    # the directed table: the double army descends at full 2 > 1 and
+    # dislodges. Symmetric reading: 2 x 1/2 = 1, not > 1, bounce -- the
+    # verdict itself separates the directed table from a symmetric one.
+    phase: S25M
+    units:
+      FINGOLFIN: ["2A SEW"]
+      MORGOTH: ["A DLN"]
+    orders:
+      FINGOLFIN: ["2A SEW - DLN"]
+    expect:
+      resolutions:
+        "2A SEW - DLN": succeeds
+      dislodged: ["MORGOTH A DLN"]
+      units:
+        FINGOLFIN: ["2A DLN"]
+
+  - id: BATC.H.2
+    title: supporting outward across the barrier is full — the discriminating support
+    # Support direction is supporter province -> subject target.
+    # Attack: A MIT - DLN (MIT-DLN carries no barrier) at 1, plus the SEW
+    # supporter projecting outward SEW->DLN (not in the table) at full 1 =
+    # 2. Defense: hold 1 plus the CNI supporter projecting CNI->DLN -- a
+    # penalized crossing (one of the six both-way pairs) -- at 1/2 = 3/2.
+    # Directed: 2 > 3/2, the defender falls. Symmetric reading: the SEW
+    # support would also halve, 3/2 = 3/2, and the attack would bounce.
+    phase: S25M
+    units:
+      FINGOLFIN: ["A MIT", "A SEW"]
+      MORGOTH: ["A DLN", "A CNI"]
+    orders:
+      FINGOLFIN: ["A MIT - DLN", "A SEW S A MIT - DLN"]
+      MORGOTH: ["A DLN H", "A CNI S MORGOTH A DLN"]
+    expect:
+      resolutions:
+        "A MIT - DLN": succeeds
+        "A SEW S A MIT - DLN": succeeds
+        "A CNI S MORGOTH A DLN": succeeds
+      dislodged: ["MORGOTH A DLN"]
+      units:
+        FINGOLFIN: ["A DLN", "A SEW"]
+        MORGOTH: ["A CNI"]
+
+  - id: BATC.H.3
+    title: fleet moves pay the toll — a halved double fleet bounces
+    # The directed table carries sea/coastal fleet lanes (NBE->ELO/NEV/VIN,
+    # NFA->NEV/VIN, LAM->ELO, ELO<->NEV), so the halving is LIVE for
+    # fleets ("Fleets pay the toll too" -- the penalty is not armies-only).
+    # NEV->ELO is penalized: 2 x 1/2 = 1, not > 1, the double fleet
+    # bounces off a single. Were fleets exempt, 2 > 1 would dislodge.
+    phase: S25M
+    units:
+      TELERI: ["2F NEV"]
+      FINROD: ["F ELO"]
+    orders:
+      TELERI: ["2F NEV - ELO"]
+    expect:
+      resolutions:
+        "2F NEV - ELO": fails
+      units:
+        TELERI: ["2F NEV"]
+        FINROD: ["F ELO"]
+
+  - id: BATC.H.4
+    title: a fleet head-to-head decided purely by crossing direction
+    # LAM->ELO is penalized, ELO->LAM is not. In the head-to-head the
+    # Teleri attack at full 2; the Finrod fleet crosses at 2 x 1/2 = 1 and
+    # -- because attack, prevent and defend are one MOVE-role value (docs/adjudication.tex
+    # Sec. 2) --
+    # also DEFENDS its head-to-head at 1 (retention would be unmodified,
+    # but a dislodged mover retains nothing). 2 > 1: the free-direction
+    # fleet wins the lane. Symmetric reading: 1 vs 1 both ways, a double
+    # bounce -- both verdicts flip.
+    phase: S25M
+    units:
+      TELERI: ["2F ELO"]
+      FINROD: ["2F LAM"]
+    orders:
+      TELERI: ["2F ELO - LAM"]
+      FINROD: ["2F LAM - ELO"]
+    expect:
+      resolutions:
+        "2F ELO - LAM": succeeds
+        "2F LAM - ELO": fails
+      dislodged: ["FINROD 2F LAM"]
+      units:
+        TELERI: ["2F LAM"]
+
+  - id: BATC.H.5
+    title: a convoyed landing across a tolled beach is halved
+    # The rulebook tolls the DISEMBARK crossing -- last convoying sea ->
+    # landing province -- never the origin edge the army sails around: this
+    # landing pays 2 x 1/2 = 1, not > 1, because NBE->ELO is penalized, not
+    # because of the LAM->ELO range. (Here an origin->destination endpoint
+    # reading would halve too -- on this map every penalized
+    # coastal-coastal pair lands on a tolled beach; H.7 is the position
+    # where the two readings part ways.) Were convoyed landings exempt
+    # entirely, 2 > 1 would dislodge the defender.
+    phase: S25M
+    units:
+      FINROD: ["2A LAM"]
+      TELERI: ["2F NBE"]
+      FINGOLFIN: ["A ELO"]
+    orders:
+      FINROD: ["2A LAM - ELO via convoy"]
+      TELERI: ["2F NBE C 2A LAM - ELO"]
+    expect:
+      resolutions:
+        "2A LAM - ELO via convoy": fails
+      units:
+        FINROD: ["2A LAM"]
+        TELERI: ["2F NBE"]
+        FINGOLFIN: ["A ELO"]
+
+  - id: BATC.H.6
+    title: the reverse convoy lands on a free beach and lands whole
+    # The same lane sailed the other way: the disembark crossing NBE->LAM
+    # is not in the directed table, so the convoyed double army lands at
+    # full 2 > 1 and dislodges the defender -- the free-beach control for
+    # H.5, and the reason a Lammoth defender cannot hide behind the
+    # LAM~ELO range from the sea side.
+    phase: S25M
+    units:
+      FINROD: ["2A ELO"]
+      TELERI: ["2F NBE"]
+      FINGOLFIN: ["A LAM"]
+    orders:
+      FINROD: ["2A ELO - LAM via convoy"]
+      TELERI: ["2F NBE C 2A ELO - LAM"]
+    expect:
+      resolutions:
+        "2A ELO - LAM via convoy": succeeds
+        "2F NBE C 2A ELO - LAM": succeeds
+      dislodged: ["FINGOLFIN A LAM"]
+      units:
+        FINROD: ["2A LAM"]
+        TELERI: ["2F NBE"]
+
+  - id: BATC.H.7
+    title: the toll reads the beach, not the road — the convoyed landing pays
+    # The discriminating position for the disembark rule: VIN->NEV carries
+    # no barrier, but the only sea touching Nevrast's coast is NBE and
+    # NBE->NEV is penalized. By sea the double army disembarks at
+    # 2 x 1/2 = 1, not > 1, and bounces off a single defender; an endpoint
+    # (origin->destination) reading would land it whole at 2 > 1 and
+    # dislodge. H.8 marches the same army over the same border for the
+    # overland control.
+    phase: S25M
+    units:
+      FINROD: ["2A VIN"]
+      TELERI: ["2F NBE"]
+      FINGOLFIN: ["A NEV"]
+    orders:
+      FINROD: ["2A VIN - NEV via convoy"]
+      TELERI: ["2F NBE C 2A VIN - NEV"]
+    expect:
+      resolutions:
+        "2A VIN - NEV via convoy": fails
+      units:
+        FINROD: ["2A VIN"]
+        TELERI: ["2F NBE"]
+        FINGOLFIN: ["A NEV"]
+
+  - id: BATC.H.8
+    title: the same army walks the same border and pays nothing (control for H.7)
+    # Overland the toll is the origin->destination crossing, and VIN->NEV
+    # is not in the directed table: the double army marches at a whole
+    # 2 > 1 and dislodges the defender the convoy could not budge.
+    phase: S25M
+    units:
+      FINROD: ["2A VIN"]
+      FINGOLFIN: ["A NEV"]
+    orders:
+      FINROD: ["2A VIN - NEV"]
+    expect:
+      resolutions:
+        "2A VIN - NEV": succeeds
+      dislodged: ["FINGOLFIN A NEV"]
+      units:
+        FINROD: ["2A NEV"]

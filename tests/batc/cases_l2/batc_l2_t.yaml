@@ -1,0 +1,112 @@
+# BATC-L2 section T -- Transform (rulebook "Fleets").
+section: "BATC-L2 T. Transform"
+cases:
+  - id: BATC-L2.T.1
+    title: an army transforms to a fleet in a coastal province (knowledge held)
+    script:
+      - phase: S25M
+        orders:
+          TELERI: ["A BRI TFM F"]
+    expect:
+      resolutions: {"A BRI TFM F": succeeds}
+      events: ["TELERI A BRI transforms to F"]
+      units:
+        TELERI: ["F BRI", "F EGL", "2F SFA"]
+
+  - id: BATC-L2.T.2
+    title: an attacked unit does not transform, even when the attack fails
+    # (The attacker stands in NFA: NFA-BRI is an edge of the board, NWB-BRI
+    # is not.)
+    start:
+      phase: S25M
+      units:
+        TELERI: ["F BRI"]
+        FINROD: ["A NFA"]
+    script:
+      - phase: S25M
+        orders:
+          TELERI: ["F BRI TFM A"]
+          FINROD: ["A NFA - BRI"]
+    expect:
+      resolutions:
+        "F BRI TFM A": fails
+        "A NFA - BRI": fails
+      units:
+        TELERI: ["F BRI"]
+        FINROD: ["A NFA"]
+
+  - id: BATC-L2.T.3
+    title: no transform without the fleet-building knowledge
+    script:
+      - phase: S25M
+        orders:
+          FINGOLFIN: ["A NEV TFM F"]
+    expect:
+      resolutions: {"A NEV TFM F": fails}
+      units:
+        FINGOLFIN: ["A DLN", "2A MIT", "A NEV"]
+
+  - id: BATC-L2.T.4
+    title: no transform in an inland province
+    start:
+      phase: S25M
+      units:
+        # the fleet keeps Teleri clear of the fleet-shortage disorder rule
+        TELERI: ["A NWB", "F EGL"]
+    script:
+      - phase: S25M
+        orders:
+          TELERI: ["A NWB TFM F"]
+    expect:
+      resolutions: {"A NWB TFM F": fails}
+      units:
+        TELERI: ["A NWB", "F EGL"]
+
+  - id: BATC-L2.T.5
+    title: a Double Army becomes a Double Fleet (strength carries over)
+    start:
+      phase: S25M
+      units:
+        # the fleet keeps Teleri clear of the fleet-shortage disorder rule
+        TELERI: ["2A SFA", "F EGL"]
+    script:
+      - phase: S25M
+        orders:
+          TELERI: ["2A SFA TFM F"]
+    expect:
+      resolutions: {"2A SFA TFM F": succeeds}
+      units:
+        TELERI: ["2F SFA", "F EGL"]
+
+  - id: BATC-L2.T.6
+    title: a dislodged unit transforms nothing
+    # (The attack pair stands in NFA/BNI, as in T.2; NWB-BRI is not an edge
+    # of the board.)
+    start:
+      phase: S25M
+      units:
+        TELERI: ["F BRI"]
+        FINROD: ["A NFA", "A BNI"]
+    script:
+      - phase: S25M
+        orders:
+          TELERI: ["F BRI TFM A"]
+          FINROD:
+            - "A NFA - BRI"
+            - "A BNI S A NFA - BRI"
+    expect:
+      resolutions:
+        "F BRI TFM A": fails
+        "A NFA - BRI": succeeds
+      phase: S25R
+
+  - id: BATC-L2.T.7
+    title: a fleet transforms back to an army
+    script:
+      - phase: S25M
+        orders:
+          TELERI: ["F EGL TFM A"]
+    expect:
+      resolutions: {"F EGL TFM A": succeeds}
+      units:
+        TELERI: ["A BRI", "A EGL", "2F SFA"]

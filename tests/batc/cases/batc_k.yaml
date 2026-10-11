@@ -1,0 +1,506 @@
+# BATC section K -- Special-unit designators: a reference fits a unit only
+# when the two designators are equal or neither is written.
+# Rulebook "Dictionary": "A Signature is the designator of a special Unit,
+# written after its Strength in Orders and references, i. e. 3A(M) for
+# Morgoth or 3A(G) for Glaurung (see: Morgoth). The designator must always be
+# written: 3A(M) fits only Morgoth and 3A(G) only Glaurung, while 3A written
+# without a designator fits no Unit -- an Order or a reference written so is
+# invalid, like one with a wrong Unit type. Morgoth and Glaurung are therefore
+# never twins."
+#
+# On the board both specials are a plain MORGOTH 3A, so the adjudicator knows
+# a special only by the designator its own order writes. In a game that is
+# every special: the game layer writes the designator into every order it
+# lists and holds a special that has no valid order under it, so a
+# designated reference always meets a designated unit. These positions are
+# played without the game layer: a 3A whose order writes no designator, or
+# that has no order, is an unnamed 3A -- no special -- and only a bare
+# reference fits it. Each binding place gets the four pairings -- a
+# designated reference against an unnamed 3A (no fit), a bare one against an
+# unnamed 3A (fit), a bare one against a designated 3A (no fit), a designated
+# one against the same designator (fit): a support's subject (K.1-K.4), a
+# support-hold's subject (K.5-K.8), a Dislodge's victim with its order named
+# (K.9-K.12) and without (K.13-K.16), and a Bar's victim (K.17-K.20). K.21 and
+# K.22 put Glaurung beside two unnamed 3As in one Area: each reference
+# engages the one class it names. A support whose subject fits no unit that
+# received the subject order matches no order: it is invalid, its unit holds,
+# and its row fails (rulebook "Invalid Orders": "the invalid order is
+# replaced with a Hold order") -- K.1, K.3, K.5 and K.7.
+section: "BATC K. Special-unit designators"
+ruleset: beleriand
+cases:
+  - id: BATC.K.1
+    title: a designated support subject does not fit an unnamed 3A
+    # "3A(M) fits only Morgoth and 3A(G) only Glaurung." MORGOTH's 3A writes
+    # no designator on its Move, so it is an unnamed 3A and no Morgoth: the
+    # support written for 3A(M) matches no order, so it is invalid and fails,
+    # and the Move meets Doriath's 3A in Eithel Sirion with 3 against 3 and
+    # fails too.
+    phase: S25M
+    units:
+      MORGOTH: ["3A ANF", "A NEW"]
+      DORIATH: ["3A EIT"]
+    orders:
+      MORGOTH: ["3A ANF - EIT", "A NEW S MORGOTH 3A(M) ANF - EIT"]
+      DORIATH: ["3A EIT H"]
+    expect:
+      resolutions:
+        "3A ANF - EIT": fails
+        "A NEW S MORGOTH 3A(M) ANF - EIT": fails
+        "3A EIT H": succeeds
+      dislodged: []
+      units:
+        MORGOTH: ["3A ANF", "A NEW"]
+        DORIATH: ["3A EIT"]
+
+  - id: BATC.K.2
+    title: a bare support subject fits an unnamed 3A
+    # "3A(M) fits only Morgoth and 3A(G) only Glaurung." K.1's control:
+    # neither the support's subject nor the Move writes a designator, so the
+    # support binds the unnamed 3A and the Move dislodges Doriath's 3A with 4
+    # against 3.
+    phase: S25M
+    units:
+      MORGOTH: ["3A ANF", "A NEW"]
+      DORIATH: ["3A EIT"]
+    orders:
+      MORGOTH: ["3A ANF - EIT", "A NEW S MORGOTH 3A ANF - EIT"]
+      DORIATH: ["3A EIT H"]
+    expect:
+      resolutions:
+        "3A ANF - EIT": succeeds
+        "A NEW S MORGOTH 3A ANF - EIT": succeeds
+        "3A EIT H": fails
+      dislodged: ["DORIATH 3A EIT"]
+      units:
+        MORGOTH: ["3A EIT", "A NEW"]
+        DORIATH: []
+
+  - id: BATC.K.3
+    title: a bare support subject does not fit the designated Morgoth unit
+    # "3A written without a designator fits no Unit." The Move writes 3A(M),
+    # so the 3A is the Morgoth unit, and the bare subject fits no unit: the
+    # support matches no order, so it is invalid and fails, and the Move
+    # fails at 3 against 3.
+    phase: S25M
+    units:
+      MORGOTH: ["3A ANF", "A NEW"]
+      DORIATH: ["3A EIT"]
+    orders:
+      MORGOTH: ["3A(M) ANF - EIT", "A NEW S MORGOTH 3A ANF - EIT"]
+      DORIATH: ["3A EIT H"]
+    expect:
+      resolutions:
+        "3A(M) ANF - EIT": fails
+        "A NEW S MORGOTH 3A ANF - EIT": fails
+        "3A EIT H": succeeds
+      dislodged: []
+      units:
+        MORGOTH: ["3A ANF", "A NEW"]
+        DORIATH: ["3A EIT"]
+
+  - id: BATC.K.4
+    title: a designated support subject fits the same designator
+    # "3A(M) fits only Morgoth." Subject and Move both write 3A(M): the
+    # support binds the Morgoth unit and the Move dislodges Doriath's 3A with
+    # 4 against 3.
+    phase: S25M
+    units:
+      MORGOTH: ["3A ANF", "A NEW"]
+      DORIATH: ["3A EIT"]
+    orders:
+      MORGOTH: ["3A(M) ANF - EIT", "A NEW S MORGOTH 3A(M) ANF - EIT"]
+      DORIATH: ["3A EIT H"]
+    expect:
+      resolutions:
+        "3A(M) ANF - EIT": succeeds
+        "A NEW S MORGOTH 3A(M) ANF - EIT": succeeds
+        "3A EIT H": fails
+      dislodged: ["DORIATH 3A EIT"]
+      units:
+        MORGOTH: ["3A EIT", "A NEW"]
+        DORIATH: []
+
+  - id: BATC.K.5
+    title: a designated support-hold subject does not fit an unordered 3A
+    # "3A(M) fits only Morgoth and 3A(G) only Glaurung." The 3A in
+    # Anfauglith has no order, so it holds as an unnamed 3A: the support-hold
+    # written for 3A(M) matches no order, so it is invalid, fails and adds
+    # nothing to the defence, and the Feanorian Dislodge takes the 3A with 4
+    # against 3.
+    phase: S25M
+    units:
+      MORGOTH: ["3A ANF", "A LOT"]
+      FEANORIANS: ["4A LAD"]
+    orders:
+      MORGOTH: ["A LOT S MORGOTH 3A(M) ANF"]
+      FEANORIANS: ["4A LAD DIS MORGOTH 3A ANF"]
+    expect:
+      resolutions:
+        "4A LAD DIS MORGOTH 3A ANF": succeeds
+        "A LOT S MORGOTH 3A(M) ANF": fails
+      dislodged: ["MORGOTH 3A ANF"]
+      units:
+        MORGOTH: ["A LOT"]
+        FEANORIANS: ["4A ANF"]
+
+  - id: BATC.K.6
+    title: a bare support-hold subject fits an unordered 3A
+    # "3A(M) fits only Morgoth and 3A(G) only Glaurung." K.5's control: the
+    # bare subject binds the unnamed 3A, which defends at 3 + 1 = 4, and the
+    # Dislodge fails at 4 against 4.
+    phase: S25M
+    units:
+      MORGOTH: ["3A ANF", "A LOT"]
+      FEANORIANS: ["4A LAD"]
+    orders:
+      MORGOTH: ["A LOT S MORGOTH 3A ANF"]
+      FEANORIANS: ["4A LAD DIS MORGOTH 3A ANF"]
+    expect:
+      resolutions:
+        "4A LAD DIS MORGOTH 3A ANF": fails
+        "A LOT S MORGOTH 3A ANF": succeeds
+      dislodged: []
+      units:
+        MORGOTH: ["3A ANF", "A LOT"]
+        FEANORIANS: ["4A LAD"]
+
+  - id: BATC.K.7
+    title: a bare support-hold subject does not fit the designated Morgoth unit
+    # "3A written without a designator fits no Unit." The 3A holds as
+    # 3A(M), so the bare support-hold matches no order: it is invalid and
+    # fails, and the Dislodge naming 3A(M) takes the 3A with 4 against 3.
+    phase: S25M
+    units:
+      MORGOTH: ["3A ANF", "A LOT"]
+      FEANORIANS: ["4A LAD"]
+    orders:
+      MORGOTH: ["3A(M) ANF H", "A LOT S MORGOTH 3A ANF"]
+      FEANORIANS: ["4A LAD DIS MORGOTH 3A(M) ANF"]
+    expect:
+      resolutions:
+        "4A LAD DIS MORGOTH 3A(M) ANF": succeeds
+        "3A(M) ANF H": fails
+        "A LOT S MORGOTH 3A ANF": fails
+      dislodged: ["MORGOTH 3A ANF"]
+      units:
+        MORGOTH: ["A LOT"]
+        FEANORIANS: ["4A ANF"]
+
+  - id: BATC.K.8
+    title: a designated support-hold subject fits the same designator
+    # "3A(M) fits only Morgoth." The support-hold and the Hold both write
+    # 3A(M): the Morgoth unit defends at 3 + 1 = 4 and the Dislodge fails.
+    phase: S25M
+    units:
+      MORGOTH: ["3A ANF", "A LOT"]
+      FEANORIANS: ["4A LAD"]
+    orders:
+      MORGOTH: ["3A(M) ANF H", "A LOT S MORGOTH 3A(M) ANF"]
+      FEANORIANS: ["4A LAD DIS MORGOTH 3A(M) ANF"]
+    expect:
+      resolutions:
+        "4A LAD DIS MORGOTH 3A(M) ANF": fails
+        "3A(M) ANF H": succeeds
+        "A LOT S MORGOTH 3A(M) ANF": succeeds
+      dislodged: []
+      units:
+        MORGOTH: ["3A ANF", "A LOT"]
+        FEANORIANS: ["4A LAD"]
+
+  - id: BATC.K.9
+    title: a Dislodge naming its victim's order with a designator does not fit an unordered 3A
+    # "3A(M) fits only Morgoth and 3A(G) only Glaurung." The unordered 3A
+    # holds as an unnamed 3A, so no unit fits the victim written 3A(M) with
+    # its Hold, and the attack fails outright (Sec. 3.4: "no unit has that
+    # order").
+    phase: S25M
+    units:
+      MORGOTH: ["3A ANF"]
+      FEANORIANS: ["4A LAD"]
+    orders:
+      FEANORIANS: ["4A LAD DIS MORGOTH 3A(M) ANF H"]
+    expect:
+      resolutions:
+        "4A LAD DIS MORGOTH 3A(M) ANF H": fails
+      dislodged: []
+      units:
+        MORGOTH: ["3A ANF"]
+        FEANORIANS: ["4A LAD"]
+
+  - id: BATC.K.10
+    title: a bare Dislodge naming its victim's order fits an unordered 3A
+    # "3A(M) fits only Morgoth and 3A(G) only Glaurung." K.9's control: the
+    # bare reference fits the unnamed 3A, whose order is a Hold, and the
+    # attack dislodges it with 4 against 3.
+    phase: S25M
+    units:
+      MORGOTH: ["3A ANF"]
+      FEANORIANS: ["4A LAD"]
+    orders:
+      FEANORIANS: ["4A LAD DIS MORGOTH 3A ANF H"]
+    expect:
+      resolutions:
+        "4A LAD DIS MORGOTH 3A ANF H": succeeds
+      dislodged: ["MORGOTH 3A ANF"]
+      units:
+        MORGOTH: []
+        FEANORIANS: ["4A ANF"]
+
+  - id: BATC.K.11
+    title: a bare Dislodge naming its victim's order does not fit the designated Morgoth unit
+    # "3A written without a designator fits no Unit." The 3A holds as
+    # 3A(M); the bare victim with its Hold fits no unit, and the attack
+    # fails outright.
+    phase: S25M
+    units:
+      MORGOTH: ["3A ANF"]
+      FEANORIANS: ["4A LAD"]
+    orders:
+      MORGOTH: ["3A(M) ANF H"]
+      FEANORIANS: ["4A LAD DIS MORGOTH 3A ANF H"]
+    expect:
+      resolutions:
+        "4A LAD DIS MORGOTH 3A ANF H": fails
+        "3A(M) ANF H": succeeds
+      dislodged: []
+      units:
+        MORGOTH: ["3A ANF"]
+        FEANORIANS: ["4A LAD"]
+
+  - id: BATC.K.12
+    title: a designated Dislodge naming its victim's order fits the same designator
+    # "3A(M) fits only Morgoth." Victim and Hold both write 3A(M), and the
+    # attack dislodges the Morgoth unit with 4 against 3.
+    phase: S25M
+    units:
+      MORGOTH: ["3A ANF"]
+      FEANORIANS: ["4A LAD"]
+    orders:
+      MORGOTH: ["3A(M) ANF H"]
+      FEANORIANS: ["4A LAD DIS MORGOTH 3A(M) ANF H"]
+    expect:
+      resolutions:
+        "4A LAD DIS MORGOTH 3A(M) ANF H": succeeds
+        "3A(M) ANF H": fails
+      dislodged: ["MORGOTH 3A ANF"]
+      units:
+        MORGOTH: []
+        FEANORIANS: ["4A ANF"]
+
+  - id: BATC.K.13
+    title: a designated Dislodge does not fit an unordered 3A
+    # "3A(M) fits only Morgoth and 3A(G) only Glaurung." The 3A has no
+    # order, so it is an unnamed 3A: the victim written 3A(M) describes no
+    # unit, and the attack fails and cuts nothing (Sec. 3.4, a mis-specified
+    # victim).
+    phase: S25M
+    units:
+      MORGOTH: ["3A ANF"]
+      FEANORIANS: ["4A LAD"]
+    orders:
+      FEANORIANS: ["4A LAD DIS MORGOTH 3A(M) ANF"]
+    expect:
+      resolutions:
+        "4A LAD DIS MORGOTH 3A(M) ANF": fails
+      dislodged: []
+      units:
+        MORGOTH: ["3A ANF"]
+        FEANORIANS: ["4A LAD"]
+
+  - id: BATC.K.14
+    title: a bare Dislodge fits an unordered 3A
+    # "3A(M) fits only Morgoth and 3A(G) only Glaurung." K.13's control: the
+    # bare victim fits the unnamed 3A, and the attack dislodges it with 4
+    # against 3.
+    phase: S25M
+    units:
+      MORGOTH: ["3A ANF"]
+      FEANORIANS: ["4A LAD"]
+    orders:
+      FEANORIANS: ["4A LAD DIS MORGOTH 3A ANF"]
+    expect:
+      resolutions:
+        "4A LAD DIS MORGOTH 3A ANF": succeeds
+      dislodged: ["MORGOTH 3A ANF"]
+      units:
+        MORGOTH: []
+        FEANORIANS: ["4A ANF"]
+
+  - id: BATC.K.15
+    title: a bare Dislodge does not fit the designated Morgoth unit
+    # "3A written without a designator fits no Unit." The 3A holds as
+    # 3A(M); the bare victim describes no unit and the attack fails.
+    phase: S25M
+    units:
+      MORGOTH: ["3A ANF"]
+      FEANORIANS: ["4A LAD"]
+    orders:
+      MORGOTH: ["3A(M) ANF H"]
+      FEANORIANS: ["4A LAD DIS MORGOTH 3A ANF"]
+    expect:
+      resolutions:
+        "4A LAD DIS MORGOTH 3A ANF": fails
+        "3A(M) ANF H": succeeds
+      dislodged: []
+      units:
+        MORGOTH: ["3A ANF"]
+        FEANORIANS: ["4A LAD"]
+
+  - id: BATC.K.16
+    title: a designated Dislodge fits the same designator
+    # "3A(M) fits only Morgoth." The victim and the Hold both write 3A(M),
+    # and the attack dislodges the Morgoth unit with 4 against 3.
+    phase: S25M
+    units:
+      MORGOTH: ["3A ANF"]
+      FEANORIANS: ["4A LAD"]
+    orders:
+      MORGOTH: ["3A(M) ANF H"]
+      FEANORIANS: ["4A LAD DIS MORGOTH 3A(M) ANF"]
+    expect:
+      resolutions:
+        "4A LAD DIS MORGOTH 3A(M) ANF": succeeds
+        "3A(M) ANF H": fails
+      dislodged: ["MORGOTH 3A ANF"]
+      units:
+        MORGOTH: []
+        FEANORIANS: ["4A ANF"]
+
+  - id: BATC.K.17
+    title: a designated Bar does not fit an unnamed 3A
+    # "3A(M) fits only Morgoth and 3A(G) only Glaurung." The entrant's Move
+    # writes no designator, so the Bar written against 3A(M) binds no entrant
+    # and fails, and the Move enters Lothlann.
+    phase: S25M
+    units:
+      MORGOTH: ["3A ANF"]
+      DORIATH: ["3A LOT"]
+    orders:
+      MORGOTH: ["3A ANF - LOT"]
+      DORIATH: ["3A LOT BAR MORGOTH 3A(M) ANF - LOT"]
+    expect:
+      resolutions:
+        "3A ANF - LOT": succeeds
+        "3A LOT BAR MORGOTH 3A(M) ANF - LOT": fails
+      dislodged: []
+      units:
+        MORGOTH: ["3A LOT"]
+        DORIATH: ["3A LOT"]
+
+  - id: BATC.K.18
+    title: a bare Bar fits an unnamed 3A
+    # "3A(M) fits only Morgoth and 3A(G) only Glaurung." K.17's control: the
+    # bare Bar binds the unnamed entrant and wins the tie of 3 against 3
+    # ("a tie favours the Barring Order").
+    phase: S25M
+    units:
+      MORGOTH: ["3A ANF"]
+      DORIATH: ["3A LOT"]
+    orders:
+      MORGOTH: ["3A ANF - LOT"]
+      DORIATH: ["3A LOT BAR MORGOTH 3A ANF - LOT"]
+    expect:
+      resolutions:
+        "3A ANF - LOT": fails
+        "3A LOT BAR MORGOTH 3A ANF - LOT": succeeds
+      dislodged: []
+      units:
+        MORGOTH: ["3A ANF"]
+        DORIATH: ["3A LOT"]
+
+  - id: BATC.K.19
+    title: a bare Bar does not fit the designated Morgoth unit
+    # "3A written without a designator fits no Unit." The entrant writes
+    # 3A(M), so the bare Bar binds no entrant and fails, and the Move enters.
+    phase: S25M
+    units:
+      MORGOTH: ["3A ANF"]
+      DORIATH: ["3A LOT"]
+    orders:
+      MORGOTH: ["3A(M) ANF - LOT"]
+      DORIATH: ["3A LOT BAR MORGOTH 3A ANF - LOT"]
+    expect:
+      resolutions:
+        "3A(M) ANF - LOT": succeeds
+        "3A LOT BAR MORGOTH 3A ANF - LOT": fails
+      dislodged: []
+      units:
+        MORGOTH: ["3A LOT"]
+        DORIATH: ["3A LOT"]
+
+  - id: BATC.K.20
+    title: a designated Bar fits the same designator
+    # "3A(M) fits only Morgoth." The Bar and the Move both write 3A(M): the
+    # Bar binds the Morgoth unit and wins the tie of 3 against 3.
+    phase: S25M
+    units:
+      MORGOTH: ["3A ANF"]
+      DORIATH: ["3A LOT"]
+    orders:
+      MORGOTH: ["3A(M) ANF - LOT"]
+      DORIATH: ["3A LOT BAR MORGOTH 3A(M) ANF - LOT"]
+    expect:
+      resolutions:
+        "3A(M) ANF - LOT": fails
+        "3A LOT BAR MORGOTH 3A(M) ANF - LOT": succeeds
+      dislodged: []
+      units:
+        MORGOTH: ["3A ANF"]
+        DORIATH: ["3A LOT"]
+
+  - id: BATC.K.21
+    title: Dislodges written against Glaurung engage him alone, never an unnamed 3A beside him
+    # "3A(M) fits only Morgoth and 3A(G) only Glaurung." Glaurung holds as
+    # 3A(G) beside two unnamed 3As that hold bare. Both unnamed Dislodges are
+    # written against 3A(G), so both fit Glaurung and nobody else: they meet
+    # on him with 4 against 4 and fail together, as rivals for one victim do,
+    # and neither falls on an unnamed 3A instead.
+    phase: S25M
+    units:
+      MORGOTH: ["3A ANF", "3A ANF", "3A ANF"]
+      DORIATH: ["4A EIT"]
+      FEANORIANS: ["4A LAD"]
+    orders:
+      MORGOTH: ["3A(G) ANF H", "3A ANF H", "3A ANF H"]
+      DORIATH: ["4A EIT DIS MORGOTH 3A(G) ANF"]
+      FEANORIANS: ["4A LAD DIS MORGOTH 3A(G) ANF"]
+    expect:
+      resolutions:
+        "4A EIT DIS MORGOTH 3A(G) ANF": fails
+        "4A LAD DIS MORGOTH 3A(G) ANF": fails
+        "3A(G) ANF H": succeeds
+        "3A ANF H": succeeds
+      dislodged: []
+      units:
+        MORGOTH: ["3A ANF", "3A ANF", "3A ANF"]
+        DORIATH: ["4A EIT"]
+        FEANORIANS: ["4A LAD"]
+
+  - id: BATC.K.22
+    title: bare Dislodges engage the unnamed twins alone, never Glaurung
+    # "3A written without a designator fits no Unit." K.21 with both
+    # Dislodges written bare: they fit the two unnamed 3As, a stack of twins,
+    # and never Glaurung. Twins rule 6 matches them one each against the
+    # twins from the top of Morgoth's list, and each takes its twin with 4
+    # against 3; Glaurung stands.
+    phase: S25M
+    units:
+      MORGOTH: ["3A ANF", "3A ANF", "3A ANF"]
+      DORIATH: ["4A EIT"]
+      FEANORIANS: ["4A LAD"]
+    orders:
+      MORGOTH: ["3A(G) ANF H", "3A ANF H", "3A ANF H"]
+      DORIATH: ["4A EIT DIS MORGOTH 3A ANF"]
+      FEANORIANS: ["4A LAD DIS MORGOTH 3A ANF"]
+    expect:
+      resolutions:
+        "4A EIT DIS MORGOTH 3A ANF": succeeds
+        "4A LAD DIS MORGOTH 3A ANF": succeeds
+        "3A(G) ANF H": succeeds
+        "3A ANF H": fails
+      dislodged: ["MORGOTH 3A ANF"]
+      units:
+        MORGOTH: ["3A ANF"]
+        DORIATH: ["4A ANF"]
+        FEANORIANS: ["4A ANF"]

@@ -1,0 +1,171 @@
+# DATC section 6.A — Basic checks.
+# Hand-encoded from the DATC v3.3 document (docs/references/, git-ignored;
+# live copy: webdiplomacy.net/datc.php). Case ids follow the DATC numbering;
+# where the document allows more than one outcome, the choice this suite
+# certifies is stated on the case itself. No other engine's test encodings
+# were consulted.
+section: 6.A Basic checks
+ruleset: standard
+cases:
+  - id: 6.A.1
+    title: moving to a province that is not a neighbour
+    phase: S1901M
+    units:
+      ENGLAND: [F NTH]
+    orders:
+      ENGLAND: [F NTH - PIC]
+    expect:
+      resolutions:
+        F NTH - PIC: fails
+
+  - id: 6.A.2
+    title: move army to sea
+    phase: S1901M
+    units:
+      ENGLAND: [A LVP]
+    orders:
+      ENGLAND: [A LVP - IRI]
+    expect:
+      resolutions:
+        A LVP - IRI: fails
+
+  - id: 6.A.3
+    title: move fleet to land
+    phase: S1901M
+    units:
+      GERMANY: [F KIE]
+    orders:
+      GERMANY: [F KIE - MUN]
+    expect:
+      resolutions:
+        F KIE - MUN: fails
+
+  - id: 6.A.4
+    title: move to own province
+    phase: S1901M
+    units:
+      GERMANY: [F KIE]
+    orders:
+      GERMANY: [F KIE - KIE]
+    expect:
+      resolutions:
+        F KIE - KIE: fails
+
+  - id: 6.A.5
+    title: move to own province with convoy
+    phase: S1901M
+    units:
+      ENGLAND: [F NTH, A YOR, A LVP]
+      GERMANY: [F LON, A WAL]
+    orders:
+      ENGLAND: [F NTH C A YOR - YOR, A YOR - YOR, A LVP S A YOR - YOR]
+      GERMANY: [F LON - YOR, A WAL S F LON - YOR]
+    expect:
+      resolutions:
+        F NTH C A YOR - YOR: fails
+        A YOR - YOR: fails
+        A LVP S A YOR - YOR: fails
+        F LON - YOR: succeeds
+        A WAL S F LON - YOR: succeeds
+      dislodged: [ENGLAND A YOR]
+      units:
+        GERMANY: [F YOR, A WAL]
+        ENGLAND: [F NTH, A LVP]
+
+  - id: 6.A.6
+    title: ordering a unit of another country
+    phase: S1901M
+    units:
+      ENGLAND: [F LON]
+    orders:
+      GERMANY: [F LON - NTH]
+    expect:
+      resolutions:
+        F LON - NTH: fails
+      units:
+        ENGLAND: [F LON]
+
+  - id: 6.A.7
+    title: only armies can be convoyed
+    phase: S1901M
+    units:
+      ENGLAND: [F LON, F NTH]
+    orders:
+      ENGLAND: [F LON - BEL, F NTH C A LON - BEL]
+    expect:
+      resolutions:
+        F LON - BEL: fails
+        F NTH C A LON - BEL: fails
+
+  - id: 6.A.8
+    title: support to hold yourself is not possible
+    phase: S1901M
+    units:
+      ITALY: [A VEN, A TYR]
+      AUSTRIA: [F TRI]
+    orders:
+      ITALY: [A VEN - TRI, A TYR S A VEN - TRI]
+      AUSTRIA: [F TRI S F TRI]
+    expect:
+      resolutions:
+        A VEN - TRI: succeeds
+        A TYR S A VEN - TRI: succeeds
+        F TRI S F TRI: fails
+      dislodged: [AUSTRIA F TRI]
+
+  - id: 6.A.9
+    title: fleets must follow coast if not on sea
+    phase: S1901M
+    units:
+      ITALY: [F ROM]
+    orders:
+      ITALY: [F ROM - VEN]
+    expect:
+      resolutions:
+        F ROM - VEN: fails
+
+  - id: 6.A.10
+    title: support on unreachable destination not possible
+    phase: S1901M
+    units:
+      AUSTRIA: [A VEN]
+      ITALY: [F ROM, A APU]
+    orders:
+      AUSTRIA: [A VEN H]
+      ITALY: [F ROM S A APU - VEN, A APU - VEN]
+    expect:
+      resolutions:
+        A VEN H: succeeds
+        F ROM S A APU - VEN: fails
+        A APU - VEN: fails
+
+  - id: 6.A.11
+    title: simple bounce
+    phase: S1901M
+    units:
+      AUSTRIA: [A VIE]
+      ITALY: [A VEN]
+    orders:
+      AUSTRIA: [A VIE - TYR]
+      ITALY: [A VEN - TYR]
+    expect:
+      resolutions:
+        A VIE - TYR: fails
+        A VEN - TYR: fails
+
+  - id: 6.A.12
+    title: bounce of three units
+    phase: S1901M
+    units:
+      AUSTRIA: [A VIE]
+      GERMANY: [A MUN]
+      ITALY: [A VEN]
+    orders:
+      AUSTRIA: [A VIE - TYR]
+      GERMANY: [A MUN - TYR]
+      ITALY: [A VEN - TYR]
+    expect:
+      resolutions:
+        A VIE - TYR: fails
+        A MUN - TYR: fails
+        A VEN - TYR: fails

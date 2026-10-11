@@ -1,0 +1,127 @@
+# DATC section 6.I — Building.
+# Hand-encoded from the DATC v3.3 document (docs/references/, git-ignored;
+# live copy: webdiplomacy.net/datc.php). Case ids follow the DATC numbering;
+# the 4.B.7, 4.C.4, 4.D.4 and 4.D.5 build choices are stated on the cases
+# that certify them. No other engine's test encodings were consulted.
+#
+# Adjustment cases: `centers` carries supply-center ownership; the document's
+# "illegal" annotations map to fails. Orders are processed top to bottom and
+# the first legal builds consume the quota (4.D.4 choice B).
+section: 6.I Building
+ruleset: standard
+cases:
+  - id: 6.I.1
+    title: too many build orders
+    phase: W1901A
+    units:
+      GERMANY: [A PRU, A SIL]
+    centers:
+      GERMANY: [KIE, MUN, WAR]
+    orders:
+      # One build allowed (3 centers, 2 units): Warsaw is no German home
+      # center and fails without consuming the right; Kiel takes it; the
+      # otherwise-legal Munich build exceeds the quota.
+      GERMANY: [Build A WAR, Build A KIE, Build A MUN]
+    expect:
+      resolutions:
+        Build A WAR: fails
+        Build A KIE: succeeds
+        Build A MUN: fails
+      units:
+        GERMANY: [A PRU, A SIL, A KIE]
+
+  - id: 6.I.2
+    title: fleets cannot be built on inland provinces
+    phase: W1901A
+    units:
+      RUSSIA: []
+    centers:
+      RUSSIA: [MOS]
+    orders:
+      RUSSIA: [Build F MOS]
+    expect:
+      resolutions:
+        Build F MOS: fails
+      units:
+        RUSSIA: []
+
+  - id: 6.I.3
+    title: supply center must be empty for building
+    phase: W1901A
+    units:
+      GERMANY: [A BER]
+    centers:
+      GERMANY: [BER, WAR]
+    orders:
+      GERMANY: [Build A BER]
+    expect:
+      resolutions:
+        Build A BER: fails
+      units:
+        GERMANY: [A BER]
+
+  - id: 6.I.4
+    title: both coasts must be empty for building
+    phase: W1901A
+    units:
+      RUSSIA: [F STP/SC]
+    centers:
+      RUSSIA: [MOS, STP]
+    orders:
+      RUSSIA: [Build F STP/NC]
+    expect:
+      resolutions:
+        Build F STP/NC: fails
+      units:
+        RUSSIA: [F STP/SC]
+
+  - id: 6.I.5
+    title: building in home supply center that is not owned
+    phase: W1901A
+    units:
+      GERMANY: [F BAL]
+    centers:
+      # Russia captured Berlin in a previous Fall and later left it; the
+      # center stays Russian until someone else occupies it at an update.
+      GERMANY: [HOL, WAR]
+      RUSSIA: [BER]
+    orders:
+      GERMANY: [Build A BER]
+    expect:
+      resolutions:
+        Build A BER: fails
+      units:
+        GERMANY: [F BAL]
+
+  - id: 6.I.6
+    title: building in owned supply center that is not a home supply center
+    phase: W1901A
+    units:
+      GERMANY: [A HOL]
+    centers:
+      GERMANY: [WAR, HOL]
+    orders:
+      GERMANY: [Build A WAR]
+    expect:
+      resolutions:
+        Build A WAR: fails
+      units:
+        GERMANY: [A HOL]
+
+  - id: 6.I.7
+    title: only one build in a home supply center
+    phase: W1901A
+    units:
+      RUSSIA: []
+    centers:
+      RUSSIA: [MOS, BUD]
+    orders:
+      # Identical duplicated lines are one order (the first occurrence's
+      # resolution is reported); the second Moscow build is void and only
+      # one army appears.
+      RUSSIA: [Build A MOS, Build A MOS]
+    expect:
+      resolutions:
+        Build A MOS: succeeds
+      units:
+        RUSSIA: [A MOS]

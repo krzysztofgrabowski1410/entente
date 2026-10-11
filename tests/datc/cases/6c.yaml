@@ -1,0 +1,167 @@
+# DATC section 6.C — Circular movement.
+# Hand-encoded from the DATC v3.3 document (docs/references/, git-ignored).
+# Convoy-order entries are asserted with the spec section-5.1 route-used
+# semantics; where the document's "available" annotation describes a fleet
+# whose route was not used (6.C.5 AEG/ADR), the convoy order is left
+# unasserted: an order whose route was not used has no outcome to certify.
+section: 6.C Circular movement
+ruleset: standard
+cases:
+  - id: 6.C.1
+    title: three army circular movement
+    phase: S1901M
+    units:
+      TURKEY: [F ANK, A CON, A SMY]
+    orders:
+      TURKEY: [F ANK - CON, A CON - SMY, A SMY - ANK]
+    expect:
+      resolutions:
+        F ANK - CON: succeeds
+        A CON - SMY: succeeds
+        A SMY - ANK: succeeds
+      units:
+        TURKEY: [F CON, A SMY, A ANK]
+
+  - id: 6.C.2
+    title: three army circular movement with support
+    phase: S1901M
+    units:
+      TURKEY: [F ANK, A SMY, A BUL]
+      ITALY: [A CON]
+    orders:
+      TURKEY: [F ANK - CON, A SMY - ANK, A BUL S F ANK - CON]
+      ITALY: [A CON - SMY]
+    expect:
+      resolutions:
+        F ANK - CON: succeeds
+        A SMY - ANK: succeeds
+        A BUL S F ANK - CON: succeeds
+        A CON - SMY: succeeds
+
+  - id: 6.C.3
+    title: a disrupted three army circular movement
+    phase: S1901M
+    units:
+      TURKEY: [F ANK, A CON, A SMY, A BUL]
+    orders:
+      TURKEY: [F ANK - CON, A CON - SMY, A SMY - ANK, A BUL - CON]
+    expect:
+      resolutions:
+        F ANK - CON: fails
+        A CON - SMY: fails
+        A SMY - ANK: fails
+        A BUL - CON: fails
+
+  - id: 6.C.4
+    title: a circular movement with attacked convoy
+    phase: S1901M
+    units:
+      AUSTRIA: [A TRI, A SER]
+      TURKEY: [A BUL, F AEG, F ION, F ADR]
+      ITALY: [F NAP]
+    orders:
+      AUSTRIA: [A TRI - SER, A SER - BUL]
+      TURKEY: [A BUL - TRI, F AEG C A BUL - TRI, F ION C A BUL - TRI, F ADR C A BUL - TRI]
+      ITALY: [F NAP - ION]
+    expect:
+      resolutions:
+        A TRI - SER: succeeds
+        A SER - BUL: succeeds
+        A BUL - TRI: succeeds
+        F AEG C A BUL - TRI: succeeds
+        F ION C A BUL - TRI: succeeds
+        F ADR C A BUL - TRI: succeeds
+        F NAP - ION: fails
+
+  - id: 6.C.5
+    title: a disrupted circular movement due to dislodged convoy
+    phase: S1901M
+    units:
+      AUSTRIA: [A TRI, A SER]
+      TURKEY: [A BUL, F AEG, F ION, F ADR]
+      ITALY: [F NAP, F TUN]
+    orders:
+      AUSTRIA: [A TRI - SER, A SER - BUL]
+      TURKEY: [A BUL - TRI, F AEG C A BUL - TRI, F ION C A BUL - TRI, F ADR C A BUL - TRI]
+      ITALY: [F NAP - ION, F TUN S F NAP - ION]
+    expect:
+      resolutions:
+        A TRI - SER: fails
+        A SER - BUL: fails
+        A BUL - TRI: fails
+        F ION C A BUL - TRI: fails
+        F NAP - ION: succeeds
+        F TUN S F NAP - ION: succeeds
+      dislodged: [TURKEY F ION]
+
+  - id: 6.C.6
+    title: two armies with two convoys
+    phase: S1901M
+    units:
+      ENGLAND: [F NTH, A LON]
+      FRANCE: [F ENG, A BEL]
+    orders:
+      ENGLAND: [F NTH C A LON - BEL, A LON - BEL]
+      FRANCE: [F ENG C A BEL - LON, A BEL - LON]
+    expect:
+      resolutions:
+        F NTH C A LON - BEL: succeeds
+        A LON - BEL: succeeds
+        F ENG C A BEL - LON: succeeds
+        A BEL - LON: succeeds
+      units:
+        ENGLAND: [F NTH, A BEL]
+        FRANCE: [F ENG, A LON]
+
+  - id: 6.C.7
+    title: disrupted unit swap
+    phase: S1901M
+    units:
+      ENGLAND: [F NTH, A LON]
+      FRANCE: [F ENG, A BEL, A BUR]
+    orders:
+      ENGLAND: [F NTH C A LON - BEL, A LON - BEL]
+      FRANCE: [F ENG C A BEL - LON, A BEL - LON, A BUR - BEL]
+    expect:
+      resolutions:
+        A LON - BEL: fails
+        A BEL - LON: fails
+        A BUR - BEL: fails
+
+  - id: 6.C.8
+    title: no self dislodgment in disrupted circular movement
+    phase: S1901M
+    units:
+      TURKEY: [F CON, A BUL, A SMY]
+      RUSSIA: [F BLA]
+      AUSTRIA: [A SER]
+    orders:
+      TURKEY: [F CON - BLA, A BUL - CON, A SMY S A BUL - CON]
+      RUSSIA: [F BLA - BUL/EC]
+      AUSTRIA: [A SER - BUL]
+    expect:
+      resolutions:
+        F CON - BLA: fails
+        A BUL - CON: fails
+        A SMY S A BUL - CON: succeeds
+        F BLA - BUL/EC: fails
+        A SER - BUL: fails
+
+  - id: 6.C.9
+    title: no help in dislodgment of own unit in disrupted circular movement
+    phase: S1901M
+    units:
+      TURKEY: [F CON, A SMY]
+      RUSSIA: [F BLA]
+      AUSTRIA: [A SER, A BUL]
+    orders:
+      TURKEY: [F CON - BLA, A SMY S A BUL - CON]
+      RUSSIA: [F BLA - BUL/EC]
+      AUSTRIA: [A SER - BUL, A BUL - CON]
+    expect:
+      resolutions:
+        F CON - BLA: fails
+        A SMY S A BUL - CON: succeeds
+        F BLA - BUL/EC: fails
+        A SER - BUL: fails
+        A BUL - CON: fails

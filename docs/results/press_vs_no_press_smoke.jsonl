@@ -1,0 +1,10 @@
+{"press": false, "seat": "FRANCE", "seed": 0, "sos": 0.15625, "supply_centers": 5, "survived": true}
+{"press": false, "seat": "FRANCE", "seed": 1, "sos": 0.14792899408284024, "supply_centers": 5, "survived": true}
+{"press": false, "seat": "FRANCE", "seed": 2, "sos": 0.16778523489932887, "supply_centers": 5, "survived": true}
+{"press": false, "seat": "FRANCE", "seed": 3, "sos": 0.15822784810126583, "supply_centers": 5, "survived": true}
+{"press": false, "seat": "FRANCE", "seed": 4, "sos": 0.10738255033557047, "supply_centers": 4, "survived": true}
+{"press": true, "seat": "FRANCE", "seed": 0, "sos": 0.15822784810126583, "supply_centers": 5, "survived": true}
+{"press": true, "seat": "FRANCE", "seed": 1, "sos": 0.16778523489932887, "supply_centers": 5, "survived": true}
+{"press": true, "seat": "FRANCE", "seed": 2, "sos": 0.10596026490066225, "supply_centers": 4, "survived": true}
+{"press": true, "seat": "FRANCE", "seed": 3, "sos": 0.15822784810126583, "supply_centers": 5, "survived": true}
+{"press": true, "seat": "FRANCE", "seed": 4, "sos": 0.16778523489932887, "supply_centers": 5, "survived": true}

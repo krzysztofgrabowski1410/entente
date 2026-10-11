@@ -1,0 +1,193 @@
+# BATC-L2 section W -- the variant winter (rulebook "Morgoth", "Men",
+# "Dwarves (Naugrim)").
+section: "BATC-L2 W. Winter adjustments"
+cases:
+  - id: BATC-L2.W.1
+    title: Angband accepts several builds in one winter, garrison and all
+    start:
+      phase: S25M
+      units:
+        MORGOTH: ["3A ANG", "A ANF"]
+    script:
+      - phase: S25M
+      - phase: F25M
+      - phase: W25A
+        orders:
+          MORGOTH: ["Build A ANG", "Build A ANG", "Build A ANG"]
+    expect:
+      resolutions: {"Build A ANG": succeeds}
+      units:
+        MORGOTH: ["3A ANG", "A ANF", "A ANG", "A ANG", "A ANG"]
+
+  - id: BATC-L2.W.2
+    title: the Morgoth unit needs no supply — civil disorder removes the other army
+    start:
+      phase: S25M
+      units:
+        # both on non-centers, ownership stripped: quota is 0 - 1 non-special
+        MORGOTH: ["3A FSE", "A NEW"]
+      ownership: {ANG: null, ANF: null}
+    script:
+      - phase: S25M
+      - phase: F25M
+    expect:
+      phase: S24M
+      units:
+        MORGOTH: ["3A FSE"]
+
+  - id: BATC-L2.W.3
+    title: Men build at any owned center and in Eriador while its centers last
+    # (GVA is a SC Men owns, exercising the "build at any owned center"
+    # rule; NEL is not a supply center. The seed army starts in Eriador --
+    # where a migration arrival would place it -- because nothing enters
+    # Eriador from the board.)
+    start:
+      phase: S24M
+      units:
+        MEN: ["A ERI"]
+      ownership: {GVA: MEN}
+      l2:
+        eriador_centers: 2
+    script:
+      - phase: S24M
+      - phase: F24M
+      - phase: W24A
+        orders:
+          MEN: ["Build A ERI", "Build A ERI", "Build A GVA"]
+    expect:
+      resolutions:
+        "Build A ERI": succeeds
+        "Build A GVA": succeeds
+      units:
+        MEN: ["A ERI", "A ERI", "A ERI", "A GVA"]
+
+  - id: BATC-L2.W.4
+    title: a defeated Morgoth has no winter decisions — his builds never happen
+    start:
+      phase: S25M
+      units:
+        MORGOTH: ["A ANF"]
+      l2:
+        morgoth_defeated: true
+    script:
+      - phase: S25M
+      - phase: F25M
+    expect:
+      phase: S24M
+      units:
+        MORGOTH: ["A ANF"]
+
+  # W.5-W.9 certify Beleriand's OWN civil-disorder law (rulebook "Paradoxes
+  # resolve" 4.D.8). Every other map keeps the standard 4.D.8 law that DATC
+  # 6.J certifies. Both count to an OWNED Centre; what differs here is the
+  # per-kind metric and the tiebreak.
+  - id: BATC-L2.W.5
+    title: distance runs to the power's own Supply Centre, not to any on the map
+    # (The rulebook's qualifier is "owned", so the metric measures from
+    # Belegost alone: A NEL is next door at 1, A POA five provinces off, and
+    # the far one goes. Measured to any Centre of any owner, both armies
+    # would be one step out and A NEL would go on the alphabetical tie.)
+    start:
+      phase: S25M
+      units:
+        NAUGRIM: ["A NEL", "A POA"]
+      # one owned centre, two units: exactly one removal owed
+      ownership: {DOL: null, NOG: null}
+    script:
+      - phase: S25M
+      - phase: F25M
+      - phase: W25A  # the power has a choice, so winter waits; the empty
+                     # sheet leaves the whole quota to the civil-disorder sweep
+    expect:
+      phase: S24M
+      units:
+        NAUGRIM: ["A NEL"]
+
+  - id: BATC-L2.W.6
+    title: at equal distance the territory name decides — a fleet has no priority
+    # The rulebook's tiebreak is "alphabetical order of the territories" and
+    # nothing else. From TELERI's own South Falas, Ivrin is two steps overland
+    # and North Belegaer two lanes by sea, so the two tie and "Ivrin" <
+    # "North Belegaer" removes the ARMY. The standard law breaks the same tie
+    # the other way, fleets before armies, and would take F NBE. Fleets DO come
+    # off first when the power owns no coastal Centre -- see W.8 -- but that
+    # falls out of the distance, not out of a blanket priority.
+    start:
+      phase: S25M
+      units:
+        TELERI: ["A IVR", "F NBE"]
+      ownership: {BRI: null, EGL: null}
+    script:
+      - phase: S25M
+      - phase: F25M
+      - phase: W25A
+    expect:
+      phase: S24M
+      units:
+        TELERI: ["F NBE"]
+
+  - id: BATC-L2.W.7
+    title: two removals come off one sorted list — farthest first, then the name
+    # Measured from FINGOLFIN's own Dor-Lomin: Southern Ered Luin is seven
+    # steps out and goes first; the second removal
+    # takes the alphabetically earlier of the two five-step armies ("Aeluin" <
+    # "Andram"). Distances are static, so the list is sorted once rather than
+    # recomputed after each removal.
+    start:
+      phase: S25M
+      units:
+        FINGOLFIN: ["A SEL", "A AEL", "A AND"]
+      ownership: {MIT: null, NEV: null}
+    script:
+      - phase: S25M
+      - phase: F25M
+      - phase: W25A
+    expect:
+      phase: S24M
+      units:
+        FINGOLFIN: ["A AND"]
+
+  - id: BATC-L2.W.8
+    title: a power with no coastal Centre loses its fleets first
+    # The rulebook's clause: "If a Player owns no coastal Supply Centre, then
+    # no fleet of that Player can reach an owned Supply Centre, and all
+    # their fleets are removed before their armies". It needs no special
+    # case in the code -- a fleet counts only sea and coastal lanes, so with
+    # Gelion Vale (inland) the only Centre TELERI owns there is nothing for
+    # F NBE to measure to. It is infinitely far and outranks A CNI, which is
+    # itself six steps from Gelion Vale.
+    start:
+      phase: S25M
+      units:
+        TELERI: ["F NBE", "A CNI"]
+      ownership: {BRI: null, EGL: null, SFA: null, GVA: TELERI}
+    script:
+      - phase: S25M
+      - phase: F25M
+      - phase: W25A
+    expect:
+      phase: S24M
+      units:
+        TELERI: ["A CNI"]
+
+  - id: BATC-L2.W.9
+    title: an army's distance crosses water — "over any territory"
+    # 4.D.8 lets armies "Move over any territory", so the army metric is the
+    # province projection of army adjacency united with the fleet lanes. From
+    # TELERI's Coasts of the Bay of Balar, Cirith Ninnlach is five steps with
+    # the water and seven without, while Dor Dinen is six either way -- so the
+    # clause reverses which army is farther, and A DDI goes. Counting armies
+    # overland only would have removed A CNI.
+    start:
+      phase: S25M
+      units:
+        TELERI: ["A CNI", "A DDI"]
+      ownership: {BRI: null, EGL: null, SFA: null, CBB: TELERI}
+    script:
+      - phase: S25M
+      - phase: F25M
+      - phase: W25A
+    expect:
+      phase: S24M
+      units:
+        TELERI: ["A CNI"]

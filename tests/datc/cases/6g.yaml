@@ -1,0 +1,436 @@
+# DATC section 6.G — Convoying to adjacent provinces.
+# Hand-encoded from the DATC v3.3 document (docs/references/, git-ignored).
+# The choice this section turns on is 4.A.3: the WRITTEN FORM
+# decides the route — an army move flagged `via convoy` is a convoy attempt
+# and never falls back to land (2025EE); an unflagged move is overland even
+# when own fleets offer a convoy (no kidnapping, no intent detection). Where
+# the v3.3 document's preferred column derives intent from an own convoying
+# fleet (6.G.1/5/6/9/11/14), this suite pins the explicit-convoy (DPTG-form)
+# outcome instead, and says so on each case that deviates.
+# A convoy order whose cargo's written move is overland is invalid (fails);
+# 4.A.7-b nulling applies when the dislodger's move was overland (6.G.14).
+section: 6.G Convoying to adjacent provinces
+ruleset: standard
+cases:
+  - id: 6.G.1
+    title: two units can swap provinces by convoy
+    phase: S1901M
+    units:
+      ENGLAND: [A NWY, F SKA]
+      RUSSIA: [A SWE]
+    orders:
+      ENGLAND: [A NWY - SWE, F SKA C A NWY - SWE]
+      RUSSIA: [A SWE - NWY]
+    expect:
+      # Under 4.A.3's written form: both moves are overland, so this is a
+      # head-to-head tie (the document's preferred intent reading swaps).
+      resolutions:
+        A NWY - SWE: fails
+        F SKA C A NWY - SWE: fails
+        A SWE - NWY: fails
+      dislodged: []
+
+  - id: 6.G.2
+    title: kidnapping an army
+    phase: S1901M
+    units:
+      ENGLAND: [A NWY]
+      RUSSIA: [F SWE]
+      GERMANY: [F SKA]
+    orders:
+      ENGLAND: [A NWY - SWE]
+      RUSSIA: [F SWE - NWY]
+      GERMANY: [F SKA C A NWY - SWE]
+    expect:
+      resolutions:
+        A NWY - SWE: fails
+        F SWE - NWY: fails
+        F SKA C A NWY - SWE: fails
+      dislodged: []
+
+  - id: 6.G.3
+    title: an unwanted disrupted convoy to adjacent province
+    phase: S1901M
+    units:
+      FRANCE: [F BRE, A PIC, A BUR, F MAO]
+      ENGLAND: [F ENG]
+    orders:
+      FRANCE: [F BRE - ENG, A PIC - BEL, A BUR S A PIC - BEL, F MAO S F BRE - ENG]
+      ENGLAND: [F ENG C A PIC - BEL]
+    expect:
+      resolutions:
+        F BRE - ENG: succeeds
+        A PIC - BEL: succeeds
+        A BUR S A PIC - BEL: succeeds
+        F MAO S F BRE - ENG: succeeds
+        F ENG C A PIC - BEL: fails
+      dislodged: [ENGLAND F ENG]
+
+  - id: 6.G.4
+    title: an unwanted disrupted convoy to adjacent province and opposite move
+    phase: S1901M
+    units:
+      FRANCE: [F BRE, A PIC, A BUR, F MAO]
+      ENGLAND: [F ENG, A BEL]
+    orders:
+      FRANCE: [F BRE - ENG, A PIC - BEL, A BUR S A PIC - BEL, F MAO S F BRE - ENG]
+      ENGLAND: [F ENG C A PIC - BEL, A BEL - PIC]
+    expect:
+      resolutions:
+        F BRE - ENG: succeeds
+        A PIC - BEL: succeeds
+        A BUR S A PIC - BEL: succeeds
+        F MAO S F BRE - ENG: succeeds
+        F ENG C A PIC - BEL: fails
+        A BEL - PIC: fails
+      dislodged: [ENGLAND F ENG, ENGLAND A BEL]
+
+  - id: 6.G.5
+    title: swapping with multiple fleets with one own fleet
+    phase: S1901M
+    units:
+      ITALY: [A ROM, F TYS]
+      TURKEY: [A APU, F ION]
+    orders:
+      ITALY: [A ROM - APU, F TYS C A APU - ROM]
+      TURKEY: [A APU - ROM, F ION C A APU - ROM]
+    expect:
+      # Under 4.A.3's written form: both moves overland, head-to-head tie
+      # (the document's preferred intent reading swaps).
+      resolutions:
+        A ROM - APU: fails
+        F TYS C A APU - ROM: fails
+        A APU - ROM: fails
+        F ION C A APU - ROM: fails
+      dislodged: []
+
+  - id: 6.G.6
+    title: swapping with unintended intent
+    phase: S1901M
+    units:
+      ENGLAND: [A LVP, F ENG]
+      GERMANY: [A EDI]
+      FRANCE: [F IRI, F NTH]
+      RUSSIA: [F NWG, F NAO]
+    orders:
+      ENGLAND: [A LVP - EDI, F ENG C A LVP - EDI]
+      GERMANY: [A EDI - LVP]
+      FRANCE: [F IRI H, F NTH H]
+      RUSSIA: [F NWG C A LVP - EDI, F NAO C A LVP - EDI]
+    expect:
+      # Under 4.A.3's written form: overland head-to-head tie (the document's
+      # preferred intent reading swaps).
+      resolutions:
+        A LVP - EDI: fails
+        F ENG C A LVP - EDI: fails
+        A EDI - LVP: fails
+        F IRI H: succeeds
+        F NTH H: succeeds
+        F NWG C A LVP - EDI: fails
+        F NAO C A LVP - EDI: fails
+      dislodged: []
+
+  - id: 6.G.7
+    title: swapping with illegal intent
+    phase: S1901M
+    units:
+      ENGLAND: [F SKA, F NWY]
+      RUSSIA: [A SWE, F BOT]
+    orders:
+      ENGLAND: [F SKA C A SWE - NWY, F NWY - SWE]
+      RUSSIA: [A SWE - NWY, F BOT C A SWE - NWY]
+    expect:
+      resolutions:
+        F SKA C A SWE - NWY: fails
+        F NWY - SWE: fails
+        A SWE - NWY: fails
+        F BOT C A SWE - NWY: fails
+      dislodged: []
+
+  - id: 6.G.8
+    title: explicit convoy that isn't there
+    phase: S1901M
+    units:
+      FRANCE: [A BEL]
+      ENGLAND: [F NTH, A HOL]
+    orders:
+      FRANCE: [A BEL - HOL via convoy]
+      ENGLAND: [F NTH - HEL, A HOL - KIE]
+    expect:
+      resolutions:
+        A BEL - HOL via convoy: fails
+        F NTH - HEL: succeeds
+        A HOL - KIE: succeeds
+
+  - id: 6.G.9
+    title: swapped or dislodged
+    phase: S1901M
+    units:
+      ENGLAND: [A NWY, F SKA, F FIN]
+      RUSSIA: [A SWE]
+    orders:
+      ENGLAND: [A NWY - SWE, F SKA C A NWY - SWE, F FIN S A NWY - SWE]
+      RUSSIA: [A SWE - NWY]
+    expect:
+      # Under 4.A.3's written form: an overland head-to-head that Norway wins
+      # 2:1 — the Russian army is dislodged (the document's preferred intent
+      # reading swaps instead).
+      resolutions:
+        A NWY - SWE: succeeds
+        F SKA C A NWY - SWE: fails
+        F FIN S A NWY - SWE: succeeds
+        A SWE - NWY: fails
+      dislodged: [RUSSIA A SWE]
+
+  - id: 6.G.10
+    title: swapped or an head-to-head battle
+    phase: S1901M
+    units:
+      ENGLAND: [A NWY, F DEN, F FIN]
+      GERMANY: [F SKA]
+      RUSSIA: [A SWE, F BAR]
+      FRANCE: [F NWG, F NTH]
+    orders:
+      ENGLAND: [A NWY - SWE via convoy, F DEN S A NWY - SWE, F FIN S A NWY - SWE]
+      GERMANY: [F SKA C A NWY - SWE]
+      RUSSIA: [A SWE - NWY, F BAR S A SWE - NWY]
+      FRANCE: [F NWG - NWY, F NTH S F NWG - NWY]
+    expect:
+      # 4.A.7-b: the Swedish army was dislodged by a CONVOYED attack from its
+      # destination, so its prevent at Norway stands and the French bounce.
+      resolutions:
+        A NWY - SWE via convoy: succeeds
+        F DEN S A NWY - SWE: succeeds
+        F FIN S A NWY - SWE: succeeds
+        F SKA C A NWY - SWE: succeeds
+        A SWE - NWY: fails
+        F BAR S A SWE - NWY: succeeds
+        F NWG - NWY: fails
+        F NTH S F NWG - NWY: succeeds
+      dislodged: [RUSSIA A SWE]
+
+  - id: 6.G.11
+    title: a convoy to an adjacent province with a paradox
+    phase: S1901M
+    units:
+      ENGLAND: [F NWY, F NTH]
+      RUSSIA: [A SWE, F SKA, F BAR]
+    orders:
+      ENGLAND: [F NWY S F NTH - SKA, F NTH - SKA]
+      RUSSIA: [A SWE - NWY, F SKA C A SWE - NWY, F BAR S A SWE - NWY]
+    expect:
+      # Under 4.A.3's written form: A SWE - NWY is overland, so there is no
+      # paradox at all — the attack cuts Norway's support and dislodges the
+      # fleet (the document's 2025EE-intent column keeps Norway instead).
+      resolutions:
+        F NWY S F NTH - SKA: fails
+        F NTH - SKA: fails
+        A SWE - NWY: succeeds
+        F SKA C A SWE - NWY: fails
+        F BAR S A SWE - NWY: succeeds
+      dislodged: [ENGLAND F NWY]
+
+  - id: 6.G.12
+    title: swapping two units with two convoys
+    phase: S1901M
+    units:
+      ENGLAND: [A LVP, F NAO, F NWG]
+      GERMANY: [A EDI, F NTH, F ENG, F IRI]
+    orders:
+      ENGLAND: [A LVP - EDI via convoy, F NAO C A LVP - EDI, F NWG C A LVP - EDI]
+      GERMANY: [A EDI - LVP via convoy, F NTH C A EDI - LVP, F ENG C A EDI - LVP, F IRI C A EDI - LVP]
+    expect:
+      resolutions:
+        A LVP - EDI via convoy: succeeds
+        F NAO C A LVP - EDI: succeeds
+        F NWG C A LVP - EDI: succeeds
+        A EDI - LVP via convoy: succeeds
+        F NTH C A EDI - LVP: succeeds
+        F ENG C A EDI - LVP: succeeds
+        F IRI C A EDI - LVP: succeeds
+      units:
+        ENGLAND: [A EDI, F NAO, F NWG]
+        GERMANY: [A LVP, F NTH, F ENG, F IRI]
+
+  - id: 6.G.13
+    title: support cut on attack on itself via convoy
+    phase: S1901M
+    units:
+      AUSTRIA: [F ADR, A TRI]
+      ITALY: [A VEN, F ALB]
+    orders:
+      AUSTRIA: [F ADR C A TRI - VEN, A TRI - VEN via convoy]
+      ITALY: [A VEN S F ALB - TRI, F ALB - TRI]
+    expect:
+      # 4.A.4-a: the convoyed attack still comes from Trieste, the province
+      # Venice's support is directed against — the support is not cut.
+      resolutions:
+        F ADR C A TRI - VEN: succeeds
+        A TRI - VEN via convoy: fails
+        A VEN S F ALB - TRI: succeeds
+        F ALB - TRI: succeeds
+      dislodged: [AUSTRIA A TRI]
+
+  - id: 6.G.14
+    title: bounce by convoy to adjacent province
+    phase: S1901M
+    units:
+      ENGLAND: [A NWY, F DEN, F FIN]
+      FRANCE: [F NWG, F NTH]
+      GERMANY: [F SKA]
+      RUSSIA: [A SWE, F BAR]
+    orders:
+      ENGLAND: [A NWY - SWE, F DEN S A NWY - SWE, F FIN S A NWY - SWE]
+      FRANCE: [F NWG - NWY, F NTH S F NWG - NWY]
+      GERMANY: [F SKA C A SWE - NWY]
+      RUSSIA: [A SWE - NWY via convoy, F BAR S A SWE - NWY]
+    expect:
+      # Under 4.A.3's written form: A NWY - SWE is overland, so 4.A.7-b nulls
+      # the dislodged Swedish army's prevent at Norway and the French fleet
+      # advances (the document's intent column has a convoyed dislodger and
+      # bounces it).
+      resolutions:
+        A NWY - SWE: succeeds
+        F DEN S A NWY - SWE: succeeds
+        F FIN S A NWY - SWE: succeeds
+        F NWG - NWY: succeeds
+        F NTH S F NWG - NWY: succeeds
+        F SKA C A SWE - NWY: succeeds
+        A SWE - NWY via convoy: fails
+        F BAR S A SWE - NWY: succeeds
+      dislodged: [RUSSIA A SWE]
+
+  - id: 6.G.15
+    title: bounce and dislodge with double convoy
+    phase: S1901M
+    units:
+      ENGLAND: [F NTH, A HOL, A YOR, A LON]
+      FRANCE: [F ENG, A BEL]
+    orders:
+      ENGLAND: [F NTH C A LON - BEL, A HOL S A LON - BEL, A YOR - LON, A LON - BEL]
+      FRANCE: [F ENG C A BEL - LON, A BEL - LON]
+    expect:
+      # 4.A.7-b: Belgium's army was dislodged by a CONVOYED attack from its
+      # destination, so its prevent at London stands and Yorkshire bounces.
+      resolutions:
+        F NTH C A LON - BEL: succeeds
+        A HOL S A LON - BEL: succeeds
+        A YOR - LON: fails
+        A LON - BEL: succeeds
+        F ENG C A BEL - LON: succeeds
+        A BEL - LON: fails
+      dislodged: [FRANCE A BEL]
+
+  - id: 6.G.16
+    title: the two unit in one province bug moving by convoy
+    phase: S1901M
+    units:
+      ENGLAND: [A NWY, A DEN, F BAL, F NTH]
+      RUSSIA: [A SWE, F SKA, F NWG]
+    orders:
+      ENGLAND: [A NWY - SWE, A DEN S A NWY - SWE, F BAL S A NWY - SWE, F NTH - NWY]
+      RUSSIA: [A SWE - NWY via convoy, F SKA C A SWE - NWY, F NWG S A SWE - NWY]
+    expect:
+      resolutions:
+        A NWY - SWE: succeeds
+        A DEN S A NWY - SWE: succeeds
+        F BAL S A NWY - SWE: succeeds
+        F NTH - NWY: fails
+        A SWE - NWY via convoy: succeeds
+        F SKA C A SWE - NWY: succeeds
+        F NWG S A SWE - NWY: succeeds
+      units:
+        ENGLAND: [A SWE, A DEN, F BAL, F NTH]
+        RUSSIA: [A NWY, F SKA, F NWG]
+
+  - id: 6.G.17
+    title: the two unit in one province bug moving over land
+    phase: S1901M
+    units:
+      ENGLAND: [A NWY, A DEN, F BAL, F SKA, F NTH]
+      RUSSIA: [A SWE, F NWG]
+    orders:
+      ENGLAND:
+        - A NWY - SWE via convoy
+        - A DEN S A NWY - SWE
+        - F BAL S A NWY - SWE
+        - F SKA C A NWY - SWE
+        - F NTH - NWY
+      RUSSIA: [A SWE - NWY, F NWG S A SWE - NWY]
+    expect:
+      resolutions:
+        A NWY - SWE via convoy: succeeds
+        A DEN S A NWY - SWE: succeeds
+        F BAL S A NWY - SWE: succeeds
+        F SKA C A NWY - SWE: succeeds
+        F NTH - NWY: fails
+        A SWE - NWY: succeeds
+        F NWG S A SWE - NWY: succeeds
+      units:
+        ENGLAND: [A SWE, A DEN, F BAL, F SKA, F NTH]
+        RUSSIA: [A NWY, F NWG]
+
+  - id: 6.G.18
+    title: the two unit in one province bug with double convoy
+    phase: S1901M
+    units:
+      ENGLAND: [F NTH, A HOL, A YOR, A LON, A RUH]
+      FRANCE: [F ENG, A BEL, A WAL]
+    orders:
+      ENGLAND:
+        - F NTH C A LON - BEL
+        - A HOL S A LON - BEL
+        - A YOR - LON
+        - A LON - BEL
+        - A RUH S A LON - BEL
+      FRANCE: [F ENG C A BEL - LON, A BEL - LON, A WAL S A BEL - LON]
+    expect:
+      resolutions:
+        F NTH C A LON - BEL: succeeds
+        A HOL S A LON - BEL: succeeds
+        A YOR - LON: fails
+        A LON - BEL: succeeds
+        A RUH S A LON - BEL: succeeds
+        F ENG C A BEL - LON: succeeds
+        A BEL - LON: succeeds
+        A WAL S A BEL - LON: succeeds
+      units:
+        ENGLAND: [F NTH, A HOL, A YOR, A BEL, A RUH]
+        FRANCE: [F ENG, A LON, A WAL]
+
+  - id: 6.G.19
+    title: swapping with intent of unnecessary convoy
+    phase: S1901M
+    units:
+      FRANCE: [A MAR, F WES]
+      ITALY: [F LYO, A SPA]
+    orders:
+      FRANCE: [A MAR - SPA, F WES C A MAR - SPA]
+      ITALY: [F LYO C A MAR - SPA, A SPA - MAR]
+    expect:
+      resolutions:
+        A MAR - SPA: fails
+        F WES C A MAR - SPA: fails
+        F LYO C A MAR - SPA: fails
+        A SPA - MAR: fails
+      dislodged: []
+
+  - id: 6.G.20
+    title: explicit convoy to adjacent province disrupted
+    phase: S1901M
+    units:
+      FRANCE: [F BRE, A PIC, A BUR, F MAO]
+      ENGLAND: [F ENG]
+    orders:
+      FRANCE: [F BRE - ENG, A PIC - BEL via convoy, A BUR S A PIC - BEL, F MAO S F BRE - ENG]
+      ENGLAND: [F ENG C A PIC - BEL]
+    expect:
+      # Under 4.A.3's written form (2025EE): the flagged move considers only the convoy
+      # route; with the channel dislodged there is no land fallback.
+      resolutions:
+        F BRE - ENG: succeeds
+        A PIC - BEL via convoy: fails
+        A BUR S A PIC - BEL: succeeds
+        F MAO S F BRE - ENG: succeeds
+        F ENG C A PIC - BEL: fails
+      dislodged: [ENGLAND F ENG]

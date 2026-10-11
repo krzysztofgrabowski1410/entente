@@ -1,0 +1,190 @@
+# DATC section 6.J — Civil disorder and disbands.
+# Hand-encoded from the DATC v3.3 document (docs/references/, git-ignored;
+# live copy: webdiplomacy.net/datc.php). Case ids follow the DATC numbering.
+#
+# The removal rule is the 2023/2025EE reformulation of 4.D.8: distance to
+# the nearest *owned* supply center, counted over
+# absolute province adjacency (identical for armies and fleets), removing
+# the farthest first; ties remove fleets before armies, then alphabetically
+# by the province name printed on the map. The document notes its 6.J cases
+# do not cover rulebooks prior to 2023.
+section: 6.J Civil disorder and disbands
+ruleset: standard
+cases:
+  - id: 6.J.1
+    title: too many disband orders
+    phase: W1901A
+    units:
+      FRANCE: [A PAR, A PIC]
+    centers:
+      FRANCE: [PAR]
+    orders:
+      # One removal due: the Gulf of Lyon disband names no French unit and
+      # fails without consuming; Picardy takes the removal; Paris exceeds it.
+      FRANCE: [Disband F LYO, Disband A PIC, Disband A PAR]
+    expect:
+      resolutions:
+        Disband F LYO: fails
+        Disband A PIC: succeeds
+        Disband A PAR: fails
+      units:
+        FRANCE: [A PAR]
+
+  - id: 6.J.2
+    title: removing the same unit twice
+    phase: W1901A
+    units:
+      FRANCE: [A PAR, F NTH, F ENG]
+    centers:
+      FRANCE: [PAR]
+    orders:
+      # Two removals due; the duplicated line is one order, so the second
+      # removal falls to the civil-disorder rule: the English Channel fleet
+      # (distance 2) is farther than the Paris army (distance 0).
+      FRANCE: [Disband F NTH, Disband F NTH]
+    expect:
+      resolutions:
+        Disband F NTH: succeeds
+      civil_disorder: [FRANCE F ENG]
+      units:
+        FRANCE: [A PAR]
+
+  - id: 6.J.3
+    title: civil disorder two armies with different distance
+    phase: W1901A
+    units:
+      RUSSIA: [A LVN, A PRU]
+    centers:
+      RUSSIA: [STP]
+    expect:
+      # Livonia touches St Petersburg (distance 1); Prussia is at 2.
+      civil_disorder: [RUSSIA A PRU]
+      units:
+        RUSSIA: [A LVN]
+
+  - id: 6.J.4
+    title: civil disorder two armies with equal distance
+    phase: W1901A
+    units:
+      RUSSIA: [A LVN, A UKR]
+    centers:
+      RUSSIA: [MOS]
+    expect:
+      # Both at distance 1 from Moscow; Livonia comes first alphabetically.
+      civil_disorder: [RUSSIA A LVN]
+      units:
+        RUSSIA: [A UKR]
+
+  - id: 6.J.5
+    title: civil disorder two fleets with different distance
+    phase: W1901A
+    units:
+      RUSSIA: [F SKA, F NAO]
+    centers:
+      RUSSIA: [STP]
+    expect:
+      # Skagerrak reaches St Petersburg via Norway (2); the North Atlantic
+      # Ocean needs three steps.
+      civil_disorder: [RUSSIA F NAO]
+      units:
+        RUSSIA: [F SKA]
+
+  - id: 6.J.6
+    title: civil disorder two fleets with equal distance
+    phase: W1901A
+    units:
+      RUSSIA: [F BOT, F NTH]
+    centers:
+      RUSSIA: [MUN]
+    expect:
+      # Both at distance 3 from Munich; "Gulf of Bothnia" precedes
+      # "North Sea" alphabetically.
+      civil_disorder: [RUSSIA F BOT]
+      units:
+        RUSSIA: [F NTH]
+
+  - id: 6.J.7
+    title: civil disorder two fleets and army with equal distance
+    phase: W1901A
+    units:
+      RUSSIA: [A BOH, F SKA, F NTH]
+    centers:
+      RUSSIA: [STP, WAR]
+    expect:
+      # All three at distance 2: fleets are removed before armies although
+      # Bohemia is alphabetically first, and the North Sea precedes
+      # Skagerrak.
+      civil_disorder: [RUSSIA F NTH]
+      units:
+        RUSSIA: [A BOH, F SKA]
+
+  - id: 6.J.8
+    title: civil disorder a fleet with shorter distance than the army
+    phase: W1901A
+    units:
+      RUSSIA: [A TYR, F BAL]
+    centers:
+      RUSSIA: [WAR]
+    expect:
+      # The army in Tyrolia is at 3 (distance counts absolute province
+      # adjacency, regardless of what the unit could sail or walk); the
+      # Baltic fleet is at 2 via Prussia.
+      civil_disorder: [RUSSIA A TYR]
+      units:
+        RUSSIA: [F BAL]
+
+  - id: 6.J.9
+    title: civil disorder must be counted from both coasts south coast shortest
+    phase: W1901A
+    units:
+      RUSSIA: [A ALB, A SEV, F BAL]
+    centers:
+      RUSSIA: [STP, SEV]
+    expect:
+      # The Baltic fleet reaches St Petersburg in 2 (the province distance —
+      # the south coast in the document's older per-coast phrasing); Albania
+      # is at 4 and is removed.
+      civil_disorder: [RUSSIA A ALB]
+      units:
+        RUSSIA: [A SEV, F BAL]
+
+  - id: 6.J.10
+    title: civil disorder must be counted from both coasts north coast shortest
+    phase: W1901A
+    units:
+      RUSSIA: [A ALB, A SEV, F SKA]
+    centers:
+      RUSSIA: [STP, SEV]
+    expect:
+      # Mirror of 6.J.9 with the short route on the north-coast side.
+      civil_disorder: [RUSSIA A ALB]
+      units:
+        RUSSIA: [A SEV, F SKA]
+
+  - id: 6.J.11
+    title: civil disorder counting convoying distance
+    phase: W1901A
+    units:
+      ITALY: [A ALB, A PIE]
+    centers:
+      ITALY: [NAP]
+    expect:
+      # For distance, armies count sea provinces too: Albania reaches Naples
+      # through the Ionian Sea in 2, Piedmont needs 3 — Piedmont is removed.
+      civil_disorder: [ITALY A PIE]
+      units:
+        ITALY: [A ALB]
+
+  - id: 6.J.12
+    title: distance to owned supply center
+    phase: W1901A
+    units:
+      ITALY: [A WAR, A TUS]
+    centers:
+      ITALY: [WAR]
+    expect:
+      # 2023 rule: distance to *owned* (not home) centers — the army defending
+      # Warsaw is at 0 and Italy keeps it, removing Tuscany.
+      civil_disorder: [ITALY A TUS]
+      units:
+        ITALY: [A WAR]

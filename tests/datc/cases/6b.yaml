@@ -1,0 +1,303 @@
+# DATC section 6.B — Multi-coast issues.
+# Hand-encoded from the DATC v3.3 document (docs/references/, git-ignored).
+# 6.B.14 (building with unspecified coast) is a build-phase case, so it is
+# encoded with the adjustment sections 6.I and 6.J rather than here.
+section: 6.B Multi-coast issues
+ruleset: standard
+cases:
+  - id: 6.B.1
+    title: moving with unspecified coast when coast is necessary
+    phase: S1901M
+    units:
+      FRANCE: [F POR]
+    orders:
+      FRANCE: [F POR - SPA]
+    expect:
+      resolutions:
+        F POR - SPA: fails
+
+  - id: 6.B.2
+    title: moving with unspecified coast when coast is not necessary
+    phase: S1901M
+    units:
+      FRANCE: [F GAS]
+    orders:
+      FRANCE: [F GAS - SPA]
+    expect:
+      resolutions:
+        F GAS - SPA: succeeds
+      units:
+        FRANCE: [F SPA/NC]
+
+  - id: 6.B.3
+    title: moving to impossible coast while other coast is possible
+    phase: S1901M
+    units:
+      FRANCE: [F GAS]
+    orders:
+      FRANCE: [F GAS - SPA/SC]
+    expect:
+      resolutions:
+        F GAS - SPA/SC: fails
+      units:
+        FRANCE: [F GAS]
+
+  - id: 6.B.4
+    title: support to unreachable coast allowed
+    phase: S1901M
+    units:
+      FRANCE: [F GAS, F MAR]
+      ITALY: [F WES]
+    orders:
+      FRANCE: [F GAS - SPA/NC, F MAR S F GAS - SPA/NC]
+      ITALY: [F WES - SPA/SC]
+    expect:
+      resolutions:
+        F GAS - SPA/NC: succeeds
+        F MAR S F GAS - SPA/NC: succeeds
+        F WES - SPA/SC: fails
+      units:
+        FRANCE: [F SPA/NC, F MAR]
+        ITALY: [F WES]
+
+  - id: 6.B.5
+    title: support from unreachable coast not allowed
+    phase: S1901M
+    units:
+      FRANCE: [F MAR, F SPA/NC]
+      ITALY: [F LYO]
+    orders:
+      FRANCE: [F MAR - LYO, F SPA/NC S F MAR - LYO]
+      ITALY: [F LYO H]
+    expect:
+      resolutions:
+        F MAR - LYO: fails
+        F SPA/NC S F MAR - LYO: fails
+        F LYO H: succeeds
+
+  - id: 6.B.6
+    title: support can be cut with other coast
+    phase: S1901M
+    units:
+      ENGLAND: [F IRI, F NAO]
+      FRANCE: [F SPA/NC, F MAO]
+      ITALY: [F LYO]
+    orders:
+      ENGLAND: [F IRI S F NAO - MAO, F NAO - MAO]
+      FRANCE: [F SPA/NC S F MAO, F MAO H]
+      ITALY: [F LYO - SPA/SC]
+    expect:
+      resolutions:
+        F IRI S F NAO - MAO: succeeds
+        F NAO - MAO: succeeds
+        F SPA/NC S F MAO: fails
+        F MAO H: fails
+        F LYO - SPA/SC: fails
+      dislodged: [FRANCE F MAO]
+
+  - id: 6.B.7
+    title: supporting own unit with unspecified coast
+    phase: S1901M
+    units:
+      FRANCE: [F POR, F MAO]
+      ITALY: [F LYO, F WES]
+    orders:
+      FRANCE: [F POR S F MAO - SPA, F MAO - SPA/NC]
+      ITALY: [F LYO S F WES - SPA/SC, F WES - SPA/SC]
+    expect:
+      resolutions:
+        F POR S F MAO - SPA: succeeds
+        F MAO - SPA/NC: fails
+        F LYO S F WES - SPA/SC: succeeds
+        F WES - SPA/SC: fails
+
+  - id: 6.B.8
+    title: supporting with unspecified coast when only one coast is possible
+    phase: S1901M
+    units:
+      FRANCE: [F POR, F GAS]
+      ITALY: [F LYO, F WES]
+    orders:
+      FRANCE: [F POR S F GAS - SPA, F GAS - SPA/NC]
+      ITALY: [F LYO S F WES - SPA/SC, F WES - SPA/SC]
+    expect:
+      resolutions:
+        F POR S F GAS - SPA: succeeds
+        F GAS - SPA/NC: fails
+        F LYO S F WES - SPA/SC: succeeds
+        F WES - SPA/SC: fails
+
+  - id: 6.B.9
+    title: supporting with wrong coast
+    phase: S1901M
+    units:
+      FRANCE: [F POR, F MAO]
+      ITALY: [F LYO, F WES]
+    orders:
+      FRANCE: [F POR S F MAO - SPA/NC, F MAO - SPA/SC]
+      ITALY: [F LYO S F WES - SPA/SC, F WES - SPA/SC]
+    expect:
+      resolutions:
+        F POR S F MAO - SPA/NC: fails
+        F MAO - SPA/SC: fails
+        F LYO S F WES - SPA/SC: succeeds
+        F WES - SPA/SC: succeeds
+      units:
+        ITALY: [F SPA/SC, F LYO]
+
+  - id: 6.B.10
+    title: unit ordered with wrong coast
+    phase: S1901M
+    units:
+      FRANCE: [F SPA/SC]
+    orders:
+      FRANCE: [F SPA/NC - LYO]
+    expect:
+      resolutions:
+        F SPA/NC - LYO: succeeds
+      units:
+        FRANCE: [F LYO]
+
+  - id: 6.B.11
+    title: coast cannot be ordered to change
+    phase: S1901M
+    units:
+      FRANCE: [F SPA/NC]
+    orders:
+      FRANCE: [F SPA/SC - LYO]
+    expect:
+      resolutions:
+        F SPA/SC - LYO: fails
+      units:
+        FRANCE: [F SPA/NC]
+
+  - id: 6.B.12
+    title: army movement with coastal specification
+    phase: S1901M
+    units:
+      FRANCE: [A GAS]
+    orders:
+      FRANCE: [A GAS - SPA/NC]
+    expect:
+      resolutions:
+        A GAS - SPA/NC: succeeds
+      units:
+        FRANCE: [A SPA]
+
+  - id: 6.B.13
+    title: coastal crawl not allowed
+    phase: S1901M
+    units:
+      TURKEY: [F BUL/SC, F CON]
+    orders:
+      TURKEY: [F BUL/SC - CON, F CON - BUL/EC]
+    expect:
+      resolutions:
+        F BUL/SC - CON: fails
+        F CON - BUL/EC: fails
+      units:
+        TURKEY: [F BUL/SC, F CON]
+
+  - id: 6.B.15
+    title: supporting foreign unit with unspecified coast
+    phase: S1901M
+    units:
+      FRANCE: [F POR]
+      ENGLAND: [F MAO]
+      ITALY: [F LYO, F WES]
+    orders:
+      FRANCE: [F POR S F MAO - SPA]
+      ENGLAND: [F MAO - SPA/NC]
+      ITALY: [F LYO S F WES - SPA/SC, F WES - SPA/SC]
+    expect:
+      resolutions:
+        F POR S F MAO - SPA: succeeds
+        F MAO - SPA/NC: fails
+        F LYO S F WES - SPA/SC: succeeds
+        F WES - SPA/SC: fails
+
+  - id: 6.B.16
+    title: hold support with wrong coast
+    phase: S1901M
+    units:
+      FRANCE: [A GAS, A MAR]
+      ITALY: [F SPA/SC]
+      ENGLAND: [F POR]
+    orders:
+      FRANCE: [A GAS - SPA, A MAR S A GAS - SPA]
+      ITALY: [F SPA/SC H]
+      ENGLAND: [F POR S F SPA/NC]
+    expect:
+      resolutions:
+        A GAS - SPA: fails
+        A MAR S A GAS - SPA: succeeds
+        F SPA/SC H: succeeds
+        F POR S F SPA/NC: succeeds
+
+  - id: 6.B.17
+    title: move support with wrong coast for departure province
+    phase: S1901M
+    units:
+      ENGLAND: [F MAO]
+      FRANCE: [F SPA/SC]
+      ITALY: [F WES]
+    orders:
+      ENGLAND: [F MAO H]
+      FRANCE: [F SPA/SC - MAO]
+      ITALY: [F WES S F SPA/NC - MAO]
+    expect:
+      resolutions:
+        F MAO H: fails
+        F SPA/SC - MAO: succeeds
+        F WES S F SPA/NC - MAO: succeeds
+      dislodged: [ENGLAND F MAO]
+      units:
+        FRANCE: [F MAO]
+
+  - id: 6.B.18
+    title: convoy starting from multi-coast province
+    phase: S1901M
+    units:
+      TURKEY: [A BUL, F BLA]
+    orders:
+      TURKEY: [A BUL - SEV, F BLA C A BUL - SEV]
+    expect:
+      resolutions:
+        A BUL - SEV: succeeds
+        F BLA C A BUL - SEV: succeeds
+      units:
+        TURKEY: [A SEV, F BLA]
+
+  - id: 6.B.19
+    title: convoy ending at multi-coast province
+    phase: S1901M
+    units:
+      ITALY: [A TUS, F LYO]
+    orders:
+      ITALY: [A TUS - SPA, F LYO C A TUS - SPA]
+    expect:
+      resolutions:
+        A TUS - SPA: succeeds
+        F LYO C A TUS - SPA: succeeds
+      units:
+        ITALY: [A SPA, F LYO]
+
+  # A build-phase case, encoded with the adjustment
+  # adjustment machinery.
+  - id: 6.B.14
+    title: building with unspecified coast
+    phase: W1901A
+    units:
+      RUSSIA: []
+    centers:
+      RUSSIA: [STP]
+    orders:
+      # 4.B.7: a fleet built in a split-coast province must name the coast.
+      # The failed build does not use up the build right (the document notes
+      # subsequent orders may still take it).
+      RUSSIA: [Build F STP]
+    expect:
+      resolutions:
+        Build F STP: fails
+      units:
+        RUSSIA: []

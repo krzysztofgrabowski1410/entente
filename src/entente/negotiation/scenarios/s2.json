@@ -1,0 +1,28 @@
+{
+  "phase": "S1901M",
+  "self_power": "ENGLAND",
+  "proposer": "FRANCE",
+  "ally": "GERMANY",
+  "true_move_index": 0,
+  "note": "Truthful: FRANCE's announced move is its actual scripted move. The classic Burgundy bounce point -- FRANCE claims it, asks GERMANY to reposition via Ruhr.",
+  "message": "PROPOSAL from FRANCE to GERMANY for S1901M: FRANCE orders [A PAR - BUR, F BRE - MAO, A MAR - SPA]; GERMANY orders [A MUN - RUH, F KIE - HOL, A BER H]. Burgundy's mine -- Ruhr keeps you flexible without the two of us bouncing there.",
+  "candidates": {
+    "FRANCE": {
+      "order_sets": [
+        ["A PAR - BUR", "F BRE - MAO", "A MAR - SPA"],
+        ["A PAR - PIC", "F BRE - MAO", "A MAR - SPA"],
+        ["A PAR H", "F BRE H", "A MAR H"]
+      ],
+      "anchor": [0.3, 0.4, 0.3]
+    },
+    "GERMANY": {
+      "order_sets": [
+        ["A MUN - RUH", "F KIE - HOL", "A BER H"],
+        ["A MUN - BUR", "F KIE - HOL", "A BER H"],
+        ["A BER H", "F KIE H", "A MUN H"]
+      ],
+      "anchor": [0.34, 0.33, 0.33]
+    }
+  },
+  "pikl": {"lam": 1.0, "iterations": 64}
+}

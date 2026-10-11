@@ -1,0 +1,940 @@
+# BATC-L2 section S -- special-unit designators (rulebook: "Morgoth Unit is
+# represented as 3A(M)", "Glaurung Unit is represented as 3A(G)"; the Signature
+# paragraph: "The designator must always be written: 3A(M) fits only Morgoth
+# and 3A(G) only Glaurung, while 3A written without a designator fits no Unit
+# -- an Order or a reference written so is invalid, like one with a wrong Unit
+# type. Morgoth and Glaurung are therefore never twins."). The rulebook's own
+# notation names MORGOTH's two strength-3 specials, and the engine demands it:
+# a special's own order and every order that names it -- a Dislodge's or a
+# Bar's victim, a support's subject, a convoy's cargo -- write the designator,
+# or the order is invalid and Holds, exactly as a false designator makes it;
+# the game layer checks both before adjudication, and the adjudicator reads
+# the designator as the unit's signature, so the two specials never form a
+# wall, a wave or a walk list together. The designator also adds an
+# identity-binding demand (which special moves, which retreat claims the open
+# slot, which victim goes to limbo). Each behaviour is certified twice where
+# it is outcome-relevant: the SAME board with the OTHER designator, or with
+# the designator written, yields the OPPOSITE result, so only the designator
+# can be doing the work. Co-located specials are set up with two `3A ANF`
+# MORGOTH armies plus `l2: {glaurung: ANF}` (seed tags the first as the
+# Morgoth unit; the override tags the second as Glaurung).
+section: "BATC-L2 S. Special-unit designators"
+cases:
+  - id: BATC-L2.S.1
+    title: a designated move splits co-located twins — Glaurung moves, the Morgoth unit holds
+    # The moved special keeps its identity: a following designated Devastate at
+    # LOT binds Glaurung (Devastate is Glaurung's alone), so it succeeds
+    # there. The `3A(G) ... DEV` designator composes with Devastate's own
+    # Glaurung demand (both name the same identity).
+    start:
+      phase: S25M
+      units:
+        MORGOTH: ["3A ANF", "3A ANF"]
+      l2:
+        glaurung: ANF
+    script:
+      - phase: S25M
+        orders:
+          MORGOTH: ["3A(G) ANF - LOT"]
+      - phase: F25M
+        orders:
+          MORGOTH: ["3A(G) LOT DEV"]
+    expect:
+      resolutions: {"3A(G) LOT DEV": succeeds}
+      events: ["Glaurung devastates LOT"]
+      devastated: [LOT]
+      specials:
+        glaurung: {province: LOT, limbo: false}
+        morgoth-unit: {province: ANF, limbo: false}
+      units:
+        MORGOTH: ["3A ANF", "3A LOT"]
+
+  - id: BATC-L2.S.2
+    title: the designator alone flips the split — the Morgoth unit moves, Glaurung holds
+    # Same board as S.1 with (M) in place of (G): now the Morgoth unit walks to
+    # LOT and Glaurung stays in Anfauglith, so the same `3A(G) LOT DEV` finds
+    # no dragon and fails. Nothing but the designator changed.
+    start:
+      phase: S25M
+      units:
+        MORGOTH: ["3A ANF", "3A ANF"]
+      l2:
+        glaurung: ANF
+    script:
+      - phase: S25M
+        orders:
+          MORGOTH: ["3A(M) ANF - LOT"]
+      - phase: F25M
+        orders:
+          MORGOTH: ["3A(G) LOT DEV"]
+    expect:
+      resolutions: {"3A(G) LOT DEV": fails}
+      devastated: []
+      specials:
+        glaurung: {province: ANF, limbo: false}
+        morgoth-unit: {province: LOT, limbo: false}
+      units:
+        MORGOTH: ["3A ANF", "3A LOT"]
+
+  - id: BATC-L2.S.3
+    title: a designated victim strikes the Morgoth unit — Glaurung lives, MORGOTH is defeated
+    # The outcome-relevance case: an attacker names 3A(M) as the victim, so the
+    # Morgoth unit (not Glaurung) takes the freed slot into limbo and, unordered
+    # in the retreat, disbands -- defeating MORGOTH. The value-level dislodge is
+    # a four-strength supported attack on the strength-3 special (hold 3).
+    start:
+      phase: S25M
+      units:
+        MORGOTH: ["3A ANF", "3A ANF"]
+        DORIATH: ["A LOT", "A EIT", "A LAD", "A DNN"]
+      l2:
+        glaurung: ANF
+    script:
+      - phase: S25M
+        orders:
+          DORIATH:
+            - "A LOT DIS MORGOTH 3A(M) ANF"
+            - "A EIT S DORIATH A LOT DIS MORGOTH 3A(M) ANF"
+            - "A LAD S DORIATH A LOT DIS MORGOTH 3A(M) ANF"
+            - "A DNN S DORIATH A LOT DIS MORGOTH 3A(M) ANF"
+      - phase: S25R
+    expect:
+      events:
+        - "MORGOTH is defeated (the Morgoth unit disbands during retreats); his units stand in civil disorder"
+      morgoth_defeated: true
+      specials:
+        glaurung: {province: ANF, limbo: false}
+      units:
+        MORGOTH: ["3A ANF"]
+
+  - id: BATC-L2.S.4
+    title: the same attack aimed at Glaurung — the Morgoth unit lives, no defeat
+    # Identical board and attack as S.3 with 3A(G) as the victim: Glaurung goes
+    # to limbo and disbands, but the Morgoth unit survives, so MORGOTH stands.
+    # An attacker naming an untagged victim could not choose between them; the
+    # designator makes the choice, and it is decisive.
+    start:
+      phase: S25M
+      units:
+        MORGOTH: ["3A ANF", "3A ANF"]
+        DORIATH: ["A LOT", "A EIT", "A LAD", "A DNN"]
+      l2:
+        glaurung: ANF
+    script:
+      - phase: S25M
+        orders:
+          DORIATH:
+            - "A LOT DIS MORGOTH 3A(G) ANF"
+            - "A EIT S DORIATH A LOT DIS MORGOTH 3A(G) ANF"
+            - "A LAD S DORIATH A LOT DIS MORGOTH 3A(G) ANF"
+            - "A DNN S DORIATH A LOT DIS MORGOTH 3A(G) ANF"
+      - phase: S25R
+    expect:
+      morgoth_defeated: false
+      specials:
+        morgoth-unit: {province: ANF, limbo: false}
+      units:
+        MORGOTH: ["3A ANF"]
+
+  - id: BATC-L2.S.5
+    title: both specials dislodged — the designated Glaurung retreat leaves the Morgoth unit to disband
+    # Two supported dislodges (2A + two supports each = 4 > 3) put both specials
+    # in limbo at Anfauglith. Only one retreat is ordered, and it names 3A(G):
+    # Glaurung claims the open slot (RIV; the dislodger origins LOT/DNN are
+    # forbidden, 4.A.5-b) while the Morgoth unit, unordered, disbands -- MORGOTH
+    # is defeated. Which special claims the one retreat decides the game.
+    start:
+      phase: S25M
+      units:
+        MORGOTH: ["3A ANF", "3A ANF"]
+        DORIATH: ["2A LOT", "A EIT", "A LAD", "2A DNN", "A FSE", "A NEW"]
+      l2:
+        glaurung: ANF
+    script:
+      - phase: S25M
+        orders:
+          DORIATH:
+            - "2A LOT DIS MORGOTH 3A(M) ANF"
+            - "A EIT S DORIATH 2A LOT DIS MORGOTH 3A(M) ANF"
+            - "A LAD S DORIATH 2A LOT DIS MORGOTH 3A(M) ANF"
+            - "2A DNN DIS MORGOTH 3A(G) ANF"
+            - "A FSE S DORIATH 2A DNN DIS MORGOTH 3A(G) ANF"
+            - "A NEW S DORIATH 2A DNN DIS MORGOTH 3A(G) ANF"
+      - phase: S25R
+        orders:
+          MORGOTH: ["3A(G) ANF - RIV"]
+    expect:
+      events:
+        - "MORGOTH is defeated (the Morgoth unit disbands during retreats); his units stand in civil disorder"
+      morgoth_defeated: true
+      specials:
+        glaurung: {province: RIV, limbo: false}
+      units:
+        MORGOTH: ["3A RIV"]
+
+  - id: BATC-L2.S.6
+    title: the same dislodgement with the Morgoth unit ordered out — Glaurung disbands, no defeat
+    # Identical to S.5 but the one retreat names 3A(M): the Morgoth unit survives
+    # in RIV and Glaurung disbands, so MORGOTH stands. Same board, opposite
+    # designator, opposite verdict.
+    start:
+      phase: S25M
+      units:
+        MORGOTH: ["3A ANF", "3A ANF"]
+        DORIATH: ["2A LOT", "A EIT", "A LAD", "2A DNN", "A FSE", "A NEW"]
+      l2:
+        glaurung: ANF
+    script:
+      - phase: S25M
+        orders:
+          DORIATH:
+            - "2A LOT DIS MORGOTH 3A(M) ANF"
+            - "A EIT S DORIATH 2A LOT DIS MORGOTH 3A(M) ANF"
+            - "A LAD S DORIATH 2A LOT DIS MORGOTH 3A(M) ANF"
+            - "2A DNN DIS MORGOTH 3A(G) ANF"
+            - "A FSE S DORIATH 2A DNN DIS MORGOTH 3A(G) ANF"
+            - "A NEW S DORIATH 2A DNN DIS MORGOTH 3A(G) ANF"
+      - phase: S25R
+        orders:
+          MORGOTH: ["3A(M) ANF - RIV"]
+    expect:
+      morgoth_defeated: false
+      specials:
+        morgoth-unit: {province: RIV, limbo: false}
+      units:
+        MORGOTH: ["3A RIV"]
+
+  - id: BATC-L2.S.7
+    title: a false own-unit designation is invalid — the order Holds
+    # The Morgoth unit stands in HIT, so `3A(M) ANF - LOT` names a special that
+    # is not there: the order is invalid and the co-located Glaurung simply
+    # holds (mirroring the mis-specified-victim rule, docs/adjudication.tex Sec. 3.4).
+    start:
+      phase: S25M
+      units:
+        MORGOTH: ["3A HIT", "3A ANF"]
+      l2:
+        morgoth_unit: HIT
+        glaurung: ANF
+    script:
+      - phase: S25M
+        orders:
+          MORGOTH: ["3A(M) ANF - LOT"]
+    expect:
+      resolutions: {"3A(M) ANF - LOT": fails}
+      specials:
+        glaurung: {province: ANF, limbo: false}
+        morgoth-unit: {province: HIT, limbo: false}
+      units:
+        MORGOTH: ["3A ANF", "3A HIT"]
+
+  - id: BATC-L2.S.8
+    title: a false designated victim reference makes the Dislodge fail
+    # No Morgoth unit stands in Anfauglith (it is in HIT), so a Dislodge naming
+    # `MORGOTH 3A(M) ANF` as its victim is invalid and fails; the Glaurung twin
+    # in ANF is untouched.
+    start:
+      phase: S25M
+      units:
+        MORGOTH: ["3A HIT", "3A ANF"]
+        DORIATH: ["A LOT", "A EIT", "A LAD", "A DNN"]
+      l2:
+        morgoth_unit: HIT
+        glaurung: ANF
+    script:
+      - phase: S25M
+        orders:
+          DORIATH:
+            - "A LOT DIS MORGOTH 3A(M) ANF"
+            - "A EIT S DORIATH A LOT DIS MORGOTH 3A(M) ANF"
+            - "A LAD S DORIATH A LOT DIS MORGOTH 3A(M) ANF"
+            - "A DNN S DORIATH A LOT DIS MORGOTH 3A(M) ANF"
+    expect:
+      resolutions: {"A LOT DIS MORGOTH 3A(M) ANF": fails}
+      specials:
+        glaurung: {province: ANF, limbo: false}
+        morgoth-unit: {province: HIT, limbo: false}
+      units:
+        MORGOTH: ["3A ANF", "3A HIT"]
+
+  - id: BATC-L2.S.9
+    title: only MORGOTH has specials — a non-Morgoth power's designator is invalid
+    # The (M)/(G) tokens name MORGOTH's units; DORIATH writing `A(M)` designates a
+    # special it cannot own, so the order is invalid and Holds.
+    start:
+      phase: S25M
+      units:
+        MORGOTH: ["3A ANF", "3A ANF"]
+        DORIATH: ["A LOT"]
+      l2:
+        glaurung: ANF
+    script:
+      - phase: S25M
+        orders:
+          DORIATH: ["A(M) LOT - EIT"]
+    expect:
+      resolutions: {"A(M) LOT - EIT": fails}
+      units:
+        DORIATH: ["A LOT"]
+
+  - id: BATC-L2.S.10
+    title: a retreat designator must name a special in limbo — a false one is invalid
+    # A designated Dislodge sends the Morgoth unit to limbo; Glaurung stays on the
+    # board. Retreating `3A(G)` names a special that is not dislodged, so the
+    # retreat is invalid -- the Morgoth unit, unretreated, disbands (MORGOTH falls)
+    # while Glaurung is untouched.
+    start:
+      phase: S25M
+      units:
+        MORGOTH: ["3A ANF", "3A ANF"]
+        DORIATH: ["A LOT", "A EIT", "A LAD", "A DNN"]
+      l2:
+        glaurung: ANF
+    script:
+      - phase: S25M
+        orders:
+          DORIATH:
+            - "A LOT DIS MORGOTH 3A(M) ANF"
+            - "A EIT S DORIATH A LOT DIS MORGOTH 3A(M) ANF"
+            - "A LAD S DORIATH A LOT DIS MORGOTH 3A(M) ANF"
+            - "A DNN S DORIATH A LOT DIS MORGOTH 3A(M) ANF"
+      - phase: S25R
+        orders:
+          MORGOTH: ["3A(G) ANF - RIV"]
+    expect:
+      resolutions: {"3A(G) ANF - RIV": fails}
+      morgoth_defeated: true
+      specials:
+        glaurung: {province: ANF, limbo: false}
+      units:
+        MORGOTH: ["3A ANF"]
+
+  - id: BATC-L2.S.11
+    title: a valid designation still needs the attack to succeed — a weak Dislodge delivers nothing
+    # 3A(M) truly stands in ANF, so the victim reference is valid, but a single
+    # unsupported army (strength 1) cannot beat the special's hold of 3: the
+    # Dislodge fails and no special goes to limbo. The designator narrows the
+    # binding only when a dislodgement actually occurs.
+    start:
+      phase: S25M
+      units:
+        MORGOTH: ["3A ANF", "3A ANF"]
+        DORIATH: ["A LOT"]
+      l2:
+        glaurung: ANF
+    script:
+      - phase: S25M
+        orders:
+          DORIATH: ["A LOT DIS MORGOTH 3A(M) ANF"]
+    expect:
+      resolutions: {"A LOT DIS MORGOTH 3A(M) ANF": fails}
+      morgoth_defeated: false
+      specials:
+        glaurung: {province: ANF, limbo: false}
+        morgoth-unit: {province: ANF, limbo: false}
+      units:
+        MORGOTH: ["3A ANF", "3A ANF"]
+
+  # -- the designator is required: a special named bare is named wrongly ----------
+
+  - id: BATC-L2.S.12
+    title: a special's bare Move is invalid — the unit Holds
+    # "3A written without a designator fits no Unit -- an Order or a reference
+    # written so is invalid, like one with a wrong Unit type." The Morgoth
+    # unit alone in Anfauglith is ordered `3A ANF - LOT`: the order names no
+    # unit, fails, and the special stays.
+    start:
+      phase: S25M
+      units:
+        MORGOTH: ["3A ANF"]
+    script:
+      - phase: S25M
+        orders:
+          MORGOTH: ["3A ANF - LOT"]
+    expect:
+      resolutions: {"3A ANF - LOT": fails}
+      specials:
+        morgoth-unit: {province: ANF, limbo: false}
+      units:
+        MORGOTH: ["3A ANF"]
+
+  - id: BATC-L2.S.13
+    title: a special's bare Support is invalid — the army it would have defended falls
+    # "An Order ... written so is invalid." The Morgoth unit's `3A ANF S MORGOTH
+    # A ANF` lends nothing, so DORIATH's supported Dislodge (1 + 1) beats the
+    # army's bare 1.
+    start:
+      phase: S25M
+      units:
+        MORGOTH: ["3A ANF", "A ANF"]
+        DORIATH: ["A LOT", "A EIT"]
+    script:
+      - phase: S25M
+        orders:
+          MORGOTH: ["3A ANF S MORGOTH A ANF"]
+          DORIATH:
+            - "A LOT DIS MORGOTH A ANF"
+            - "A EIT S DORIATH A LOT DIS MORGOTH A ANF"
+    expect:
+      resolutions:
+        "3A ANF S MORGOTH A ANF": fails
+        "A LOT DIS MORGOTH A ANF": succeeds
+      phase: S25R
+
+  - id: BATC-L2.S.14
+    title: the same Support written with the designator holds the army
+    # Same board as S.13 with `3A(M)`: the support is given, the army defends
+    # at 1 + 3, and the Dislodge at 2 fails. Nothing but the designator changed.
+    start:
+      phase: S25M
+      units:
+        MORGOTH: ["3A ANF", "A ANF"]
+        DORIATH: ["A LOT", "A EIT"]
+    script:
+      - phase: S25M
+        orders:
+          MORGOTH: ["3A(M) ANF S MORGOTH A ANF"]
+          DORIATH:
+            - "A LOT DIS MORGOTH A ANF"
+            - "A EIT S DORIATH A LOT DIS MORGOTH A ANF"
+    expect:
+      resolutions:
+        "3A(M) ANF S MORGOTH A ANF": succeeds
+        "A LOT DIS MORGOTH A ANF": fails
+      units:
+        MORGOTH: ["3A ANF", "A ANF"]
+
+  - id: BATC-L2.S.15
+    title: a special's bare Dislodge is invalid — the victim stands
+    # The strength-3 attack would beat a lone army; written bare it names no
+    # unit and Holds instead.
+    start:
+      phase: S25M
+      units:
+        MORGOTH: ["3A ANF"]
+        DORIATH: ["A LOT", "A LOT"]
+    script:
+      - phase: S25M
+        orders:
+          MORGOTH: ["3A ANF DIS DORIATH A LOT"]
+    expect:
+      resolutions: {"3A ANF DIS DORIATH A LOT": fails}
+      units:
+        MORGOTH: ["3A ANF"]
+        DORIATH: ["A LOT", "A LOT"]
+
+  - id: BATC-L2.S.16
+    title: a special's bare Bar is invalid — the barred army enters
+    # A Bar of strength 3 would stop the army at the door; written bare it
+    # Holds and the door is open.
+    start:
+      phase: S25M
+      units:
+        MORGOTH: ["3A ANF"]
+        DORIATH: ["A LOT"]
+    script:
+      - phase: S25M
+        orders:
+          MORGOTH: ["3A ANF BAR DORIATH A LOT - ANF"]
+          DORIATH: ["A LOT - ANF"]
+    expect:
+      resolutions:
+        "3A ANF BAR DORIATH A LOT - ANF": fails
+        "A LOT - ANF": succeeds
+      units:
+        DORIATH: ["A ANF"]
+
+  - id: BATC-L2.S.17
+    title: Glaurung's bare Devastate is invalid — nothing burns
+    # Glaurung stands in Anfauglith beside the Morgoth unit; `3A ANF DEV`
+    # names neither and Holds. With `(G)` written, the same order devastates
+    # the Area (S.1 shows it at LOT).
+    start:
+      phase: S25M
+      units:
+        MORGOTH: ["3A ANF", "3A ANF"]
+      l2:
+        glaurung: ANF
+    script:
+      - phase: S25M
+        orders:
+          MORGOTH: ["3A ANF DEV"]
+    expect:
+      resolutions: {"3A ANF DEV": fails}
+      devastated: []
+
+  - id: BATC-L2.S.18
+    title: a bare and a designated order for one special — the designated one takes place
+    # Rule 4.C.1, choice C: "if an Order with correct designation exists, then
+    # the correct Order is valid and takes place." The bare Move is thrown out
+    # before adjudication and the designated Move to Eithel Sirion goes.
+    start:
+      phase: S25M
+      units:
+        MORGOTH: ["3A ANF"]
+    script:
+      - phase: S25M
+        orders:
+          MORGOTH: ["3A ANF - LOT", "3A(M) ANF - EIT"]
+    expect:
+      resolutions:
+        "3A ANF - LOT": fails
+        "3A(M) ANF - EIT": succeeds
+      specials:
+        morgoth-unit: {province: EIT, limbo: false}
+      units:
+        MORGOTH: ["3A EIT"]
+
+  - id: BATC-L2.S.19
+    title: a bare retreat for the dislodged Morgoth unit is invalid — it disbands and MORGOTH falls
+    # The sharpest consequence of the law. A designated strength-4 Dislodge
+    # sends the Morgoth unit to limbo; its retreat `3A ANF - RIV` is written
+    # bare, names no unit, and with no valid retreat the unit disbands --
+    # which is Morgoth's defeat (the same retreat written `3A(M)` reaches RIV,
+    # S.6).
+    start:
+      phase: S25M
+      units:
+        MORGOTH: ["3A ANF"]
+        DORIATH: ["A LOT", "A EIT", "A LAD", "A DNN"]
+    script:
+      - phase: S25M
+        orders:
+          DORIATH:
+            - "A LOT DIS MORGOTH 3A(M) ANF"
+            - "A EIT S DORIATH A LOT DIS MORGOTH 3A(M) ANF"
+            - "A LAD S DORIATH A LOT DIS MORGOTH 3A(M) ANF"
+            - "A DNN S DORIATH A LOT DIS MORGOTH 3A(M) ANF"
+      - phase: S25R
+        orders:
+          MORGOTH: ["3A ANF - RIV"]
+    expect:
+      resolutions: {"3A ANF - RIV": fails}
+      events:
+        - "MORGOTH is defeated (the Morgoth unit disbands during retreats); his units stand in civil disorder"
+      morgoth_defeated: true
+      specials: {}
+      units:
+        MORGOTH: []
+
+  # -- a reference naming a special bare is invalid too -------------------------
+
+  - id: BATC-L2.S.20
+    title: a Dislodge naming a bare 3A is invalid — the special stands
+    # "3A(M) fits only Morgoth ... while 3A written without a designator fits
+    # no Unit." The same strength-4 attack that dislodges `3A(M)` in S.3
+    # names `3A` here: attack and supports are all invalid, and the Morgoth
+    # unit stands.
+    start:
+      phase: S25M
+      units:
+        MORGOTH: ["3A ANF"]
+        DORIATH: ["A LOT", "A EIT", "A LAD", "A DNN"]
+    script:
+      - phase: S25M
+        orders:
+          DORIATH:
+            - "A LOT DIS MORGOTH 3A ANF"
+            - "A EIT S DORIATH A LOT DIS MORGOTH 3A ANF"
+            - "A LAD S DORIATH A LOT DIS MORGOTH 3A ANF"
+            - "A DNN S DORIATH A LOT DIS MORGOTH 3A ANF"
+    expect:
+      resolutions:
+        "A LOT DIS MORGOTH 3A ANF": fails
+        "A EIT S DORIATH A LOT DIS MORGOTH 3A ANF": fails
+      specials:
+        morgoth-unit: {province: ANF, limbo: false}
+      phase: F25M
+
+  - id: BATC-L2.S.21
+    title: supports whose subject names a bare 3A are invalid — the designated Dislodge is alone
+    # The attacker names `3A(M)`; its three supporters name `3A` in the
+    # subject they support. Each support is a reference written wrongly and
+    # Holds, so the Dislodge meets the special's 3 with 1 and fails.
+    start:
+      phase: S25M
+      units:
+        MORGOTH: ["3A ANF"]
+        DORIATH: ["A LOT", "A EIT", "A LAD", "A DNN"]
+    script:
+      - phase: S25M
+        orders:
+          DORIATH:
+            - "A LOT DIS MORGOTH 3A(M) ANF"
+            - "A EIT S DORIATH A LOT DIS MORGOTH 3A ANF"
+            - "A LAD S DORIATH A LOT DIS MORGOTH 3A ANF"
+            - "A DNN S DORIATH A LOT DIS MORGOTH 3A ANF"
+    expect:
+      resolutions:
+        "A LOT DIS MORGOTH 3A(M) ANF": fails
+        "A EIT S DORIATH A LOT DIS MORGOTH 3A ANF": fails
+      specials:
+        morgoth-unit: {province: ANF, limbo: false}
+      phase: F25M
+
+  - id: BATC-L2.S.22
+    title: a Bar naming a bare 3A is invalid — the special enters Lothlann
+    # DORIATH's strength-3 Bar would stop the special's entry on a tie; naming
+    # its victim `3A` it names no unit, Holds, and the Morgoth unit walks in.
+    start:
+      phase: S25M
+      units:
+        MORGOTH: ["3A ANF"]
+        DORIATH: ["3A LOT"]
+    script:
+      - phase: S25M
+        orders:
+          DORIATH: ["3A LOT BAR MORGOTH 3A ANF - LOT"]
+          MORGOTH: ["3A(M) ANF - LOT"]
+    expect:
+      resolutions:
+        "3A LOT BAR MORGOTH 3A ANF - LOT": fails
+        "3A(M) ANF - LOT": succeeds
+      units:
+        MORGOTH: ["3A LOT"]
+
+  - id: BATC-L2.S.23
+    title: the same Bar naming 3A(M) binds the entrant and wins the tie
+    # Same board as S.22 with the designator in the Bar's reference: the Bar
+    # stands at 3 against 3 and stops the entry. Nothing but the designator
+    # changed.
+    start:
+      phase: S25M
+      units:
+        MORGOTH: ["3A ANF"]
+        DORIATH: ["3A LOT"]
+    script:
+      - phase: S25M
+        orders:
+          DORIATH: ["3A LOT BAR MORGOTH 3A(M) ANF - LOT"]
+          MORGOTH: ["3A(M) ANF - LOT"]
+    expect:
+      resolutions:
+        "3A LOT BAR MORGOTH 3A(M) ANF - LOT": succeeds
+        "3A(M) ANF - LOT": fails
+      units:
+        MORGOTH: ["3A ANF"]
+
+  - id: BATC-L2.S.24
+    title: a support-hold naming a bare 3A is invalid — the special falls to four
+    # MEN may support Morgoth, but `A LOT S MORGOTH 3A ANF` names no unit and
+    # Holds: the Morgoth unit defends with its 3 alone and the strength-4
+    # Dislodge dislodges it.
+    start:
+      phase: S25M
+      units:
+        MORGOTH: ["3A ANF"]
+        MEN: ["A LOT"]
+        DORIATH: ["A FSE", "A EIT", "A LAD", "A DNN"]
+    script:
+      - phase: S25M
+        orders:
+          MEN: ["A LOT S MORGOTH 3A ANF"]
+          DORIATH:
+            - "A FSE DIS MORGOTH 3A(M) ANF"
+            - "A EIT S DORIATH A FSE DIS MORGOTH 3A(M) ANF"
+            - "A LAD S DORIATH A FSE DIS MORGOTH 3A(M) ANF"
+            - "A DNN S DORIATH A FSE DIS MORGOTH 3A(M) ANF"
+    expect:
+      resolutions:
+        "A LOT S MORGOTH 3A ANF": fails
+        "A FSE DIS MORGOTH 3A(M) ANF": succeeds
+      specials:
+        morgoth-unit: {province: ANF, limbo: true}
+      phase: S25R
+
+  - id: BATC-L2.S.25
+    title: the same support-hold naming 3A(M) holds the special at four
+    # Same board as S.24 with the designator in MEN's subject: 3 + 1 meets 4
+    # and the Dislodge fails. Nothing but the designator changed.
+    start:
+      phase: S25M
+      units:
+        MORGOTH: ["3A ANF"]
+        MEN: ["A LOT"]
+        DORIATH: ["A FSE", "A EIT", "A LAD", "A DNN"]
+    script:
+      - phase: S25M
+        orders:
+          MEN: ["A LOT S MORGOTH 3A(M) ANF"]
+          DORIATH:
+            - "A FSE DIS MORGOTH 3A(M) ANF"
+            - "A EIT S DORIATH A FSE DIS MORGOTH 3A(M) ANF"
+            - "A LAD S DORIATH A FSE DIS MORGOTH 3A(M) ANF"
+            - "A DNN S DORIATH A FSE DIS MORGOTH 3A(M) ANF"
+    expect:
+      resolutions:
+        "A LOT S MORGOTH 3A(M) ANF": succeeds
+        "A FSE DIS MORGOTH 3A(M) ANF": fails
+      specials:
+        morgoth-unit: {province: ANF, limbo: false}
+      phase: F25M
+
+  - id: BATC-L2.S.26
+    title: a support-move naming a bare 3A is invalid — the special bounces on the tie
+    # DORIATH's double in Dor-nu-Fauglith defends at 2 + 1. MEN's `A LAD S
+    # MORGOTH 3A ANF - DNN` names no unit and Holds, so the special attacks
+    # at 3 against 3 and fails.
+    start:
+      phase: S25M
+      units:
+        MORGOTH: ["3A ANF"]
+        MEN: ["A LAD"]
+        DORIATH: ["2A DNN", "A RIV"]
+    script:
+      - phase: S25M
+        orders:
+          MEN: ["A LAD S MORGOTH 3A ANF - DNN"]
+          MORGOTH: ["3A(M) ANF - DNN"]
+          DORIATH: ["2A DNN H", "A RIV S DORIATH 2A DNN"]
+    expect:
+      resolutions:
+        "A LAD S MORGOTH 3A ANF - DNN": fails
+        "3A(M) ANF - DNN": fails
+      units:
+        MORGOTH: ["3A ANF"]
+        DORIATH: ["2A DNN", "A RIV"]
+
+  - id: BATC-L2.S.27
+    title: the same support-move naming 3A(M) carries the special through
+    # Same board as S.26 with the designator in MEN's subject: 3 + 1 beats
+    # 2 + 1 and the double is dislodged. Nothing but the designator changed.
+    start:
+      phase: S25M
+      units:
+        MORGOTH: ["3A ANF"]
+        MEN: ["A LAD"]
+        DORIATH: ["2A DNN", "A RIV"]
+    script:
+      - phase: S25M
+        orders:
+          MEN: ["A LAD S MORGOTH 3A(M) ANF - DNN"]
+          MORGOTH: ["3A(M) ANF - DNN"]
+          DORIATH: ["2A DNN H", "A RIV S DORIATH 2A DNN"]
+    expect:
+      resolutions:
+        "A LAD S MORGOTH 3A(M) ANF - DNN": succeeds
+        "3A(M) ANF - DNN": succeeds
+      specials:
+        morgoth-unit: {province: DNN, limbo: false}
+      phase: S25R
+
+  # -- never twins: each special holds under its own designator ---------------------
+
+  - id: BATC-L2.S.28
+    title: two unordered specials share no wall — the support-hold on 3A(M) leaves Glaurung bare
+    # "Morgoth and Glaurung are therefore never twins." Neither special is
+    # ordered; MEN's support-hold names 3A(M). Under the twins' wall the
+    # support would defend both; it defends the Morgoth unit alone, and the
+    # strength-4 Dislodge of 3A(G) meets Glaurung's bare 3 and succeeds.
+    start:
+      phase: S25M
+      units:
+        MORGOTH: ["3A ANF", "3A ANF"]
+        MEN: ["A LOT"]
+        DORIATH: ["A FSE", "A EIT", "A LAD", "A DNN"]
+      l2:
+        glaurung: ANF
+    script:
+      - phase: S25M
+        orders:
+          MEN: ["A LOT S MORGOTH 3A(M) ANF"]
+          DORIATH:
+            - "A FSE DIS MORGOTH 3A(G) ANF"
+            - "A EIT S DORIATH A FSE DIS MORGOTH 3A(G) ANF"
+            - "A LAD S DORIATH A FSE DIS MORGOTH 3A(G) ANF"
+            - "A DNN S DORIATH A FSE DIS MORGOTH 3A(G) ANF"
+    expect:
+      resolutions:
+        "A LOT S MORGOTH 3A(M) ANF": succeeds
+        "A FSE DIS MORGOTH 3A(G) ANF": succeeds
+      specials:
+        glaurung: {province: ANF, limbo: true}
+        morgoth-unit: {province: ANF, limbo: false}
+      units:
+        MORGOTH: ["3A ANF"]
+
+  - id: BATC-L2.S.29
+    title: the same attack aimed at 3A(M) breaks on his wall
+    # Same board as S.28 with the Dislodge naming 3A(M): the Morgoth unit
+    # defends at 3 + 1 against 4 and stands, and Glaurung is not touched.
+    # Nothing but the designator changed.
+    start:
+      phase: S25M
+      units:
+        MORGOTH: ["3A ANF", "3A ANF"]
+        MEN: ["A LOT"]
+        DORIATH: ["A FSE", "A EIT", "A LAD", "A DNN"]
+      l2:
+        glaurung: ANF
+    script:
+      - phase: S25M
+        orders:
+          MEN: ["A LOT S MORGOTH 3A(M) ANF"]
+          DORIATH:
+            - "A FSE DIS MORGOTH 3A(M) ANF"
+            - "A EIT S DORIATH A FSE DIS MORGOTH 3A(M) ANF"
+            - "A LAD S DORIATH A FSE DIS MORGOTH 3A(M) ANF"
+            - "A DNN S DORIATH A FSE DIS MORGOTH 3A(M) ANF"
+    expect:
+      resolutions:
+        "A FSE DIS MORGOTH 3A(M) ANF": fails
+      specials:
+        glaurung: {province: ANF, limbo: false}
+        morgoth-unit: {province: ANF, limbo: false}
+      units:
+        MORGOTH: ["3A ANF", "3A ANF"]
+
+  # -- winter -------------------------------------------------------------------------
+
+  - id: BATC-L2.S.30
+    title: a winter Disband naming a special is invalid, bare or designated
+    # The specials need no supply centres and are never removed. MORGOTH owes
+    # one removal (Anfauglith feeds one of his two plain armies); both
+    # Disbands naming the Morgoth unit fail, and civil disorder takes the
+    # army farthest from his centres.
+    start:
+      phase: F25M
+      units:
+        MORGOTH: ["3A ANF", "A ANF", "A HIT"]
+      ownership:
+        ANG: null
+    script:
+      - phase: F25M
+      - phase: W25A
+        orders:
+          MORGOTH: ["Disband 3A ANF", "Disband 3A(M) ANF"]
+    expect:
+      resolutions:
+        "Disband 3A ANF": fails
+        "Disband 3A(M) ANF": fails
+      specials:
+        morgoth-unit: {province: ANF, limbo: false}
+      units:
+        MORGOTH: ["3A ANF", "A ANF"]
+
+  # -- a reference to the other special is a reference to another order ----------
+
+  - id: BATC-L2.S.31
+    title: a support naming the other special supports nothing — the attack on 3A(M) is alone
+    # "3A(M) fits only Morgoth and 3A(G) only Glaurung." The double attacks the
+    # Morgoth unit; its two supporters write supports for a Dislodge of
+    # Glaurung, an order nobody gave, so each matches nothing and Holds. The
+    # attack meets 3 with 2 and fails, and both specials stand.
+    start:
+      phase: S25M
+      units:
+        MORGOTH: ["3A ANF", "3A ANF"]
+        DORIATH: ["2A LOT", "A LAD", "A EIT"]
+      l2:
+        glaurung: ANF
+    script:
+      - phase: S25M
+        orders:
+          DORIATH:
+            - "2A LOT DIS MORGOTH 3A(M) ANF"
+            - "A LAD S DORIATH 2A LOT DIS MORGOTH 3A(G) ANF"
+            - "A EIT S DORIATH 2A LOT DIS MORGOTH 3A(G) ANF"
+    expect:
+      resolutions:
+        "2A LOT DIS MORGOTH 3A(M) ANF": fails
+        "A LAD S DORIATH 2A LOT DIS MORGOTH 3A(G) ANF": fails
+      specials:
+        glaurung: {province: ANF, limbo: false}
+        morgoth-unit: {province: ANF, limbo: false}
+      units:
+        MORGOTH: ["3A ANF", "3A ANF"]
+
+  - id: BATC-L2.S.32
+    title: the same supports naming 3A(M) carry the attack — the Morgoth unit falls
+    # Same board as S.31 with the supports naming the special the double
+    # attacks: 2 + 2 beats 3 and the Morgoth unit goes to limbo; Glaurung
+    # stands. Nothing but the designator in the supports changed.
+    start:
+      phase: S25M
+      units:
+        MORGOTH: ["3A ANF", "3A ANF"]
+        DORIATH: ["2A LOT", "A LAD", "A EIT"]
+      l2:
+        glaurung: ANF
+    script:
+      - phase: S25M
+        orders:
+          DORIATH:
+            - "2A LOT DIS MORGOTH 3A(M) ANF"
+            - "A LAD S DORIATH 2A LOT DIS MORGOTH 3A(M) ANF"
+            - "A EIT S DORIATH 2A LOT DIS MORGOTH 3A(M) ANF"
+    expect:
+      resolutions:
+        "2A LOT DIS MORGOTH 3A(M) ANF": succeeds
+        "A LAD S DORIATH 2A LOT DIS MORGOTH 3A(M) ANF": succeeds
+      specials:
+        glaurung: {province: ANF, limbo: false}
+        morgoth-unit: {province: ANF, limbo: true}
+      units:
+        MORGOTH: ["3A ANF"]
+
+  - id: BATC-L2.S.33
+    title: a support naming Glaurung's Move matches nothing when the Morgoth unit made it
+    # "3A(M) fits only Morgoth and 3A(G) only Glaurung." Both specials stand
+    # in Anfauglith; the Morgoth unit moves on Eithel Sirion and Glaurung
+    # holds. The support from Northern Ered Wethrim names a Move of Glaurung,
+    # an order nobody gave, so it matches nothing: it is invalid and fails
+    # ("... and otherwise the Unit holds"), and the Morgoth
+    # unit meets Doriath's 3A with 3 against 3 and bounces.
+    start:
+      phase: S25M
+      units:
+        MORGOTH: ["3A ANF", "3A ANF", "A NEW"]
+        DORIATH: ["3A EIT"]
+      l2:
+        glaurung: ANF
+    script:
+      - phase: S25M
+        orders:
+          MORGOTH:
+            - "3A(M) ANF - EIT"
+            - "3A(G) ANF H"
+            - "A NEW S MORGOTH 3A(G) ANF - EIT"
+          DORIATH: ["3A EIT H"]
+    expect:
+      resolutions:
+        "3A(M) ANF - EIT": fails
+        "A NEW S MORGOTH 3A(G) ANF - EIT": fails
+      specials:
+        glaurung: {province: ANF, limbo: false}
+        morgoth-unit: {province: ANF, limbo: false}
+      units:
+        MORGOTH: ["3A ANF", "3A ANF", "A NEW"]
+        DORIATH: ["3A EIT"]
+
+  - id: BATC-L2.S.34
+    title: the same support naming 3A(M) carries the Move -- Doriath's 3A falls
+    # Same board as S.33 with the support naming the special that moves: 3 + 1
+    # beats 3, the Morgoth unit enters Eithel Sirion and Doriath's 3A is
+    # dislodged; Glaurung stays in Anfauglith.
+    start:
+      phase: S25M
+      units:
+        MORGOTH: ["3A ANF", "3A ANF", "A NEW"]
+        DORIATH: ["3A EIT"]
+      l2:
+        glaurung: ANF
+    script:
+      - phase: S25M
+        orders:
+          MORGOTH:
+            - "3A(M) ANF - EIT"
+            - "3A(G) ANF H"
+            - "A NEW S MORGOTH 3A(M) ANF - EIT"
+          DORIATH: ["3A EIT H"]
+    expect:
+      resolutions:
+        "3A(M) ANF - EIT": succeeds
+        "A NEW S MORGOTH 3A(M) ANF - EIT": succeeds
+      specials:
+        glaurung: {province: ANF, limbo: false}
+        morgoth-unit: {province: EIT, limbo: false}
+      units:
+        MORGOTH: ["3A ANF", "3A EIT", "A NEW"]
+        DORIATH: []

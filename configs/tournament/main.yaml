@@ -1,0 +1,11 @@
+# Greedy heuristic vs. random baseline, 1-vs-6, rotated across every power.
+# 7 seats x 30 seeds = 210 games, clearing the 200-game floor a baseline
+# comparison is reported against.
+# Run: entente tournament configs/tournament/main.yaml
+format: one_vs_six
+agents: [greedy, random]
+seeds: { start: 0, stop: 30 }
+max_year: 1910
+ruleset: standard
+map: standard
+output: docs/results/greedy_vs_random.jsonl

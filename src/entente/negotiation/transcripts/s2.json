@@ -1,0 +1,44 @@
+{
+  "ally": "GERMANY",
+  "incoming_message": "PROPOSAL from FRANCE to GERMANY for S1901M: FRANCE orders [A PAR - BUR, F BRE - MAO, A MAR - SPA]; GERMANY orders [A MUN - RUH, F KIE - HOL, A BER H]. Burgundy's mine -- Ruhr keeps you flexible without the two of us bouncing there.",
+  "note": "Truthful: FRANCE's announced move is its actual scripted move. The classic Burgundy bounce point -- FRANCE claims it, asks GERMANY to reposition via Ruhr.",
+  "parsed_intent": {
+    "ally": "GERMANY",
+    "ally_action": [
+      "A MUN - RUH",
+      "F KIE - HOL",
+      "A BER H"
+    ],
+    "phase": "S1901M",
+    "proposer": "FRANCE",
+    "proposer_action": [
+      "A PAR - BUR",
+      "F BRE - MAO",
+      "A MAR - SPA"
+    ],
+    "rationale": "Burgundy's mine -- Ruhr keeps you flexible without the two of us bouncing there."
+  },
+  "phase": "S1901M",
+  "prediction": {
+    "baseline_mean_strategy": [
+      0.2803698608315354,
+      0.4109010377899328,
+      0.3087291013785318
+    ],
+    "baseline_probability_of_true_move": 0.2803698608315354,
+    "conditioned_mean_strategy": [
+      0.6083016036644774,
+      0.22363149213346925,
+      0.16806690420205336
+    ],
+    "conditioned_probability_of_true_move": 0.6083016036644774,
+    "true_move_index": 0
+  },
+  "proposer": "FRANCE",
+  "regenerated_message": {
+    "provider": "stub",
+    "text": "PROPOSAL from FRANCE to GERMANY for S1901M: FRANCE orders [A PAR - BUR, F BRE - MAO, A MAR - SPA]; GERMANY orders [A MUN - RUH, F KIE - HOL, A BER H]. Burgundy's mine -- Ruhr keeps you flexible without the two of us bouncing there."
+  },
+  "scenario": "s2",
+  "self_power": "ENGLAND"
+}

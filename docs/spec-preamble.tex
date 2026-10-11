@@ -1,0 +1,157 @@
+% The shared preamble of the typeset documents: docs/adjudication.tex and docs/pikl.tex.
+% Each document is \documentclass[12pt,a4paper]{article} and \input{spec-preamble}.
+%
+% Layout and idiom follow the author's own exercise solutions: 12pt on A4 with 2.5cm
+% margins, no paragraph indent and a small paragraph skip, a header line with the author's
+% name over a full-width rule, bold run-in labels ("Proof:", "Status:") instead of numbered
+% theorem boilerplate, and hidden hyperlinks.
+%
+% The source is keyboard ASCII: every glyph the PDF shows is a macro.
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[expansion=false]{microtype}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{mathtools}
+\usepackage{geometry}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage[hidelinks]{hyperref}
+\usepackage{cleveref}
+
+\geometry{margin=2.5cm}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{1ex}
+% Identifiers and paths cannot hyphenate; a little emergency stretch keeps a line with one
+% of them inside the text block instead of running into the margin.
+\setlength{\emergencystretch}{1.5em}
+% Headings are set ragged right, so a long title wraps instead of overflowing.
+\usepackage[raggedright]{titlesec}
+
+% Section numbers are a contract: the code, the tests and the decision records cite
+% "Sec. N.M" of these documents, and tests/test_spec_sections.py pins the numbering.
+% Nothing below the subsection level ever acquires a number.
+\setcounter{secnumdepth}{2}
+
+% The header block of the author's solutions: name on the left, the document's series on
+% the right, a full-width rule below. The document's title then comes as an unnumbered
+% section, the way a solution opens with its task.
+\newcommand{\specheader}[1]{%
+  \begin{Large}\noindent\textbf{Krzysztof Grabowski}\hfill #1\end{Large}\par
+  \rule{\textwidth}{1pt}\par
+  \vspace{2mm}}
+
+% Theorem-like blocks print the ids the code cites literally: Theorem T1..T4, Lemma L1..L4
+% (both counters run in order of appearance, which is the ids' order). The definition
+% style keeps the body upright, so a block reads like one of the author's bold-labelled
+% paragraphs rather than an italic theorem.
+\theoremstyle{definition}
+\newtheorem{theorem}{Theorem}
+\renewcommand{\thetheorem}{T\arabic{theorem}}
+\newtheorem{lemma}{Lemma}
+\renewcommand{\thelemma}{L\arabic{lemma}}
+\newtheorem*{definition}{Definition}
+\newtheorem*{claim}{Claim}
+\crefname{theorem}{Theorem}{Theorems}
+\Crefname{theorem}{Theorem}{Theorems}
+\crefname{lemma}{Lemma}{Lemmas}
+\Crefname{lemma}{Lemma}{Lemmas}
+
+% Run-in labels in the author's shape, "\textbf{Dowod:}" -- bold, a colon, no end mark.
+\renewenvironment{proof}[1][\proofname]{\par\noindent\textbf{#1:}\ \ignorespaces}{\par}
+\newenvironment{status}{\par\noindent\textbf{Status:}\ \ignorespaces}{\par}
+\newenvironment{note}[1][Note]{\par\noindent\begingroup\itshape(#1: \ignorespaces}{)\endgroup\par}
+
+% Repairs (R1)-(R8) and stages S1-S3 are cited by their literal ids from the code and the
+% decision records, so each id anchors itself instead of taking a counter's value: a stage
+% where Sec. 6 defines it, a repair at its entry, the eight standing in numeric order in one
+% subsection at the end of Sec. 6. \repairmark{R5} prints "(R5)" at the head of its entry,
+% and \rep{R5} cites it.
+\makeatletter
+\newcommand{\fixedlabel}[2]{\begingroup\def\@currentlabel{#2}\phantomsection\label{#1:#2}\endgroup}
+\makeatother
+\newcommand{\repairmark}[1]{\textbf{(#1)}\fixedlabel{rep}{#1}}
+\newcommand{\stagemark}[2]{\textbf{#1 -- #2}\fixedlabel{stage}{#1}}
+\newcommand{\rep}[1]{(\ref{rep:#1})}
+\newcommand{\stage}[1]{\ref{stage:#1}}
+
+% Cross-references print the way the code cites: "Sec. 4.2", "Secs. 2--4", "Lemma L1".
+\crefname{section}{Sec.}{Secs.}
+\Crefname{section}{Sec.}{Secs.}
+\crefname{subsection}{Sec.}{Secs.}
+\Crefname{subsection}{Sec.}{Secs.}
+\crefname{figure}{Figure}{Figures}
+\Crefname{figure}{Figure}{Figures}
+\newcommand{\crefrangeconjunction}{--}
+
+% Code identifiers and paths; order text in the game's own notation ("A LON - HOL").
+% Both are typewriter, never math: an order is a string a player types. A long path or
+% a dotted identifier is written with url's \path, which may break after / . _ ( , at a
+% low penalty.
+\newcommand{\code}[1]{\texttt{#1}}
+\def\UrlBreakPenalty{100}
+\def\UrlBigBreakPenalty{100}
+\newcommand{\order}[1]{\texttt{#1}}
+% Order and engine statuses.
+\newcommand{\lab}[1]{\textsc{#1}}
+
+% The calculus' operators, so that the ASCII source reads as the notation it renders.
+\DeclareMathOperator{\val}{value}
+\DeclareMathOperator{\mods}{mods}
+\DeclareMathOperator{\base}{base}
+\DeclareMathOperator{\unit}{unit}
+\DeclareMathOperator{\prov}{prov}
+\DeclareMathOperator{\pow}{pow}
+\DeclareMathOperator{\eff}{eff}
+\DeclareMathOperator{\cut}{cut}
+\DeclareMathOperator{\cutval}{cutval}
+\DeclareMathOperator{\QC}{QC}
+\DeclareMathOperator{\capa}{cap}
+\DeclareMathOperator{\hold}{hold}
+\DeclareMathOperator{\attack}{attack}
+\DeclareMathOperator{\defend}{defend}
+\DeclareMathOperator{\prevent}{prevent}
+\DeclareMathOperator{\Eval}{Eval}
+\DeclareMathOperator{\KL}{KL}
+\DeclareMathOperator{\occupants}{occupants}
+\DeclareMathOperator{\supp}{supp}
+\DeclareMathOperator{\hsupp}{hsupp}
+\DeclareMathOperator{\delivered}{delivered}
+\DeclareMathOperator{\disembark}{disembark}
+% The attributes of a unit and of an order: the state's functions on the units, the
+% province a relocating order enters, the province a support acts on, and the map's
+% terrain and supply functions.
+\DeclareMathOperator{\kind}{kind}
+\DeclareMathOperator{\loc}{loc}
+\DeclareMathOperator{\dest}{dest}
+\DeclareMathOperator{\target}{target}
+\DeclareMathOperator{\terrain}{terrain}
+\DeclareMathOperator{\supply}{supply}
+\DeclareMathOperator{\wall}{wall}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\Q}{\mathbb{Q}}
+% A strength role is a label, the argument of \mods -- never the contest function of the
+% same word (\hold is a function of a unit). Sans serif keeps the two apart on the page.
+\newcommand{\role}[1]{\mathsf{#1}}
+\newcommand{\Roles}{\mathrm{Roles}}
+\newcommand{\Powers}{\mathrm{Powers}}
+% The calculus' carrier sets: the orders, the units, the relocating orders, the supports.
+\newcommand{\Orders}{\mathcal{O}}
+\newcommand{\Units}{\mathcal{U}}
+\newcommand{\Moves}{\mathcal{M}}
+\newcommand{\Supports}{\mathcal{S}}
+% The map's sets: the locations, the fortresses, the penalized crossings, and the two
+% adjacency relations (armies between provinces, fleets between locations).
+\newcommand{\Loc}{\mathit{Loc}}
+\newcommand{\Fort}{\mathit{Fort}}
+\newcommand{\Pen}{\mathit{Pen}}
+\newcommand{\adjA}{\mathrm{adj}_{\mathrm{A}}}
+\newcommand{\adjF}{\mathrm{adj}_{\mathrm{F}}}

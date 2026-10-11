@@ -1,0 +1,42 @@
+name: Nightly
+
+on:
+  schedule:
+    - cron: "0 3 * * *"
+  workflow_dispatch:
+
+jobs:
+  # The resolver <-> enumerator differential (tests/properties/test_differential.py)
+  # at a much deeper hypothesis profile than CI pays for on every push. The two
+  # implementations must agree forever, not once, so the deep search runs on a
+  # schedule instead of being dropped (the profile mechanism is in
+  # tests/conftest.py).
+  differential-soak:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - run: uv sync --locked
+      - run: uv run pytest -m slow -q
+        env:
+          HYPOTHESIS_PROFILE: nightly
+
+  # Differential against the external AGPL `diplomacy` package: a test-time
+  # oracle only, in the `oracle` dependency group. Nothing under src/ imports it,
+  # which tests/oracle/test_isolation.py enforces, so neither its licence nor its
+  # implementation reaches this project's own code.
+  # continue-on-error: a broken or unavailable external dependency must
+  # never block the rest of nightly, and this is the only job that installs
+  # third-party runtime code from git.
+  oracle:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - run: uv sync --locked --group oracle
+      - run: uv run pytest -m oracle -q

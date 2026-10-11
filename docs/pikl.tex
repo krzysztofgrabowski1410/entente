@@ -1,0 +1,253 @@
+% !TEX program = pdflatex
+% piKL -- the specification of the KL-regularized equilibrium search, restated from the
+% paper in this project's notation. Build: uv run python scripts/build_specs.py
+% Section numbers are cited from the code and are frozen (tests/test_spec_sections.py).
+\documentclass[12pt,a4paper]{article}
+\input{spec-preamble}
+
+\begin{document}
+\specheader{entente: specification}
+
+\section*{piKL -- KL-regularized equilibrium search}
+
+\textbf{Scope.}
+This document specifies the search of the piKL agent: the KL-regularized equilibrium search of \path{src/entente/search/} and the agent that runs it over the behavioral-cloning network.
+It is written from A. P. Jacob, D. J. Wu, G. Farina, A. Lerer, H. Hu, A. Bakhtin, J. Andreas, N. Brown, \emph{Modeling Strong and Human-Like Gameplay with KL-Regularized Search}, ICML 2022, arXiv:2112.07544: the update rule, the guarantees and the hyperparameters of \crefrange{sec:3}{sec:4} and \cref{sec:7} are restated from that paper in this project's notation, and everything else -- the module boundaries, the candidate and utility constructions as implemented, the validation plan and the configuration -- is my own.
+The modules of \cref{sec:9} implement what \crefrange{sec:2}{sec:7} define.
+
+\section{Why anchored search}\label{sec:1}
+
+Behavioral cloning predicts human orders well but plays weakly; unregularized equilibrium search on a 1-ply subgame -- hedge or regret matching over sampled candidates -- plays strongly but predicts human orders poorly, and play that differs markedly from human play is hard for humans to coordinate with and to understand.
+Jacob et al.\ reconcile the two by making each player optimize its subgame utility \textbf{minus a KL penalty toward the imitation policy}.
+One knob $\lambda$ moves the agent continuously between the behavioral-cloning anchor ($\lambda \to \infty$) and the unregularized equilibrium ($\lambda \to 0$), and in their Diplomacy experiments mild regularization \emph{improves} strength rather than trading it away.
+Reproducing that tradeoff curve at small scale is this project's headline figure.
+
+\section{Setting: the 1-ply subgame}\label{sec:2}
+
+Let $\#$ be the counting measure.\\
+Fix a game state of the standard ruleset in a movement phase; the search runs in no other phase (\cref{sec:9}) and on no other ruleset.
+The reason for the second restriction is that the behavioral-cloning network, which supplies the candidates and the utilities (\cref{sec:5,sec:6}), has location tokens for the 81 locations of the standard map and for no other map.\\
+Let $n$ be the number of powers that have a unit in that state, numbered $1, \dots, n$; a power without a unit takes no part in the subgame.\\
+Let an \emph{order-set} of a power be one movement order for each of its units, all of them legal in the state.\\
+For every power $i$, let its \emph{candidate set} $A_i$ be a finite, nonempty set of its order-sets; \cref{sec:5} says how it is drawn.\\
+For every power $i$, let its \emph{anchor} $\tau_i \in \Delta(A_i)$ be the behavioral-cloning policy restricted to $A_i$ and renormalized (\cref{sec:5}); $\tau_i(a) > 0$ for every $a \in A_i$.\\
+Let a \emph{joint profile} be a tuple $a = (a_1, \dots, a_n) \in A_1 \times \dots \times A_n$, one candidate per power, and for every power $i$ let $u_i\colon A_1 \times \dots \times A_n \to [0, 1]$ be its \emph{utility}: the predicted share of the final Sum-of-Squares score that power $i$ holds after the joint profile is played (\cref{sec:6}).\\
+These data define a one-shot $n$-player normal-form game, the \emph{1-ply subgame}.
+piKL computes for every power a distribution over its candidates, its \emph{mean strategy} (\cref{sec:3}), and the agent plays its own orders from the mean strategy of its own power (\cref{sec:9}).
+
+Each power $i$ conceptually maximizes the regularized utility (paper eq.~5)
+\[
+U_i(\pi_i, \pi_{-i}) = u_i(\pi_i, \pi_{-i}) - \lambda_i \KL(\pi_i \,\|\, \tau_i), \qquad \lambda_i \in [0, \infty).
+\]
+I also admit $\lambda_i = \infty$, the limit of \cref{sec:4} at which the agent is its anchor.
+The direction of the divergence is $\KL(\pi \,\|\, \tau)$.
+The paper chooses it for ease of analysis and implementation in regret minimization, and it is the behavior I want from an anchor: it forbids $\pi$ from putting mass where $\tau$ has next to none (the paper's footnote 4 reports that the exact form of the penalty mattered less than doing any reasonable regularized search).
+
+\section{The anchored-hedge update (piKL-Hedge, paper Algorithm 1)}\label{sec:3}
+
+Let $N \ge 1$ be the number of iterations.\\
+For every power $i$ and every iteration $t \in \{0, \dots, N\}$, let $\mathrm{CV}_i^{t}\colon A_i \to \mathbb{R}$ be the \emph{cumulative action values} of power $i$ after $t$ iterations, with $\mathrm{CV}_i^{0} \equiv 0$.\\
+For every iteration $t \in \{1, \dots, N\}$ let $\eta_t > 0$ be its \emph{learning rate} (\cref{sec:7}).
+The paper's Algorithm 1 states the update with one constant rate $\eta$, and its Appendix H sets $\eta$ anew on every iteration; I write the rate of iteration $t$ into the update as $\eta_t$.\\
+Iteration $t$ does three things, for every power at once.
+\begin{enumerate}
+\item \textbf{Policy.} For every power $i$, define its \emph{iterate}
+\[
+\pi_i^{t}(a) \propto \exp\left[ \frac{\eta_t \mathrm{CV}_i^{t-1}(a) + t \lambda_i \eta_t \log \tau_i(a)}{1 + t \lambda_i \eta_t} \right], \qquad a \in A_i,
+\]
+computed as a softmax of the bracketed scores with their maximum subtracted first, so that the exponent stays finite.
+\item \textbf{Play.} For every power $i$, draw $a_i^{t} \sim \pi_i^{t}$; all powers update simultaneously in self-play.
+\item \textbf{Value update.} Every power $i$ observes the others' sampled profile $a_{-i}^{t}$ and updates \textbf{all} of its candidates:
+\[
+\mathrm{CV}_i^{t}(a) = \mathrm{CV}_i^{t-1}(a) + u_i(a, a_{-i}^{t}) \qquad \text{for each } a \in A_i.
+\]
+\end{enumerate}
+After $N$ iterations the output of power $i$ is its \emph{mean strategy} (paper eq.~7)
+\[
+\bar{\pi}_i^{N} = \frac{1}{N} \sum_{t=1}^{N} \pi_i^{t},
+\]
+and \emph{not} the final iterate: the no-regret guarantees of \cref{sec:4} attach to the average.
+Beside the mean strategies the search reports, for every power, the iterate $\pi_i^{N+1}$ that an iteration $N + 1$ would play from $\mathrm{CV}_i^{N}$, the mean utilities $\mathrm{CV}_i^{N} / N$, the number of iterations and the number of distinct joint profiles it evaluated (\code{PiklResult}).
+
+\textbf{Reading the exponent.}
+Divide the numerator and the denominator by $t \eta_t$: the exponent is $(\mathrm{CV}_i^{t-1} / t + \lambda_i \log \tau_i) / (\lambda_i + 1 / (t \eta_t))$.
+Since $\mathrm{CV}_i^{t-1} / t$ is, up to the factor $(t-1)/t$, the empirical mean utility $Q_i(a)$ of the candidate, the iterate is a softmax of $Q_i + \lambda_i \log \tau_i$ at inverse temperature $1 / (\lambda_i + 1 / (t \eta_t))$.
+As $t$ grows the learning-rate term vanishes and the policy approaches the \emph{anchored quantal response}
+\[
+\pi_i(a) \propto \tau_i(a) \cdot \exp\bigl( Q_i(a) / \lambda_i \bigr),
+\]
+the anchor reweighted exponentially by average performance, with $\lambda_i$ as the temperature.
+With a uniform anchor this is a quantal response equilibrium (McKelvey \& Palfrey 1995), which the paper notes as a special case; \code{anchored\_quantal\_response} computes it independently of the search, so that the validation of \cref{sec:8} can compare a converged mean strategy with a target it did not come from.
+
+\textbf{Update modes.}
+Algorithm 1 as stated is the \emph{sampled} update: one opponent profile is drawn per iteration, which is the only tractable choice when the joint space is large.
+In every iteration of sampled mode the search needs the utility of every one-deviation profile $(a_{-i}^{t}, a)$, $a \in A_i$, of every power $i$.
+It asks the utility oracle of \cref{sec:6} for those of them it has not been given before, all in one batch with the repeated profiles removed, and it does not call the oracle when there are none.
+It keeps every utility it has ever been given in a cache for the whole search, so that a profile is evaluated once however often the iterates revisit it.
+The search stops with an error when the oracle returns a number of results different from the number of profiles asked, a result that does not give exactly one utility for every power, or a utility that is not finite.\\
+I also implement \emph{expected} updates, $\mathrm{CV}_i^{t}(a) \mathrel{+}= \mathbb{E}_{a_{-i} \sim \pi_{-i}^{t}}\, u_i(a, a_{-i})$, which enumerate the opponents' product distribution: the whole joint product $A_1 \times \dots \times A_n$ is evaluated once up front, and every iteration feeds every power its exact expected utility vector.
+Expected updates are deterministic -- no random draw enters -- and have the same fixed points; their determinism makes the comparison of \code{run\_pikl} with the self-play driver of \code{entente.gametheory} in \cref{sec:8} exact.
+They are exponential in the number of players, so the search refuses them beyond $200{,}000$ joint profiles (\path{max_expected_profiles}), and Diplomacy always runs sampled.
+Sampled mode draws from a random generator the caller supplies (\cref{sec:9}), or from \code{random.Random(0)} when the caller supplies none, so a run is reproducible from its seed.
+
+\section{Limits and guarantees}\label{sec:4}
+
+\begin{itemize}
+\item \textbf{$\lambda \to \infty$.}
+The exponent tends to $\log \tau_i(a)$ for every $t \ge 1$, so $\pi_i^{t} = \tau_i$ exactly: the agent \emph{is} the anchor.
+$\lambda = \infty$ is a legal configuration value (\code{.inf} in YAML) and the iterate is then the renormalized anchor itself, without any arithmetic; a finite $\lambda$ so large that $t \lambda \eta_t$, or its product with the largest $\lvert \log \tau_i(a) \rvert$, overflows a double is treated the same way, since the mathematical limit is the same.
+\item \textbf{$\lambda = 0$.}
+The exponent is $\eta_t \mathrm{CV}_i^{t-1}(a)$: standard Hedge with learning rate $\eta_t$ (the paper's eqs.~3--4 state Hedge on cumulative regrets, with no learning rate written; the softmax cancels the action-independent baseline, so cumulative values and cumulative regrets induce the same policy).
+The players' joint distribution of play converges to a coarse correlated equilibrium in general, and the average policies converge to a Nash equilibrium in two-player zero-sum games.
+\item \textbf{KL bound (paper Theorem 1).}
+After $N$ iterations in any multiplayer general-sum game, $\KL(\bar{\pi}_i^{N} \,\|\, \tau_i) \le (R_i^{N} / N + D_i) / \lambda_i$, where $R_i^{N}$ is power $i$'s regret with respect to the regularized utilities and $D_i$ is any upper bound on the possible rewards of power $i$ (Proposition 1 takes an upper bound on their range).
+With sublinear regret this tends to $D_i / \lambda_i$: \textbf{the distance to the anchor shrinks like $1 / \lambda$}, which is the quantity my large-$\lambda$ tests assert (\cref{sec:8}).
+\item \textbf{Equilibrium bound (paper Theorem 2).}
+In a two-player zero-sum game every limit point of the average policies is, almost surely, a $\max_i(\lambda_i \beta_i)$-approximate Nash equilibrium of the \emph{unregularized} game, where $\beta_i = \max_a \log(1 / \tau_i(a))$ (paper eq.~21).
+So the exploitability is $O(\lambda)$ plus a finite-$N$ regret term, which is the quantity my small-$\lambda$ tests assert.
+A full-support anchor keeps $\beta_i$ finite; the candidates are drawn from the behavioral-cloning policy and every anchor probability is kept strictly positive (\cref{sec:5}), so this holds by construction.
+\item \textbf{Regret (paper Proposition 1).}
+With a constant $\eta \le 1 / (\lambda_i \beta_i + 2 D_i)$, the regret of piKL-Hedge with respect to the regularized utilities is $O(\log N)$:
+\[
+R_i^{N} \le \frac{\log \#(A_i)}{\eta} + \frac{3e(1 + \log N)}{\lambda_i \eta} \Bigl( D_i + \lambda_i \beta_i + \lambda_i \sqrt{\#(A_i)} \Bigr).
+\]
+\end{itemize}
+
+The scale of $\lambda$ is tied to the scale of the payoffs, as the paper notes in its Appendix B: by eq.~5, doubling the utility range doubles the $\lambda$ that produces the same anchoring.
+Every statement above is read, for Diplomacy, with my convention $u_i \in [0, 1]$ of \cref{sec:2}, so $D_i = 1$.
+The validation games of \cref{sec:8} keep their own payoffs, in $[-1, 1]$ for matching pennies and in $[-2, 2]$ for Kuhn poker, and the large-$\lambda$ tests of these two games assert $\KL(\bar{\pi}_i^{N} \,\|\, \tau_i) < 2 / \lambda_i$.
+
+\section{Candidate sampling (\texorpdfstring{\code{candidates.py}}{candidates.py})}\label{sec:5}
+
+The subgame is only as good as its candidate sets.
+For a power with at least one unit, \code{collect\_candidates} builds its candidate set and its anchor in five steps.
+\begin{enumerate}
+\item \textbf{Draws.}
+It asks the behavioral-cloning policy for \path{attempts} order-sets in one call -- by default $4k$, and never fewer than $k$.
+Each order-set is decoded autoregressively, one order per unit, at the configured \path{temperature} and nucleus \path{top_p} (the paper: temperature 0.5, top-p 0.95); where \path{include_greedy} is set, the first draw is the greedy (argmax) decode instead of a sample.
+Every draw is scored with its log-probability under the policy \emph{at temperature 1}: temperature and nucleus shape the sampling only, never the anchor.
+\item \textbf{Deduplication.}
+Two draws are the same order-set iff they hold the same orders; the first of them is kept with its score.
+\item \textbf{Ranking.}
+The distinct order-sets are sorted by log-probability, descending, ties broken by their written text, and the first $k$ are kept; fewer than $k$ distinct order-sets is fine, since a forced position may not have $k$ plausible ones.
+Where \path{include_greedy} is set and the greedy decode is not among the $k$, it takes the place of the $k$-th, so that the greedy decode is in every subgame.
+The greedy decode gives every unit its most probable order given the orders decoded before it; it need not be the most probable order-set.
+\item \textbf{Legality.}
+Every kept order-set is checked again: every order in it must be in \code{game.legal\_orders}, and no two of its orders may be given at one location, so that no unit receives two orders.
+The check does not ask for an order for every unit; a unit that an order-set leaves without an order holds in the successor (\cref{sec:6}).
+The decoder masks to \code{game.legal\_orders} exactly (the masking-exactness test), so a failure here is a bug upstream, and the search stops with an error rather than searching from an illegal candidate.
+\item \textbf{Anchor.}
+The anchor is the policy restricted to the kept set and renormalized, $\tau_i(a) = p_{\mathrm{BC}}(a) / \sum_{a' \in A_i} p_{\mathrm{BC}}(a')$, computed from the temperature-1 log-probabilities; a candidate whose log-probability is more than $700$ below the best one's is given the best one's log-probability minus $700$ instead, so that every $\tau_i(a)$ is strictly positive (\cref{sec:4}).
+A kept order-set whose log-probability is not finite stops \code{collect\_candidates} with an error.
+\end{enumerate}
+
+\textbf{Reweighting an anchor.}
+\code{reweight\_anchor} is the one seam through which outside information enters a subgame: it multiplies each candidate's anchor mass by a nonnegative \emph{bias} the caller supplies and renormalizes.
+A bias of 1 everywhere changes nothing, a bias above 1 favors a candidate and one below 1 disfavors it; a bias of 0 reduces a candidate to a vanishing floor of its mass rather than to zero, so that the result is a strictly positive anchor whatever the bias, and a bias of 0 everywhere gives the anchor back unchanged.
+The bias is a vector of numbers and nothing else -- never an order or an intent -- so the search stays game-agnostic; the negotiation prototype translates a parsed message into a bias before it calls.
+
+Paper scale: up to $N_c = 30$ candidates per power ($\le 3.5$ per unit), 512 iterations.
+My plan scale: $k \sim 8$--$16$ and $N \sim 64$--$256$, smaller because my compute budget is a single local GPU.
+
+\section{1-ply utility estimation (\texorpdfstring{\code{rollout.py}}{rollout.py})}\label{sec:6}
+
+The utility of a joint profile is the value network's score of the successor state, with no deeper rollout: the paper's procedure (their Sec.~4.3.1, which follows Gray et al.\ 2021, with rollout length 0 by their Table 7).
+
+Let the \emph{successor} of a joint profile be the game obtained by submitting every power's order-set to a copy of the game and adjudicating one phase (\code{branch\_game}); the engine's phase machine then passes every phase in which nobody has a decision, so the value network always sees a state where someone has one.
+That state is a retreat or an adjustment state whenever the adjudicated phase leaves some power such a decision.
+The value network was trained on movement-phase positions only, so it scores such a state outside its training distribution.
+A power absent from the profile holds with every unit.
+\code{branch\_game} branches only a movement phase, the only kind of phase in which the search runs (\cref{sec:2}); a retreat phase could not be branched in any case, since its adjudication reads the result of the movement phase before it.
+A copy made for the search carries no history and is never serialized.\\
+Let a \emph{value function} be a function from a batch of games to one mapping from powers to scores per game (\path{value_fn}).
+In production it is the behavioral-cloning value head: for a game that is not over, the softmax of its 7-power Sum-of-Squares-share prediction, which lies in $[0, 1]$ and sums to 1 over the powers; for a game that is over, the exact Sum-of-Squares scores, since the truth is at hand and the network never saw a decided board in training (\code{value\_scores}).
+The tests of \path{tests/search/test_rollout.py} pass an exact value function instead, \code{supply\_share\_value}, which scores every power by its share of the owned supply centers, and \code{rollout.py} imports no torch.\\
+\code{profile\_utility\_fn(game, powers, candidates, value\_fn)} builds the \emph{utility oracle} of one position, the function \path{ProfileUtilityFn} that the search of \cref{sec:3} calls: given a batch of joint profiles, it branches the game once per profile, scores all the successors in \textbf{one} call of the value function -- the batching seam a GPU needs -- and returns, per profile, the utility of every power in the order of \path{powers}.
+The removal of repeated profiles and the cache of evaluated ones belong to the search, not to the oracle (\cref{sec:3}): sampled play revisits profiles ever more often as the iterates concentrate, so the $O(N \sum_i \#(A_i))$ requests of a search become far fewer engine steps and network calls.
+
+\section{Hyperparameters and defaults}\label{sec:7}
+
+The agent's configuration is \code{PiklAgentConfig} (\path{search/config.py}): the checkpoint, the device, the fallback agent and the seed of \cref{sec:9}, and under \path{search} the knobs of the search itself, \code{PiklSearchConfig}.
+Of the agent's own keys, \path{device} defaults to \code{cpu}, \path{fallback} to \code{greedy} and \path{seed} to $0$, and \path{checkpoint} has no default.
+The table gives the keys of \code{PiklSearchConfig} and their defaults, against the paper's values.
+
+\begingroup\small
+\begin{tabularx}{\textwidth}{@{}l X l l@{}}
+\toprule
+Key & Meaning & Paper value & My default (\code{base.yaml}) \\
+\midrule
+\path{k} & candidates per power & $\le 30$ ($\le 3.5$ per unit) & 12 \\
+\path{attempts} & draws from the policy per power (\cref{sec:5}); $4k$ when unset & -- & 48, that is $4k$ at $k = 12$ \\
+\path{iterations} & hedge iterations $N$ & 512 & 128 \\
+\path{lam} & anchor strength $\lambda$ & $10^{-5}$ \ldots\ $10^{-1}$ & 1; the sweep sets $\{0, 0.3, 1, 3, \infty\}$ \\
+\path{eta.mode} & learning-rate schedule & adaptive & adaptive \\
+\path{eta.scale} & the scale $c$ of the adaptive schedule & $10/3$ & $10/3$ \\
+\path{eta.value} & the rate of a constant schedule & -- & unset; required in constant mode \\
+\path{temperature} & candidate sampling temperature & 0.5 & 0.5 \\
+\path{top_p} & nucleus cutoff & 0.95 & 0.95 \\
+\path{include_greedy} & keep the argmax candidate & -- & true \\
+\path{play} & how the agent plays the mean strategy: \path{sample} or \path{argmax} & sample & sample \\
+\bottomrule
+\end{tabularx}
+\endgroup
+
+Expected updates (\cref{sec:3}) are no configuration key: they are the \path{mode} argument of \code{run\_pikl}, which the agent always calls in sampled mode and the tests in either.
+
+The paper's $\lambda$ range differs from my sweep grid.
+Their utilities and mine are both scaled to $[0, 1]$, but their anchor is a far stronger policy (an imitation-learning network trained on human games, their Appendix I), and at their $\lambda = 10^{-1}$ the search already predicts human orders as accurately as the anchor (their Sec.~4.3.2).
+My sweep (\code{lambda\_sweep.yaml}) follows the grid $\{0, 0.3, 1, 3, \infty\}$, which spans KL bounds $D / \lambda \in \{\infty, 3.3, 1, 0.33, 0\}$ nats -- wide enough to expose both regimes with a weak anchor; the table above gives the paper's decades for comparison, of which its main text reports $10^{-3}$ and $10^{-1}$.
+
+\textbf{The $\eta$ schedule.}
+In adaptive mode (paper Appendix H), $\eta_t = c / (\sigma_t \sqrt{t})$ with $c$ the scale and $\sigma_t$ the population standard deviation, over the iterations $s < t$, of the expected utility $\langle \pi_i^{s}, u_i^{s} \rangle$ that the power's iterate earned in iteration $s$.
+The paper states the schedule in one sentence; this is the reading I take.
+While fewer than two iterations have run, or the spread is numerically zero (at most $10^{-12}$; constant payoffs), $\sigma_t$ is taken as 1, so that $\eta_t = c / \sqrt{t}$.\\
+Constant mode (\path{eta.mode: constant}, \path{eta.value: v}) exists for the theory-faithful choice $\eta \le 1 / (\lambda_i \beta_i + 2 D_i)$ of \cref{sec:4} and for the tests that compare the search with a learner of fixed rate (\cref{sec:8}).
+
+\section{Validation before Diplomacy (\texorpdfstring{\code{tests/search/}}{tests/search/})}\label{sec:8}
+
+The validation makes quantitative assertions on games where everything can be computed exactly, in the spirit of the paper's Blotto illustration (their Appendix B), reusing \code{entente.gametheory}.
+\begin{enumerate}
+\item \textbf{Hand-computed iterates.}
+For one power with two candidates, fed a fixed stream of utility vectors, with a constant $\eta$ and again with the adaptive schedule, the first iterates and the mean strategy are worked out by hand in the test and asserted to within $10^{-12}$ (\code{test\_pikl\_update.py}).
+This checks the arithmetic of the update: the $t \lambda \eta_t$ weight, the $1 + t \lambda \eta_t$ denominator, and that the iterate of round $t$ reads $\mathrm{CV}^{t-1}$ and not $\mathrm{CV}^{t}$.
+\item \textbf{The two limits.}
+$\lambda = 0$ gives, iterate for iterate, the plain Hedge learner of \code{entente.gametheory.regret} to within $10^{-12}$; $\lambda = \infty$ gives the anchor exactly at every iterate and as the mean, with a KL divergence of 0; a large finite $\lambda$ tempers the first iterate toward the anchor as the formula says.
+\item \textbf{Matrix games} (\code{test\_pikl\_matrix.py}, on \code{normal\_form.py}: matching pennies and rock-paper-scissors with biased or uniform anchors, and for the quantal response a $2 \times 2$ zero-sum game with uniform anchors).
+The orchestrator \code{run\_pikl} in expected mode agrees with the self-play driver of the gametheory package to within $10^{-12}$, and sampled mode is deterministic given its seed.
+At $\lambda$ near 0 the mean strategy of rock-paper-scissors is within $0.05$ of uniform in every coordinate under expected updates, and the NashConv of matching pennies under sampled updates is below $0.12$.
+At large $\lambda$ the mean strategies of matching pennies stay within $0.02$ of the anchors, and along $\lambda \in \{0.1, 0.3, 1, 3, 10\}$ the KL divergence of the mean strategy of rock-paper-scissors to its anchor does not increase by more than $10^{-6}$ from one $\lambda$ to the next.
+The mean play at a fixed $\lambda$ is within $0.02$ of the anchored quantal response computed independently (\cref{sec:3}).
+\item \textbf{Kuhn poker} (\code{test\_pikl\_kuhn.py}, on \code{kuhn.py} and \code{exploitability.py}).
+Each player's pure strategies -- the deterministic maps from information sets to actions -- are the candidate sets, the exact expected payoffs over the six deals are the utility oracle, and the piKL mixture over pure strategies is converted to a behavioral strategy (Kuhn's theorem) and scored with the existing best-response exploitability; the reduction is checked first, the normal-form and the tree scores agreeing to within $10^{-9}$.
+At $\lambda$ near 0 the game value is within $0.03$ of $-1/18$ and the exploitability is below $0.05$; at large $\lambda$ the mean strategy stays within $0.03$ of a full-support anchor on every information set, within the bound of Theorem 1 (\cref{sec:4}).
+\item \textbf{The anchor seam.}
+\code{reweight\_anchor} tilts and renormalizes as \cref{sec:5} says, is the identity for a bias of 1 everywhere, gives the anchor back for a bias of 0 everywhere, lets a growing boost dominate, and rejects a bias of the wrong length or a negative one (\code{test\_pikl\_reweight.py}).
+\end{enumerate}
+Only with these green does piKL touch Diplomacy (\code{pikl\_agent.py}), where no exact oracle exists.
+
+\section{Module map}\label{sec:9}
+
+\begingroup\small
+\begin{tabularx}{\textwidth}{@{}l X@{}}
+\toprule
+Module & Role \\
+\midrule
+\code{search/pikl.py} & \crefrange{sec:3}{sec:4}: \code{AnchoredHedge}, one power's state and update; \code{run\_pikl}, the simultaneous search of all powers over a utility oracle, with the cache and both update modes; \code{reweight\_anchor}; \code{anchored\_quantal\_response} \\
+\code{search/candidates.py} & \cref{sec:5}: \code{collect\_candidates} over a \code{CandidatePolicy} -- draws, deduplication, ranking, legality, the anchor \\
+\code{search/rollout.py} & \cref{sec:6}: \code{branch\_game}, \code{profile\_utility\_fn}, a torch-free supply-share value function for tests \\
+\code{search/config.py} & \cref{sec:7}: the configuration models of the agent, the search and the sweep, against which the committed YAML files are validated \\
+\code{agents/pikl\_agent.py} & the agent (below): the behavioral-cloning policy as \code{CandidatePolicy}, its value head as value function, the configuration applied \\
+\code{scripts/run\_lambda\_sweep.py} & the sweep of \cref{sec:7}: piKL in one seat against six anchor opponents, per $\lambda$, written as JSONL, from which the strength and agreement curves regenerate \\
+\bottomrule
+\end{tabularx}
+\endgroup
+
+\textbf{The agent.}
+\code{PiklAgent} plays a power as follows.
+In a phase that is not a movement phase it plays the \path{fallback} agent's orders, since the anchor policy is defined only where the behavioral-cloning policy is.
+In a movement phase it draws a candidate set for \emph{every} power that has a unit (\cref{sec:5}), builds the utility oracle of the position (\cref{sec:6}), runs the search in sampled mode for \path{iterations} iterations (\cref{sec:3}), and plays from the mean strategy of its own power: a draw from it when \path{play} is \path{sample}, its mode when \path{play} is \path{argmax}.
+Every power of the subgame is searched with the configured \path{lam} as its $\lambda_i$ and the configured \path{eta} as its learning-rate schedule.
+Candidate sampling, the opponents' draws inside the search and the final draw share one random generator, seeded from the configured \path{seed}, the phase tag and the power, so that a decision replays exactly.\\
+\code{search/pikl.py} is game-agnostic on purpose -- players are indices and candidates are opaque -- so the same code path is exercised by the exact-oracle tests of \cref{sec:8} and by Diplomacy, and the validation validates the production update rule.
+
+\end{document}

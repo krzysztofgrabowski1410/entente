@@ -1,0 +1,255 @@
+# BATC section F -- convoys: Double-Fleet capability, sea-Area chains,
+# disruption by Dislodge, and the rulebook's own Szykman rule.
+# Rulebook: "Fleets" ("In order to Convoy a Double Army, a Double Fleet is
+# needed"), "Paradoxes resolve" 4.A.1-B / 4.A.2-F.
+section: "BATC F. Convoys and Double Fleets"
+ruleset: beleriand
+cases:
+  - id: BATC.F.1
+    title: the rulebook convoy example, a double fleet carries a double army
+    # "2F(BoB) cnv 2A(CBB)-Arv."
+    phase: S25M
+    units:
+      TELERI: ["2F BOB", "2A CBB"]
+    orders:
+      TELERI: ["2F BOB C 2A CBB - ARV", "2A CBB - ARV via convoy"]
+    expect:
+      resolutions:
+        "2F BOB C 2A CBB - ARV": succeeds
+        "2A CBB - ARV via convoy": succeeds
+      units:
+        TELERI: ["2F BOB", "2A ARV"]
+
+  - id: BATC.F.2
+    title: a single fleet cannot carry a double army at all
+    # No capable chain exists, so the move is not even a convoy attempt --
+    # both orders are illegal and the units hold (docs/adjudication.tex
+    # Sec. 3.5, 4.E.1 buckets).
+    phase: S25M
+    units:
+      TELERI: ["F BOB", "2A CBB"]
+    orders:
+      TELERI: ["F BOB C 2A CBB - ARV", "2A CBB - ARV via convoy"]
+    expect:
+      resolutions:
+        "F BOB C 2A CBB - ARV": fails
+        "2A CBB - ARV via convoy": fails
+      units:
+        TELERI: ["F BOB", "2A CBB"]
+
+  - id: BATC.F.3
+    title: one weak link breaks a two-sea chain for a double army
+    # NBE holds a double fleet but SBE only a single: no capable chain from
+    # Northern Lammoth to South Falas, the double army stays ashore.
+    phase: S25M
+    units:
+      TELERI: ["2F NBE", "F SBE", "2A NLA"]
+    orders:
+      TELERI: ["2F NBE C 2A NLA - SFA", "F SBE C 2A NLA - SFA", "2A NLA - SFA via convoy"]
+    expect:
+      resolutions:
+        "2F NBE C 2A NLA - SFA": fails
+        "F SBE C 2A NLA - SFA": fails
+        "2A NLA - SFA via convoy": fails
+      units:
+        TELERI: ["2F NBE", "F SBE", "2A NLA"]
+
+  - id: BATC.F.4
+    title: double fleets in both seas complete the chain
+    phase: S25M
+    units:
+      TELERI: ["2F NBE", "2F SBE", "2A NLA"]
+    orders:
+      TELERI: ["2F NBE C 2A NLA - SFA", "2F SBE C 2A NLA - SFA", "2A NLA - SFA via convoy"]
+    expect:
+      resolutions:
+        "2F NBE C 2A NLA - SFA": succeeds
+        "2F SBE C 2A NLA - SFA": succeeds
+        "2A NLA - SFA via convoy": succeeds
+      units:
+        TELERI: ["2F NBE", "2F SBE", "2A SFA"]
+
+  - id: BATC.F.5
+    title: sea areas stack fleets and the capable one carries
+    # Both fleets share the Bay of Balar (a capacity-6 sea Area); the
+    # single fleet's convoy of the double army is illegal, the double
+    # fleet's is valid and used.
+    phase: S25M
+    units:
+      TELERI: ["F BOB", "2F BOB", "2A CBB"]
+    orders:
+      TELERI: ["F BOB C 2A CBB - ARV", "2F BOB C 2A CBB - ARV", "2A CBB - ARV via convoy"]
+    expect:
+      resolutions:
+        "F BOB C 2A CBB - ARV": fails
+        "2F BOB C 2A CBB - ARV": succeeds
+        "2A CBB - ARV via convoy": succeeds
+      units:
+        TELERI: ["F BOB", "2F BOB", "2A ARV"]
+
+  - id: BATC.F.6
+    title: dislodging the convoying fleet disrupts the convoy
+    # In sea Areas only a targeted Dislodge kills a fleet: three Finrod
+    # fleets throw the Teleri double fleet out of South Belegaer and the
+    # convoyed army stays home (4.A.1 choice B: all routes disrupted).
+    phase: S25M
+    units:
+      TELERI: ["2F SBE", "2A SFA"]
+      FINROD: ["F NBE", "F EGL", "F SWB"]
+    orders:
+      TELERI: ["2F SBE C 2A SFA - ARV", "2A SFA - ARV via convoy"]
+      FINROD:
+        - "F NBE DIS TELERI 2F SBE"
+        - "F EGL S F NBE DIS TELERI 2F SBE"
+        - "F SWB S F NBE DIS TELERI 2F SBE"
+    expect:
+      resolutions:
+        "F NBE DIS TELERI 2F SBE": succeeds
+        "2F SBE C 2A SFA - ARV": fails
+        "2A SFA - ARV via convoy": fails
+      dislodged: ["TELERI 2F SBE"]
+      units:
+        TELERI: ["2A SFA"]
+        FINROD: ["F SBE", "F EGL", "F SWB"]
+
+  - id: BATC.F.7
+    title: the self-protecting convoy paradox resolves by Szykman
+    # The landing at Arvenien would cut the support that dislodges the
+    # convoying fleet -- two stable outcomes, so the rulebook's 4.A.2
+    # choice F applies: the convoyed move fails, delivers no cut, the
+    # fleet falls.
+    phase: S25M
+    units:
+      TELERI: ["2F SBE", "2A SFA"]
+      FINROD: ["F NBE", "F ARV", "F EGL"]
+    orders:
+      TELERI: ["2F SBE C 2A SFA - ARV", "2A SFA - ARV via convoy"]
+      FINROD:
+        - "F NBE DIS TELERI 2F SBE"
+        - "F ARV S F NBE DIS TELERI 2F SBE"
+        - "F EGL S F NBE DIS TELERI 2F SBE"
+    expect:
+      resolutions:
+        "2A SFA - ARV via convoy": fails
+        "F NBE DIS TELERI 2F SBE": succeeds
+        "F ARV S F NBE DIS TELERI 2F SBE": succeeds
+        "F EGL S F NBE DIS TELERI 2F SBE": succeeds
+        "2F SBE C 2A SFA - ARV": fails
+      dislodged: ["TELERI 2F SBE"]
+      units:
+        TELERI: ["2A SFA"]
+        FINROD: ["F SBE", "F ARV", "F EGL"]
+
+  - id: BATC.F.8
+    title: no other power may convoy Morgoth's units
+    # Rulebook: "No Morgoth's Unit may be on the Sea or Convoyed by other
+    # Powers" -- a static movement rule, not an Ulmo timer. With no capable
+    # chain the pair is illegal and both units hold, exactly the F.2 shape.
+    phase: S25M
+    units:
+      TELERI: ["F NBE"]
+      MORGOTH: ["A NLA"]
+    orders:
+      TELERI: ["F NBE C A NLA - BRI"]
+      MORGOTH: ["A NLA - BRI via convoy"]
+    expect:
+      resolutions:
+        "F NBE C A NLA - BRI": fails
+        "A NLA - BRI via convoy": fails
+      units:
+        TELERI: ["F NBE"]
+        MORGOTH: ["A NLA"]
+
+  - id: BATC.F.9
+    title: the identical convoy carries a non-Morgoth army (control for F.8)
+    phase: S25M
+    units:
+      TELERI: ["F NBE", "A NLA"]
+    orders:
+      TELERI: ["F NBE C A NLA - BRI", "A NLA - BRI via convoy"]
+    expect:
+      resolutions:
+        "F NBE C A NLA - BRI": succeeds
+        "A NLA - BRI via convoy": succeeds
+      units:
+        TELERI: ["F NBE", "A BRI"]
+
+  - id: BATC.F.10
+    title: a second convoying fleet in the supporter's sea completes the chain (DATC 6.D.31)
+    # A support of a convoyed Move is valid iff the fleets on the board could
+    # carry the army without the supporter: F SBE (supporting) is left out,
+    # not its sea. F NBE and the twin F SBE (convoying) still link BRI to EGL,
+    # so the support stands and 2 > 1 dislodges A EGL.
+    phase: S25M
+    units:
+      TELERI: ["A BRI", "F NBE", "F SBE", "F SBE"]
+      FINROD: ["A EGL"]
+    orders:
+      TELERI:
+        - "A BRI - EGL via convoy"
+        - "F NBE C A BRI - EGL"
+        - "F SBE C A BRI - EGL"
+        - "F SBE S A BRI - EGL"
+      FINROD: ["A EGL H"]
+    expect:
+      resolutions:
+        "A BRI - EGL via convoy": succeeds
+        "F SBE S A BRI - EGL": succeeds
+      dislodged: ["FINROD A EGL"]
+
+  - id: BATC.F.11
+    title: the only other fleet is the twin in the supporter's sea (DATC 6.D.31)
+    # F NBE convoys and its twin F NBE supports; the twin is equal as a value
+    # but a different unit, so only the supporter is left out and the
+    # convoying fleet still carries A BRI to LAM.
+    phase: S25M
+    units:
+      TELERI: ["A BRI", "F NBE", "F NBE"]
+      DORIATH: ["A LAM"]
+    orders:
+      TELERI:
+        - "A BRI - LAM via convoy"
+        - "F NBE C A BRI - LAM"
+        - "F NBE S A BRI - LAM"
+      DORIATH: ["A LAM H"]
+    expect:
+      resolutions:
+        "A BRI - LAM via convoy": succeeds
+        "F NBE S A BRI - LAM": succeeds
+      dislodged: ["DORIATH A LAM"]
+
+  - id: BATC.F.12
+    title: the other fleet cannot carry the cargo, so the support still fails (DATC 6.D.31)
+    # A Double Army needs a Double Fleet (Sec. 3.5). The supporting 2F NBE is
+    # the only fleet able to carry 2A BRI; the single F NBE beside it cannot.
+    # Without the supporter no chain remains, so the support is invalid.
+    phase: S25M
+    units:
+      TELERI: ["2A BRI", "2F NBE", "F NBE"]
+      DORIATH: ["A LAM"]
+    orders:
+      TELERI:
+        - "2A BRI - LAM via convoy"
+        - "2F NBE S 2A BRI - LAM"
+        - "F NBE H"
+      DORIATH: ["A LAM H"]
+    expect:
+      resolutions:
+        "2F NBE S 2A BRI - LAM": fails
+
+  - id: BATC.F.13
+    title: two identical fleets in one sea, one convoys and one supports (DATC 6.D.31)
+    # The same sea holds a capable fleet besides the supporter: valid.
+    phase: S25M
+    units:
+      TELERI: ["A BRI", "F NBE", "F NBE"]
+      DORIATH: ["A LAM"]
+    orders:
+      TELERI:
+        - "A BRI - LAM via convoy"
+        - "F NBE S A BRI - LAM"
+        - "F NBE C A BRI - LAM"
+      DORIATH: ["A LAM H"]
+    expect:
+      resolutions:
+        "F NBE S A BRI - LAM": succeeds

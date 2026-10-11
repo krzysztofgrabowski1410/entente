@@ -1,0 +1,515 @@
+# BATC-L2 section F -- power restrictions: the support bans (elves and Morgoth
+# never support each other; the Feanorian<->other-elvish ban; the power-level
+# Anfauglith ban on Feanorian support), the Teleri fleet-shortage disorder, the
+# Gondolin shield (rulebook "Elven Powers", "Feanorian Powers", "Teleri",
+# "Gondolin").
+#
+# The rulebook's support clauses: "None of the elven power can support or be
+# supported by Morgoth." ("Elven Powers") and "Any Power with Unit in
+# Anfauglith may not be Supported by Feanorian Powers." ("Feanorian Powers").
+# F.1-F.3 are the Feanorian<->other-elvish ban and the Anfauglith bite; F.4 is
+# the no-Anfauglith control; F.8-F.14 cover the elven/Morgoth bans and the
+# power-level Anfauglith ban, hand-derived under the directed crossing table.
+#
+# The Gondolin shield falls on the shield double's WRITTEN Move/Dislodge order,
+# whether or not it succeeds, not on the double actually leaving GON: F.6 is
+# the same-phase capture, F.15-F.17 the discriminating bounce case, the Hold
+# control, and the following-Autumn disband/ownership follow-through (a
+# separate case -- see F.6's comment for why). F.7 is the Men-adjacency lift.
+section: "BATC-L2 F. Power restrictions"
+cases:
+  - id: BATC-L2.F.1
+    title: a Feanorian support of another elven power is invalid outside Anfauglith
+    start:
+      phase: S25M
+      units:
+        FINROD: ["A LAD"]
+        FEANORIANS: ["A DNN"]
+        MORGOTH: ["A AEL"]
+    script:
+      - phase: S25M
+        orders:
+          FINROD: ["A LAD - AEL"]
+          FEANORIANS: ["A DNN S FINROD A LAD - AEL"]
+    expect:
+      resolutions:
+        "A LAD - AEL": fails
+        "A DNN S FINROD A LAD - AEL": fails
+      units:
+        MORGOTH: ["A AEL"]
+
+  - id: BATC-L2.F.2
+    title: a power with a unit in Anfauglith may NOT be supported by the Feanorians
+    # The rulebook reads "Any Power with Unit in Anfauglith may not be Supported
+    # by Feanorian Powers." -- there is no exception unlocking Feanorian support
+    # of a subject standing in Anfauglith. The Feanorian support of FINGOLFIN
+    # (both elvish) is Phase-0 invalid with no exception, so Fingolfin defends
+    # alone.
+    # Crossings: every order here projects INTO ANF, a capacity-6 Area, and no
+    # penalized crossing enters an Area -- so the ANG->ANF dislodge and the
+    # HIT-ANF->ANF support both land whole. Attack 1 + 1 = 2 exceeds the lone
+    # hold 1 (the invalid Feanorian support adds nothing), so the dislodge
+    # carries and Fingolfin retreats. (Were the support counted: defense
+    # 1 + 1 = 2, the dislodge would NOT exceed it, and Fingolfin would hold at
+    # F25M.)
+    start:
+      phase: S25M
+      units:
+        FINGOLFIN: ["A ANF"]
+        FEANORIANS: ["A LAD"]
+        MORGOTH: ["A ANG", "A HIT-ANF"]
+    script:
+      - phase: S25M
+        orders:
+          FINGOLFIN: ["A ANF H"]
+          FEANORIANS: ["A LAD S FINGOLFIN A ANF"]
+          MORGOTH:
+            - "A ANG DIS FINGOLFIN A ANF"
+            - "A HIT-ANF S A ANG DIS FINGOLFIN A ANF"
+    expect:
+      resolutions:
+        "A ANG DIS FINGOLFIN A ANF": succeeds
+        "A LAD S FINGOLFIN A ANF": fails
+      phase: S25R
+
+  - id: BATC-L2.F.3
+    title: an elven support of a Feanorian unit is invalid — no exception
+    start:
+      phase: S25M
+      units:
+        FEANORIANS: ["A DNN"]
+        FINROD: ["A LAD"]
+        MORGOTH: ["A ANF", "A AEL"]
+    script:
+      - phase: S25M
+        orders:
+          FEANORIANS: ["A DNN H"]
+          FINROD: ["A LAD S FEANORIANS A DNN"]
+          MORGOTH: ["A ANF - DNN", "A AEL S A ANF - DNN"]
+    expect:
+      resolutions:
+        "A LAD S FEANORIANS A DNN": fails
+        "A ANF - DNN": succeeds
+      phase: S25R
+
+  - id: BATC-L2.F.4
+    title: Feanorian supports of non-elvish powers are unrestricted — the no-Anfauglith control
+    # Control for the power-level Anfauglith ban: NAUGRIM holds NO unit in
+    # Anfauglith, so a Feanorian support of a NAUGRIM subject stays valid.
+    # Contrast BATC-L2.F.12, where the same support is void because that power
+    # keeps a unit in ANF.
+    # (The Feanorian supporter stands in BEL and the mannish pair in THA/NOS:
+    # all three reach DOL on the board, ELA does not.)
+    start:
+      phase: S25M
+      units:
+        # The Feanorian support projects BEL->DOL, an unpenalized crossing,
+        # so it lands whole; the mannish pair projects THA->DOL and NOS->DOL,
+        # both penalized directions (supports read supporter -> subject
+        # target), so the attack is 1/2 + 1/2 = 1 against hold 1 + 1 = 2.
+        # The dwarf stands, and the fact under test is the Feanorian
+        # support's own delivery -- under a symmetric table the attack would
+        # come in whole and the support would be the deciding vote.
+        NAUGRIM: ["A DOL"]
+        FEANORIANS: ["A BEL"]
+        MEN: ["A THA", "A NOS"]
+    script:
+      - phase: S25M
+        orders:
+          NAUGRIM: ["A DOL H"]
+          FEANORIANS: ["A BEL S NAUGRIM A DOL"]
+          MEN: ["A THA - DOL", "A NOS S A THA - DOL"]
+    expect:
+      resolutions:
+        "A BEL S NAUGRIM A DOL": succeeds
+        "A THA - DOL": fails
+      units:
+        NAUGRIM: ["A DOL"]
+
+  - id: BATC-L2.F.5
+    title: more armies than fleets — the seeded pick stands in disorder
+    # The pick is seed-dependent: fifteen Ulmo dice are drawn at construction
+    # before the first randrange(2), which under seed 0 is 0.
+    # Verified, not copied: the pick gate needs armies(2) > fleets(1) and
+    # draws from the armies in state order [A BRI, A SFA] -- index 0 is the
+    # army A BRI, whose order is invalidated while A SFA's move proceeds.
+    seed: 0
+    start:
+      phase: S25M
+      units:
+        TELERI: ["A BRI", "A SFA", "F EGL"]
+    script:
+      - phase: S25M
+        orders:
+          TELERI: ["A SFA - SWB", "A BRI - NFA"]
+    expect:
+      resolutions:
+        "A SFA - SWB": succeeds
+        "A BRI - NFA": fails
+      events: ["TELERI A BRI stands in disorder (more armies than fleets)"]
+      units:
+        TELERI: ["A BRI", "A SWB", "F EGL"]
+
+  - id: BATC-L2.F.6
+    title: the Gondolin shield falls on the written order — a same-phase capture succeeds
+    # Rulebook "Gondolin": "Until 2A(Gon) is Ordered an Order that changes its
+    # location (whether or not the Order succeeds) ... no other Power may
+    # Attack Gondolin Province." The sortie's own written order lifts the
+    # shield inside `preprocess_movement`, before Phase 0 sees FINROD's
+    # attack, so both orders resolve together in the SAME phase. (A shield
+    # that fell only once the ledger double actually left GON would need two
+    # phases here: Spring's "A TOL - GON" would FAIL and only Fall's
+    # re-submission would succeed.) (BATC-L2.F.17 continues this exact
+    # scenario through the following Autumn for the ownership flip and the
+    # bound-double disband -- a separate case because the L2 runner only
+    # asserts resolutions/events against the LAST adjudicated record, and
+    # that phase transition is a different one from the capture itself.)
+    # (Crossings: the sortie 2A GON - DIM rides the free direction -- the
+    # penalty reads DIM->GON -- and enters empty DIM at a whole 2; the
+    # capture A TOL - GON climbs the penalized TOL->GON at 1/2, which an
+    # entry into vacated GON never notices. Only the shield decides both
+    # verdicts.)
+    start:
+      phase: S25M
+      units:
+        GONDOLIN: ["2A GON"]
+        FINROD: ["A TOL"]
+    script:
+      - phase: S25M
+        orders:
+          GONDOLIN: ["2A GON - DIM"]
+          FINROD: ["A TOL - GON"]
+    expect:
+      resolutions:
+        "2A GON - DIM": succeeds
+        "A TOL - GON": succeeds
+      gondolin_shield: false
+      events: ["GONDOLIN's shield is lifted (the double army ordered out of Gondolin)"]
+      units:
+        FINROD: ["A GON"]
+        GONDOLIN: ["2A DIM"]
+
+  - id: BATC-L2.F.7
+    title: a mannish unit adjacent to Gondolin lifts the shield
+    start:
+      phase: S25M
+      units:
+        GONDOLIN: ["2A GON"]
+        MEN: ["A DIM"]
+    script:
+      - phase: S25M
+    expect:
+      gondolin_shield: false
+      events: ["GONDOLIN's shield is lifted (a mannish unit stands adjacent)"]
+
+  # -- The elven/Morgoth support bans (rulebook "Elven Powers") --
+
+  - id: BATC-L2.F.8
+    title: a non-Feanorian elven support of a Morgoth unit is invalid — no elf supports Morgoth
+    # Rulebook "Elven Powers": "None of the elven power can support or be
+    # supported by Morgoth." FINROD backing Morgoth's dislodge is Phase-0
+    # invalid (the first ban), so the attack loses that support.
+    # Crossings: ANG->ANF targets the capacity-6 ANF Area -- no penalized
+    # crossing enters an Area -- so the dislodge is a whole 1; the invalid
+    # LAD->ANF support adds nothing. Attack 1 does not exceed the hold 1, and
+    # Fingolfin stands. (Contrast F.2, where Morgoth's OWN support makes it 2.)
+    start:
+      phase: S25M
+      units:
+        FINGOLFIN: ["A ANF"]
+        FINROD: ["A LAD"]
+        MORGOTH: ["A ANG"]
+    script:
+      - phase: S25M
+        orders:
+          FINGOLFIN: ["A ANF H"]
+          FINROD: ["A LAD S MORGOTH A ANG DIS FINGOLFIN A ANF"]
+          MORGOTH: ["A ANG DIS FINGOLFIN A ANF"]
+    expect:
+      resolutions:
+        "A ANG DIS FINGOLFIN A ANF": fails
+        "A LAD S MORGOTH A ANG DIS FINGOLFIN A ANF": fails
+      units:
+        FINGOLFIN: ["A ANF"]
+      phase: F25M
+
+  - id: BATC-L2.F.9
+    title: a Feanorian support of a Morgoth unit is invalid — the ban reaches the Feanorians too
+    # The same "None of the elven power can support ... Morgoth" clause (the
+    # first ban) binds the Feanorians. A Feanorian-only rule would ALLOW this
+    # support (Morgoth is not elvish); the first ban voids it before the
+    # Feanorian branch is reached.
+    # Crossings: the pair projects DNN->ANF and LOT->ANF, both into the
+    # capacity-6 ANF Area -- free -- so the attack is a whole 1 + 1 = 2. With
+    # the Feanorian support void, Morgoth defends at the bare hold 1; 2 > 1, so
+    # Morgoth is dislodged. (Were the illegal support counted, defense 2 would
+    # hold.)
+    start:
+      phase: S25M
+      units:
+        MORGOTH: ["A ANF"]
+        FEANORIANS: ["A LAD"]
+        FINGOLFIN: ["A DNN", "A LOT"]
+    script:
+      - phase: S25M
+        orders:
+          MORGOTH: ["A ANF H"]
+          FEANORIANS: ["A LAD S MORGOTH A ANF"]
+          FINGOLFIN:
+            - "A DNN DIS MORGOTH A ANF"
+            - "A LOT S A DNN DIS MORGOTH A ANF"
+    expect:
+      resolutions:
+        "A DNN DIS MORGOTH A ANF": succeeds
+        "A LAD S MORGOTH A ANF": fails
+      phase: S25R
+
+  - id: BATC-L2.F.10
+    title: a Morgoth support of an elven unit is invalid — the ban's other direction
+    # Rulebook "Elven Powers": "None of the elven power can support or be
+    # supported by Morgoth." Morgoth may not support an elvish unit (the second
+    # ban); his backing of FINROD's move is Phase-0 invalid.
+    # Crossings: DNN->AEL and the (invalid) LAD->AEL support are both free --
+    # AEL is a capacity-1 province but neither crossing is in the table.
+    # FINROD attacks at the bare 1; 1 does not exceed FINGOLFIN's hold 1, so the
+    # move bounces and FINGOLFIN stands. (Morgoth supporting MEN/NAUGRIM stays
+    # legal -- see F.11.)
+    start:
+      phase: S25M
+      units:
+        FINGOLFIN: ["A AEL"]
+        FINROD: ["A DNN"]
+        MORGOTH: ["A LAD"]
+    script:
+      - phase: S25M
+        orders:
+          FINGOLFIN: ["A AEL H"]
+          FINROD: ["A DNN - AEL"]
+          MORGOTH: ["A LAD S FINROD A DNN - AEL"]
+    expect:
+      resolutions:
+        "A DNN - AEL": fails
+        "A LAD S FINROD A DNN - AEL": fails
+      units:
+        FINGOLFIN: ["A AEL"]
+      phase: F25M
+
+  - id: BATC-L2.F.11
+    title: a Morgoth support of a mannish unit is valid — the ban names elves only
+    # Control for the second ban: the "elven power ... support or be supported
+    # by Morgoth" ban is silent on Men and Naugrim, so Morgoth backing a MEN unit
+    # is valid and counts. Morgoth supporting MEN or NAUGRIM stays legal.
+    # Crossings: ANG->ANF (the support) and the FINROD pair DNN->ANF, LOT->ANF
+    # all target the capacity-6 ANF Area -- free. FINROD attacks at
+    # 1 + 1 = 2; MEN defends at hold 1 + Morgoth's whole support 1 = 2. 2 does not
+    # exceed 2, so MEN holds -- Morgoth's support was the deciding vote.
+    start:
+      phase: S25M
+      units:
+        MEN: ["A ANF"]
+        MORGOTH: ["A ANG"]
+        FINROD: ["A DNN", "A LOT"]
+    script:
+      - phase: S25M
+        orders:
+          MEN: ["A ANF H"]
+          MORGOTH: ["A ANG S MEN A ANF"]
+          FINROD:
+            - "A DNN DIS MEN A ANF"
+            - "A LOT S A DNN DIS MEN A ANF"
+    expect:
+      resolutions:
+        "A ANG S MEN A ANF": succeeds
+        "A DNN DIS MEN A ANF": fails
+      units:
+        MEN: ["A ANF"]
+      phase: F25M
+
+  - id: BATC-L2.F.12
+    title: a Feanorian support of a power holding a unit in Anfauglith is invalid — the power-level bite
+    # The Feanorian Anfauglith clause is power-level (the fourth ban): a power
+    # keeping ANY unit in Anfauglith is unsupportable by the Feanorians, even for
+    # a subject standing elsewhere. MEN keeps A ANF, so the Feanorian support of
+    # the OTHER mannish unit (A DNN, outside ANF) is Phase-0 invalid. Contrast
+    # F.4, where the same Feanorian->Men support is valid because Men hold no
+    # ANF unit.
+    # Crossings: the Morgoth attack projects EGO->DNN and POA->DNN,
+    # both free (no crossing enters DNN), for a whole 1 + 1 = 2; the (invalid)
+    # LAD->DNN support is free too but adds nothing. MEN A DNN defends at the bare
+    # hold 1; 2 > 1, so it is dislodged. (The idle MEN A ANF is the trigger.)
+    start:
+      phase: S25M
+      units:
+        MEN: ["A DNN", "A ANF"]
+        FEANORIANS: ["A LAD"]
+        MORGOTH: ["A EGO", "A POA"]
+    script:
+      - phase: S25M
+        orders:
+          MEN:
+            - "A DNN H"
+            - "A ANF H"
+          FEANORIANS: ["A LAD S MEN A DNN"]
+          MORGOTH:
+            - "A EGO - DNN"
+            - "A POA S MORGOTH A EGO - DNN"
+    expect:
+      resolutions:
+        "A EGO - DNN": succeeds
+        "A LAD S MEN A DNN": fails
+      phase: S25R
+
+  - id: BATC-L2.F.13
+    title: a mannish support of a Morgoth unit is valid — the ban names elves only
+    # Control for the first ban: only the elven powers are barred from
+    # supporting Morgoth, so a MEN support of a Morgoth unit is valid and counts.
+    # Men and Naugrim supporters stay unrestricted in every direction.
+    # Crossings: LAD->ANF (the support) and the FINROD pair DNN->ANF, LOT->ANF
+    # all target the capacity-6 ANF Area -- free. FINROD attacks at
+    # 1 + 1 = 2; Morgoth defends at hold 1 + MEN's whole support 1 = 2. 2 does not
+    # exceed 2, so Morgoth holds -- the mannish support was the deciding vote.
+    start:
+      phase: S25M
+      units:
+        MORGOTH: ["A ANF"]
+        MEN: ["A LAD"]
+        FINROD: ["A DNN", "A LOT"]
+    script:
+      - phase: S25M
+        orders:
+          MORGOTH: ["A ANF H"]
+          MEN: ["A LAD S MORGOTH A ANF"]
+          FINROD:
+            - "A DNN DIS MORGOTH A ANF"
+            - "A LOT S A DNN DIS MORGOTH A ANF"
+    expect:
+      resolutions:
+        "A LAD S MORGOTH A ANF": succeeds
+        "A DNN DIS MORGOTH A ANF": fails
+      units:
+        MORGOTH: ["A ANF"]
+      phase: F25M
+
+  - id: BATC-L2.F.14
+    title: a Feanorian self-support is valid even while a Feanorian unit stands in Anfauglith
+    # The self-support exemption: self-support short-circuits before the
+    # power-level Anfauglith ban (the fourth ban), so the Feanorians may back
+    # their own units even while FEANORIANS A ANF makes the trigger condition
+    # true -- a literal "Any Power with Unit in Anfauglith" reading would
+    # wrongly void this.
+    # Crossings: the Morgoth attack projects AEL->LAD and LOT->LAD,
+    # both free (only ANF->LAD is penalized into LAD), for a whole 1 + 1 = 2; the
+    # self-support projects DNN->LAD, also free, so LAD defends at hold 1 + 1 = 2.
+    # 2 does not exceed 2, so LAD holds -- the exempt self-support was decisive.
+    start:
+      phase: S25M
+      units:
+        FEANORIANS: ["A LAD", "A DNN", "A ANF"]
+        MORGOTH: ["A AEL", "A LOT"]
+    script:
+      - phase: S25M
+        orders:
+          FEANORIANS:
+            - "A LAD H"
+            - "A DNN S FEANORIANS A LAD"
+            - "A ANF H"
+          MORGOTH:
+            - "A AEL - LAD"
+            - "A LOT S MORGOTH A AEL - LAD"
+    expect:
+      resolutions:
+        "A DNN S FEANORIANS A LAD": succeeds
+        "A AEL - LAD": fails
+      units:
+        FEANORIANS: ["A ANF", "A DNN", "A LAD"]
+
+  # -- The Gondolin shield on the written order (rulebook "Gondolin") --
+  # F.6 above is the same-phase capture; these three are its companions.
+
+  - id: BATC-L2.F.15
+    title: the shield falls even when the sortie itself bounces — but the attack still fails on strength
+    # The rulebook is explicit that the shield falls "whether or not the
+    # Order succeeds": GONDOLIN's own A DIM already holds, so "2A GON - DIM"
+    # bounces off its own unit and the double never leaves GON -- yet the
+    # WRITTEN order alone still lifts the shield. FINROD's attack is then
+    # LEGAL (a shield that fell only when the double actually left would keep
+    # entry_permission closed) but still fails on strength: the penalized
+    # TOL->GON crossing climbs at 1/2 against the double's retention of 2 (a
+    # failed mover keeps its own strength -- no fortress bonus).
+    # Discriminates the rule from a "the shield falls only once the sortie
+    # succeeds" misreading.
+    start:
+      phase: S25M
+      units:
+        GONDOLIN: ["2A GON", "A DIM"]
+        FINROD: ["A TOL"]
+    script:
+      - phase: S25M
+        orders:
+          GONDOLIN: ["2A GON - DIM", "A DIM H"]
+          FINROD: ["A TOL - GON"]
+    expect:
+      resolutions:
+        "2A GON - DIM": fails
+        "A TOL - GON": fails
+      gondolin_shield: false
+      events: ["GONDOLIN's shield is lifted (the double army ordered out of Gondolin)"]
+      units:
+        GONDOLIN: ["2A GON", "A DIM"]
+        FINROD: ["A TOL"]
+
+  - id: BATC-L2.F.16
+    title: a Hold order does not lift the shield — control for the written-order-not-outcome rule
+    # Control case: only a Move or Dislodge naming the shield double's own
+    # unit spec lifts it -- a Hold does not change its location, so the
+    # shield stays up.
+    # (`_lift_gondolin_shield_on_order` gates on `isinstance(order, (Move,
+    # Dislodge))`; Support, MakeMasks and mask directives share Hold's
+    # branch and are swept at the unit level in test_layer2_seams.)
+    start:
+      phase: S25M
+      units:
+        GONDOLIN: ["2A GON"]
+        FINROD: ["A TOL"]
+    script:
+      - phase: S25M
+        orders:
+          GONDOLIN: ["2A GON H"]
+          FINROD: ["A TOL H"]
+    expect:
+      gondolin_shield: true
+      units:
+        GONDOLIN: ["2A GON"]
+        FINROD: ["A TOL"]
+
+  - id: BATC-L2.F.17
+    title: capturing Gondolin's bound center disbands the fled double, at the following Autumn
+    # F.6's tail as its own case (see F.6's comment for why). Continues F.6's
+    # exact scenario one phase further: FINROD holds the captured GON into
+    # Fall, the Autumn boundary flips ownership, and `_double_disbands` kills
+    # GONDOLIN's fled double because it is still bound to the foreign-owned
+    # GON. The disband/migration events are season-boundary events (fired
+    # outside `preprocess_movement`'s own drain), so they only surface via
+    # the L2 runner's buffered-events read -- asserted here on the LAST
+    # adjudicated record, unlike F.6's mid-phase check.
+    start:
+      phase: S25M
+      units:
+        GONDOLIN: ["2A GON"]
+        FINROD: ["A TOL"]
+    script:
+      - phase: S25M
+        orders:
+          GONDOLIN: ["2A GON - DIM"]
+          FINROD: ["A TOL - GON"]
+      - phase: F25M
+        orders:
+          FINROD: ["A GON H"]
+    expect:
+      gondolin_shield: false
+      ownership: {GON: FINROD}
+      events: ["GONDOLIN 2A DIM disbands (GON was captured by FINROD)"]
+      units:
+        FINROD: ["A GON"]
+        GONDOLIN: []
+      double_bindings: {}

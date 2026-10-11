@@ -1,0 +1,461 @@
+# BATC section J -- Indistinguishable Units (twins): the gate/champion model.
+# Rulebook: section "Indistinguishable Units (twins)" rules 1-6 plus the
+# third instance of "Stopping a Unit from entering an Area" (tie favours the
+# Bar; the strongest Move stands for the whole wave). J.1/J.3/J.4 encode the
+# section's three worked examples; J.2 the first example's coda; J.5 the
+# sheet-flipped discriminator of the third example. J.6 and J.7 put the
+# backers of a Bar into a stack under unnamed Dislodges ("Barring order": a
+# Support given to a Bar "is not lost when the Unit giving it is Dislodged"):
+# which twin the attack meets, and which twin a second attack takes, leaves
+# the Bar where it was.
+#
+# Every seat is the rulebook's VERBATIM one, with no deviations. Two of its
+# own rules make that possible: a Unit can Support a Unit of its own Area
+# ("Barring order"), which legalizes the in-Area defensive supports the
+# examples are written with, and "A" is the same as "1A" ("Strength and
+# cutting Support"), which makes a bare "A ANF" subject or victim reference
+# class-exact, so the 3A attacker (J.4/J.5) and the 2A move-supporter (J.2)
+# stack in Anfauglith beside the single-strength twins exactly as the
+# examples write them.
+section: "BATC J. Indistinguishable twins (gate/champion model)"
+ruleset: beleriand
+cases:
+  - id: BATC.J.1
+    title: the worked wave example - tie favours the gate, nothing enters
+    # Rules 1-3 verbatim ("Example:" of the twins section). Morgoth's two
+    # Supports attach to one Move (rule 1: "All Supports given to
+    # identically-worded Orders of twins attach to a single one of those
+    # Orders"), so the wave has Strength 3; the second Feanorian Bar "does
+    # nothing additional and is changed into a Hold Order" (rule 3) and both
+    # Feanorian Supports -- given from INSIDE Lothlann by the bars'
+    # Area-mates, as the rulebook writes them -- attach to the Bar that
+    # stands: the gate has Strength 3. "The wave does not have more Strength
+    # than the gate, so no Morgoth Unit enters Lothlann" - rule 2's wave
+    # shares the failure ("if it does not, no Unit of the wave enters").
+    # Binding both Bars to the first mover would let the second mover slip
+    # into Lothlann unbarred.
+    # (resolution_of reads the first duplicate row: the first-listed Bar is
+    # the standing one, SUCCEEDS; the converted second Bar's FAILS row is
+    # covered at engine level in tests/engine/test_twins.py.)
+    phase: S25M
+    units:
+      MORGOTH: ["A ANF", "A ANF", "A ANF", "A ANF"]
+      FEANORIANS: ["A LOT", "A LOT", "A LOT", "A LOT"]
+    orders:
+      MORGOTH:
+        - "A ANF - LOT"
+        - "A ANF - LOT"
+        - "A ANF S A ANF - LOT"
+        - "A ANF S A ANF - LOT"
+      FEANORIANS:
+        - "A LOT BAR MORGOTH A ANF - LOT"
+        - "A LOT BAR MORGOTH A ANF - LOT"
+        - "A LOT S A LOT BAR MORGOTH A ANF - LOT"
+        - "A LOT S A LOT BAR MORGOTH A ANF - LOT"
+    expect:
+      resolutions:
+        "A ANF - LOT": fails
+        "A ANF S A ANF - LOT": succeeds
+        "A LOT BAR MORGOTH A ANF - LOT": succeeds
+        "A LOT S A LOT BAR MORGOTH A ANF - LOT": succeeds
+      dislodged: []
+      units:
+        MORGOTH: ["A ANF", "A ANF", "A ANF", "A ANF"]
+        FEANORIANS: ["A LOT", "A LOT", "A LOT", "A LOT"]
+
+  - id: BATC.J.2
+    title: the wave example's coda - a stronger support carries the whole wave
+    # "Had one of Morgoth's Supports been given by a stronger Unit (wave
+    # Strength 4), the whole wave would enter: Lothlann would then hold four
+    # Feanorian and two Morgoth Units - exactly the limit of six." The 2A
+    # supporter stacks in Anfauglith beside the twins, verbatim ("A is same
+    # as 1A" keeps the bare subjects class-exact). Wave 1+1+2 = 4 > gate 3:
+    # both movers enter together (rule 2: "if the strongest Move enters,
+    # every Move of the wave enters"), and the Area closes at six. A
+    # per-mover model agrees here (the champion beats the bar and the
+    # unbarred twin fits the last slot), so this is the wave-passes
+    # control, not a discriminator.
+    phase: S25M
+    units:
+      MORGOTH: ["A ANF", "A ANF", "A ANF", "2A ANF"]
+      FEANORIANS: ["A LOT", "A LOT", "A LOT", "A LOT"]
+    orders:
+      MORGOTH:
+        - "A ANF - LOT"
+        - "A ANF - LOT"
+        - "A ANF S A ANF - LOT"
+        - "2A ANF S A ANF - LOT"
+      FEANORIANS:
+        - "A LOT BAR MORGOTH A ANF - LOT"
+        - "A LOT BAR MORGOTH A ANF - LOT"
+        - "A LOT S A LOT BAR MORGOTH A ANF - LOT"
+        - "A LOT S A LOT BAR MORGOTH A ANF - LOT"
+    expect:
+      resolutions:
+        "A ANF - LOT": succeeds
+        "A ANF S A ANF - LOT": succeeds
+        "2A ANF S A ANF - LOT": succeeds
+        "A LOT BAR MORGOTH A ANF - LOT": fails
+      dislodged: []
+      units:
+        MORGOTH: ["A ANF", "A LOT", "A LOT", "2A ANF"]
+        FEANORIANS: ["A LOT", "A LOT", "A LOT", "A LOT"]
+
+  - id: BATC.J.3
+    title: a wave without supports - numbers add no strength
+    # The section's second worked example, verbatim: "Five identical
+    # unsupported Moves into an Area are one wave of Strength 1. A single
+    # Barring Order with a single Support (Strength 2) stops all five."
+    # Rule 2: "The size of the wave adds no Strength - to force a passage
+    # you need Supports or stronger Units, not numbers." The single support
+    # is the bar's own Area-mate (a Unit can Support a Unit of its own
+    # Area). A Bar bound to the first mover only would let the other four
+    # march in.
+    phase: S25M
+    units:
+      MORGOTH: ["A ANF", "A ANF", "A ANF", "A ANF", "A ANF"]
+      FEANORIANS: ["A LOT", "A LOT"]
+    orders:
+      MORGOTH:
+        - "A ANF - LOT"
+        - "A ANF - LOT"
+        - "A ANF - LOT"
+        - "A ANF - LOT"
+        - "A ANF - LOT"
+      FEANORIANS:
+        - "A LOT BAR MORGOTH A ANF - LOT"
+        - "A LOT S A LOT BAR MORGOTH A ANF - LOT"
+    expect:
+      resolutions:
+        "A ANF - LOT": fails
+        "A LOT BAR MORGOTH A ANF - LOT": succeeds
+        "A LOT S A LOT BAR MORGOTH A ANF - LOT": succeeds
+      dislodged: []
+      units:
+        MORGOTH: ["A ANF", "A ANF", "A ANF", "A ANF", "A ANF"]
+        FEANORIANS: ["A LOT", "A LOT"]
+
+  - id: BATC.J.4
+    title: the support-hold wall - each dislodge fights the whole stack's defence
+    # The section's third worked example (rules 5-6), on its verbatim seats:
+    # "Feanorian Powers: A(Lot) holds; A(Lot) holds; 2A(Lot) sup hold
+    # A(Lot)" - the 2A support-holds its own stack from inside Lothlann (a
+    # Unit can Support a Unit of its own Area to Hold). The Support Hold
+    # fits both holding twins and defends the stack: "The defence of every
+    # twin in the stack against
+    # Dislodgment is its own Strength plus ALL such Support Holds" - 1 + 2 =
+    # 3 for each. The two Dislodge Orders are differently worded (A against
+    # 3A(M), all four attackers stacked in Anfauglith, verbatim), so
+    # each is Supported separately (rule 6). Strength 2 is "not more than 3,
+    # it fails"; Strength 4 "Dislodges one twin. The other twin stands."
+    # The bare victim reference is class-exact ("A is same as 1A"), so the
+    # 2A is neither a victim candidate nor
+    # cut-listed - its wall stands under fire, as the example's arithmetic
+    # requires. "(Had the twins' Orders differed, the fallen twin would be
+    # the one mentioned higher in the Feanorian list of Orders.)" - the
+    # winner takes the FIRST-listed twin, so the first "A LOT H" row fails.
+    # A per-victim support binding would shield the first twin and expose
+    # the second: same attack statuses, but the first hold row would
+    # survive - the flip this case documents.
+    phase: S25M
+    units:
+      MORGOTH: ["A ANF", "A ANF", "A ANF", "3A ANF"]
+      FEANORIANS: ["A LOT", "A LOT", "2A LOT"]
+    orders:
+      MORGOTH:
+        - "A ANF DIS FEANORIANS A LOT"
+        - "A ANF S A ANF DIS FEANORIANS A LOT"
+        - "3A ANF DIS FEANORIANS A LOT"
+        - "A ANF S 3A ANF DIS FEANORIANS A LOT"
+      FEANORIANS:
+        - "A LOT H"
+        - "A LOT H"
+        - "2A LOT S A LOT"
+    expect:
+      resolutions:
+        "A ANF DIS FEANORIANS A LOT": fails
+        "3A ANF DIS FEANORIANS A LOT": succeeds
+        "A ANF S A ANF DIS FEANORIANS A LOT": succeeds
+        "A ANF S 3A ANF DIS FEANORIANS A LOT": succeeds
+        "2A LOT S A LOT": succeeds
+        "A LOT H": fails
+      dislodged: ["FEANORIANS A LOT"]
+      units:
+        MORGOTH: ["A ANF", "A ANF", "A ANF", "3A LOT"]
+        FEANORIANS: ["A LOT", "2A LOT"]
+
+  - id: BATC.J.5
+    title: winners take twins from the top - a loser consumes nothing
+    # J.4 with Morgoth's sheet flipped (strong Dislodge first). Rule 6:
+    # "each Dislodge Order with more Strength than that defence Dislodges
+    # one twin ... the remaining winning Dislodges take their victims from
+    # the attacked Player's list of Orders, from top to bottom" - and only
+    # WINNERS consume twins (the worked example's Strength-2 attack fails
+    # against the wall and shields nobody). The Strength-4 Dislodge takes
+    # the first-listed twin; the Strength-2 Dislodge still fails against
+    # the stack-wide wall of 3. A per-victim support-hold binding would
+    # dislodge BOTH twins on this sheet: the strong attack would claim the
+    # supported first twin (4 > 3) and the weak one would then beat the
+    # second twin's naked defence (2 > 1).
+    phase: S25M
+    units:
+      MORGOTH: ["A ANF", "A ANF", "A ANF", "3A ANF"]
+      FEANORIANS: ["A LOT", "A LOT", "2A LOT"]
+    orders:
+      MORGOTH:
+        - "3A ANF DIS FEANORIANS A LOT"
+        - "A ANF S 3A ANF DIS FEANORIANS A LOT"
+        - "A ANF DIS FEANORIANS A LOT"
+        - "A ANF S A ANF DIS FEANORIANS A LOT"
+      FEANORIANS:
+        - "A LOT H"
+        - "A LOT H"
+        - "2A LOT S A LOT"
+    expect:
+      resolutions:
+        "3A ANF DIS FEANORIANS A LOT": succeeds
+        "A ANF DIS FEANORIANS A LOT": fails
+        "A ANF S 3A ANF DIS FEANORIANS A LOT": succeeds
+        "A ANF S A ANF DIS FEANORIANS A LOT": succeeds
+        "2A LOT S A LOT": succeeds
+        "A LOT H": fails
+      dislodged: ["FEANORIANS A LOT"]
+      units:
+        MORGOTH: ["A ANF", "A ANF", "A ANF", "3A LOT"]
+        FEANORIANS: ["A LOT", "2A LOT"]
+
+  - id: BATC.J.6
+    title: the list order of a stack does not decide its bar
+    # Rulebook "Barring order": "A Support given to a Barring Order is cut as
+    # any other Support, but it is not lost when the Unit giving it is
+    # Dislodged in the same Phase". Three twins: two back the Bar and are
+    # listed FIRST, the barring twin is listed last. The unnamed Dislodge
+    # meets the twin at the top of the list (rule 6) -- a backer. Both
+    # written Supports are given against the attacking Unit, so it cuts
+    # neither ("Attacks cut the attacked Player's written Supports from the
+    # first listed downward", skipping what an attacker cannot cut). The Bar
+    # is 1 + 1 + 1 = 3 whichever twin the attack would take; the attack is
+    # 2 + 1 = 3, not more than 3, and a tie favours the Barring Order. A
+    # barred attack takes no twin: nobody is dislodged.
+    # (With the barring twin listed first the same three orders hold in the
+    # same way. Were a backer's support lost with its giver, this list order
+    # would hand the attacker a second consistent outcome -- the top backer
+    # falls, the Bar stands at 2, 3 passes -- and the defender's order of
+    # writing would decide the board.)
+    phase: S25M
+    units:
+      FINROD: ["2A DNN", "A LAD"]
+      MORGOTH: ["A ANF", "A ANF", "A ANF"]
+    orders:
+      FINROD:
+        - "2A DNN DIS MORGOTH A ANF"
+        - "A LAD S 2A DNN DIS MORGOTH A ANF"
+      MORGOTH:
+        - "A ANF S A ANF BAR FINROD 2A DNN - ANF"
+        - "A ANF S A ANF BAR FINROD 2A DNN - ANF"
+        - "A ANF BAR FINROD 2A DNN - ANF"
+    expect:
+      resolutions:
+        "2A DNN DIS MORGOTH A ANF": fails
+        "A LAD S 2A DNN DIS MORGOTH A ANF": succeeds
+        "A ANF S A ANF BAR FINROD 2A DNN - ANF": succeeds
+        "A ANF BAR FINROD 2A DNN - ANF": succeeds
+      dislodged: []
+      units:
+        FINROD: ["2A DNN", "A LAD"]
+        MORGOTH: ["A ANF", "A ANF", "A ANF"]
+
+  - id: BATC.J.7
+    title: a second dislodge takes a twin and the bar does not feel it
+    # Two unnamed Dislodges against one stack of four: y (A EIT with A FSE,
+    # Strength 2, not barred) is written first, x (2A DNN with A LAD,
+    # Strength 3, barred) second. Support cutting "runs on its own list",
+    # in the attackers' written order: y cuts the first listed Support, the
+    # top twin's Support Hold of A LOT (2 against 1); x would cut the next
+    # one, but both remaining Supports are given against x itself, so x cuts
+    # nothing. The Bar is 1 + 1 + 1 = 3 and no dislodgement reaches it; x, 3,
+    # does not have more Strength and is stopped, and a barred attack takes
+    # no twin. The Dislodges are then matched "strongest first, against the
+    # still-standing twins ... from top to bottom": x meets the top twin and
+    # fails; that twin "keeps standing and meets the next Dislodge", y, and
+    # 2 is more than its defence of 1: it is dislodged. One army is lost.
+    # (The expected units carry that count -- four Morgoth units remain.
+    # Were a Bar's support lost with its giver, a second consistent outcome
+    # would exist: x takes the top twin, y the second one -- a backer -- the
+    # Bar falls to 2 and x passes, two armies lost. A rule that spared only
+    # the dislodgement inflicted by the barred unit would leave that outcome
+    # standing, because there the backer falls to y.)
+    phase: S25M
+    units:
+      FINROD: ["A EIT", "A FSE", "2A DNN", "A LAD"]
+      MORGOTH: ["A ANF", "A ANF", "A ANF", "A ANF", "A LOT"]
+    orders:
+      FINROD:
+        - "A EIT DIS MORGOTH A ANF"
+        - "A FSE S A EIT DIS MORGOTH A ANF"
+        - "2A DNN DIS MORGOTH A ANF"
+        - "A LAD S 2A DNN DIS MORGOTH A ANF"
+      MORGOTH:
+        - "A ANF S A LOT"
+        - "A ANF S A ANF BAR FINROD 2A DNN - ANF"
+        - "A ANF S A ANF BAR FINROD 2A DNN - ANF"
+        - "A ANF BAR FINROD 2A DNN - ANF"
+        - "A LOT H"
+    expect:
+      resolutions:
+        "A EIT DIS MORGOTH A ANF": succeeds
+        "A FSE S A EIT DIS MORGOTH A ANF": succeeds
+        "2A DNN DIS MORGOTH A ANF": fails
+        "A LAD S 2A DNN DIS MORGOTH A ANF": succeeds
+        "A ANF S A LOT": fails
+        "A ANF S A ANF BAR FINROD 2A DNN - ANF": succeeds
+        "A ANF BAR FINROD 2A DNN - ANF": succeeds
+        "A LOT H": succeeds
+      dislodged: ["MORGOTH A ANF"]
+      units:
+        FINROD: ["A ANF", "A FSE", "2A DNN", "A LAD"]
+        MORGOTH: ["A ANF", "A ANF", "A ANF", "A LOT"]
+
+  - id: BATC.J.8
+    title: a wave that meets a dislodge head-to-head loses as one
+    # Rulebook ("Dislodge Order"): "If the Unit to be Dislodged is ordered to
+    # Move into, or to Dislodge a Unit in, the Province of the Dislodging
+    # Unit, the two Orders clash head-to-head ... Twins whose Move Orders are identical clash together,
+    # as one wave (see: Indistinguishable Units)."
+    # The Double Army's Dislodge (2) takes the first twin of the wave, and the
+    # wave (1) answers it as one: both Moves fail, so the second twin does not
+    # slip into the Dorthonion that the dislodger leaves.
+    phase: S25M
+    units:
+      FINROD: ["2A DNN"]
+      MORGOTH: ["A ANF", "A ANF"]
+    orders:
+      FINROD: ["2A DNN DIS MORGOTH A ANF - DNN"]
+      MORGOTH: ["A ANF - DNN", "A ANF - DNN"]
+    expect:
+      resolutions:
+        "2A DNN DIS MORGOTH A ANF - DNN": succeeds
+        "A ANF - DNN": fails
+      dislodged: ["MORGOTH A ANF"]
+      units:
+        FINROD: ["2A ANF"]
+        MORGOTH: ["A ANF"]
+
+  - id: BATC.J.9
+    title: the wave clash holds at an area door too
+    # Rulebook ("Dislodge Order"), as in J.8: the clash does not depend on the
+    # Dislodging Unit's Province holding one Unit. Lothlann has one free slot
+    # once the Feanorian Double Army leaves it, but the wave lost its clash
+    # with that army, so neither twin takes the slot.
+    phase: S25M
+    units:
+      FEANORIANS: ["2A LOT", "A LOT", "A LOT", "A LOT", "A LOT", "A LOT"]
+      MORGOTH: ["A ANF", "A ANF"]
+    orders:
+      FEANORIANS: ["2A LOT DIS MORGOTH A ANF - LOT", "A LOT H", "A LOT H",
+                   "A LOT H", "A LOT H", "A LOT H"]
+      MORGOTH: ["A ANF - LOT", "A ANF - LOT"]
+    expect:
+      resolutions:
+        "2A LOT DIS MORGOTH A ANF - LOT": succeeds
+        "A ANF - LOT": fails
+      dislodged: ["MORGOTH A ANF"]
+      units:
+        FEANORIANS: ["2A ANF", "A LOT", "A LOT", "A LOT", "A LOT", "A LOT"]
+        MORGOTH: ["A ANF"]
+
+  - id: BATC.J.10
+    title: a stronger wave wins the clash and its champion enters alone
+    # Rulebook ("Dislodge Order"), as in J.8, and twins rule 2: "where the
+    # whole wave does not fit, a Supported strongest Move may enter alone".
+    # The supported wave (2) beats the Dislodge (1); its champion enters
+    # Dorthonion and dislodges the attacker, while the other twin, ranked at
+    # its own 1, finds the one slot taken.
+    phase: S25M
+    units:
+      FINROD: ["A DNN"]
+      MORGOTH: ["A ANF", "A ANF", "A ANF"]
+    orders:
+      FINROD: ["A DNN DIS MORGOTH A ANF - DNN"]
+      MORGOTH: ["A ANF - DNN", "A ANF - DNN", "A ANF S A ANF - DNN"]
+    expect:
+      resolutions:
+        "A DNN DIS MORGOTH A ANF - DNN": fails
+        "A ANF S A ANF - DNN": succeeds
+      dislodged: ["FINROD A DNN"]
+      units:
+        MORGOTH: ["A DNN", "A ANF", "A ANF"]
+
+  - id: BATC.J.11
+    title: an unnamed dislodge beaten by the twins moving at it takes no twin
+    # Rulebook ("Dislodge Order"): "Twins whose Move Orders are identical
+    # clash together, as one wave", and "A Dislodge that loses its clash
+    # fails, and it does not stand in the way of the other Units entering the
+    # Area."
+    # FEANORIANS' two twin armies leave Lothlann for Anfauglith as one wave,
+    # the 2A's Support concentrated on it: 1 + 2 = 3. MORGOTH's three 2As
+    # write unnamed Dislodges of "FEANORIANS A LOT" from Anfauglith, Ladros
+    # and Aeluin. An unnamed Dislodge names every twin of the stack, so the
+    # Anfauglith Dislodge meets every twin ordered into Anfauglith -- here
+    # the whole wave -- head-to-head before any twin is dealt: 3 against 2,
+    # it loses, takes no twin from the top of the list and stands in
+    # nobody's way. The wave enters
+    # Anfauglith beside MORGOTH's 2A. The other two Dislodges take one twin
+    # each; both twins have left, so each "becomes a Move into the Area and
+    # competes for its space as a Move does": Lothlann keeps only the 2A and
+    # both enter. Written as Dislodges naming the twins' Move, the orders give
+    # the same outcome.
+    phase: S25M
+    units:
+      FEANORIANS: ["A LOT", "A LOT", "2A LOT"]
+      MORGOTH: ["2A ANF", "2A LAD", "2A AEL"]
+    orders:
+      FEANORIANS: ["A LOT - ANF", "A LOT - ANF", "2A LOT S A LOT - ANF"]
+      MORGOTH: ["2A ANF DIS FEANORIANS A LOT", "2A LAD DIS FEANORIANS A LOT",
+                "2A AEL DIS FEANORIANS A LOT"]
+    expect:
+      resolutions:
+        "A LOT - ANF": succeeds
+        "2A LOT S A LOT - ANF": succeeds
+        "2A ANF DIS FEANORIANS A LOT": fails
+        "2A LAD DIS FEANORIANS A LOT": succeeds
+        "2A AEL DIS FEANORIANS A LOT": succeeds
+      dislodged: []
+      units:
+        FEANORIANS: ["A ANF", "A ANF", "2A LOT"]
+        MORGOTH: ["2A ANF", "2A LOT", "2A LOT"]
+
+  - id: BATC.J.12
+    title: an unnamed dislodge meets the twins moving at it, not the one that holds
+    # J.11 with one twin holding. An unnamed Dislodge names every twin of the
+    # stack, and the clash is read off the orders before any twin is dealt:
+    # the Anfauglith Dislodge meets the one twin ordered into Anfauglith,
+    # which has the 2A's Support, 3 against 2, and loses -- it takes no twin
+    # and stands in nobody's way, whichever twin the list would have given
+    # it. That twin enters Anfauglith. The Ladros and Aeluin Dislodges, 2
+    # each, are dealt the twins from the top of the list: the Ladros one the
+    # twin that has left, so it "becomes a Move into the Area" and enters
+    # Lothlann; the Aeluin one the twin that holds, at 1 (the 2A supports the
+    # Move, not the hold), which it dislodges, taking its slot. Written as a
+    # Dislodge naming the moving twin's Move, the Anfauglith order gives the
+    # same outcome.
+    phase: S25M
+    units:
+      FEANORIANS: ["A LOT", "A LOT", "2A LOT"]
+      MORGOTH: ["2A ANF", "2A LAD", "2A AEL"]
+    orders:
+      FEANORIANS: ["A LOT - ANF", "A LOT H", "2A LOT S A LOT - ANF"]
+      MORGOTH: ["2A ANF DIS FEANORIANS A LOT", "2A LAD DIS FEANORIANS A LOT",
+                "2A AEL DIS FEANORIANS A LOT"]
+    expect:
+      resolutions:
+        "A LOT - ANF": succeeds
+        "A LOT H": fails
+        "2A LOT S A LOT - ANF": succeeds
+        "2A ANF DIS FEANORIANS A LOT": fails
+        "2A LAD DIS FEANORIANS A LOT": succeeds
+        "2A AEL DIS FEANORIANS A LOT": succeeds
+      dislodged: ["FEANORIANS A LOT"]
+      units:
+        FEANORIANS: ["A ANF", "2A LOT"]
+        MORGOTH: ["2A ANF", "2A LOT", "2A LOT"]

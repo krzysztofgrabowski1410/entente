@@ -1,0 +1,137 @@
+# BATC section A -- unit strengths and the one-shot cut model.
+# Hand-derived from BeleriandInstruction.docx, "Strength and cutting Support"
+# (the worked example is encoded verbatim as BATC.A.1).
+section: "BATC A. Strengths and one-shot support cutting"
+ruleset: beleriand
+cases:
+  - id: BATC.A.1
+    title: the rulebook worked example, all moves bounce
+    # A(GEL)-HIG; A(THA)-MMa; A(HIG) sup A(THA)-MMa; A(HID)-HIG;
+    # 2A(MMa) sup A(HID)-HIG. Both supports are cut at pre-cut attack
+    # strengths (2 and 3), so every move bounces -- the rulebook's own
+    # adjudication, and the paradox-free one-shot design in one position.
+    phase: S25M
+    units:
+      FEANORIANS: ["A GEL", "A HID", "2A MMA"]
+      DORIATH: ["A THA", "A HIG"]
+    orders:
+      FEANORIANS: ["A GEL - HIG", "A HID - HIG", "2A MMA S A HID - HIG"]
+      DORIATH: ["A THA - MMA", "A HIG S A THA - MMA"]
+    expect:
+      resolutions:
+        "A GEL - HIG": fails
+        "A HID - HIG": fails
+        "2A MMA S A HID - HIG": fails
+        "A THA - MMA": fails
+        "A HIG S A THA - MMA": fails
+      units:
+        FEANORIANS: ["A GEL", "A HID", "2A MMA"]
+        DORIATH: ["A THA", "A HIG"]
+
+  - id: BATC.A.2
+    title: two weak attacks cut a double support to nothing
+    # The sum aggregation (rulebook: "diminished by the COMBINED Strength of
+    # all Support-cutting Attacks"): a base-2 support hit by two strength-1
+    # attacks delivers 2 - (1+1) = 0 -- a strongest-single reading would
+    # leave 1. The spec's discriminator case (docs/adjudication.tex Sec. 10).
+    # (The second attacker stands in FOR: FOR-EST is an edge of the board,
+    # DDI-EST is not.)
+    phase: S25M
+    units:
+      DORIATH: ["2A EST", "A NEB"]
+      MORGOTH: ["A FOR", "A HID"]
+    orders:
+      DORIATH: ["2A EST S DORIATH A NEB"]
+      MORGOTH: ["A FOR - EST", "A HID - EST"]
+    expect:
+      resolutions:
+        "2A EST S DORIATH A NEB": fails
+        "A FOR - EST": fails
+        "A HID - EST": fails
+
+  - id: BATC.A.3
+    title: one weak attack only diminishes a double support
+    # The same support under a single strength-1 attack keeps 2 - 1 = 1 > 0:
+    # it still delivers (and the attack bounces off the double army).
+    # (The attacker stands in FOR, as in A.2: the attack must be a legal
+    # order, or the case would pass vacuously with the unit holding.)
+    phase: S25M
+    units:
+      DORIATH: ["2A EST", "A NEB"]
+      MORGOTH: ["A FOR"]
+    orders:
+      DORIATH: ["2A EST S DORIATH A NEB"]
+      MORGOTH: ["A FOR - EST"]
+    expect:
+      resolutions:
+        "2A EST S DORIATH A NEB": succeeds
+        "A FOR - EST": fails
+
+  - id: BATC.A.4
+    title: a double army outmuscles a single for an empty province
+    phase: S25M
+    units:
+      FEANORIANS: ["2A GEL"]
+      NAUGRIM: ["A HEL"]
+    orders:
+      FEANORIANS: ["2A GEL - THA"]
+      NAUGRIM: ["A HEL - THA"]
+    expect:
+      resolutions:
+        "2A GEL - THA": succeeds
+        "A HEL - THA": fails
+      units:
+        FEANORIANS: ["2A THA"]
+        NAUGRIM: ["A HEL"]
+
+  - id: BATC.A.5
+    title: equal double armies bounce
+    phase: S25M
+    units:
+      FEANORIANS: ["2A GEL"]
+      NAUGRIM: ["2A MMA"]
+    orders:
+      FEANORIANS: ["2A GEL - THA"]
+      NAUGRIM: ["2A MMA - THA"]
+    expect:
+      resolutions:
+        "2A GEL - THA": fails
+        "2A MMA - THA": fails
+
+  - id: BATC.A.6
+    title: a supported single equals a double army and both bounce
+    # Strength parity across different compositions: 1+1 vs 2.
+    phase: S25M
+    units:
+      FEANORIANS: ["2A GEL"]
+      NAUGRIM: ["A HEL", "A MMA"]
+    orders:
+      FEANORIANS: ["2A GEL - THA"]
+      NAUGRIM: ["A HEL - THA", "A MMA S A HEL - THA"]
+    expect:
+      resolutions:
+        "2A GEL - THA": fails
+        "A HEL - THA": fails
+
+  - id: BATC.A.7
+    title: the Morgoth unit dislodges a supported defender
+    # 3A(M) attacks at 3 against hold 1 + 1 (rulebook: Morgoth has
+    # Strength of 3; the defender's hold support delivers but loses).
+    # (The attack runs ANF -> FSE, which carries no barrier in either
+    # direction, so the rulebook's 3 > 1 + 1 comparison is unmodified; the
+    # directed barrier table penalizes ANF->RIV, which would halve the giant
+    # to 3/2 < 2 and turn this rulebook-arithmetic case into a barrier one.)
+    phase: S25M
+    units:
+      MORGOTH: ["3A ANF"]
+      FINROD: ["A FSE", "A TOL"]
+    orders:
+      MORGOTH: ["3A ANF - FSE"]
+      FINROD: ["A TOL S FINROD A FSE"]
+    expect:
+      resolutions:
+        "3A ANF - FSE": succeeds
+        "A TOL S FINROD A FSE": succeeds
+      dislodged: ["FINROD A FSE"]
+      units:
+        MORGOTH: ["3A FSE"]

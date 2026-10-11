@@ -1,0 +1,29 @@
+# CPU smoke config: proves the QLoRA training loop + LocalLoraProvider
+# integration on a genuinely tiny (112k-parameter, RANDOMLY INITIALIZED)
+# public test model -- https://huggingface.co/hf-internal-testing/tiny-random-gpt2
+# (GPT-2 architecture, vocab_size=1000, n_embd=32; fused qkv projection, hence
+# target_modules: [c_attn], unlike the Llama-style base.yaml beside this file). Not a
+# quality claim -- an untrained 32-dim model has essentially no language prior,
+# so its loss starts near the ln(1000)=6.91 random-uniform baseline and a small
+# monotonic-ish decline is the honest ceiling of "the loop learns" evidence at
+# this scale, exactly the role configs/bc/smoke.yaml plays for
+# behavioral cloning. Runs in well under a minute on CPU (`pytest -m finetune`).
+base_model: hf-internal-testing/tiny-random-gpt2
+load_in_4bit: false
+lora:
+  r: 8
+  alpha: 16
+  dropout: 0.0
+  target_modules: [c_attn]
+optim:
+  lr: 0.015
+  warmup_steps: 5
+  max_steps: 200
+  batch_size: 4
+  max_seq_length: 64
+data_path: tests/negotiation/fixtures/peskov_instructions_sample.jsonl
+seed: 0
+out_dir: checkpoints/dialogue_lora_smoke
+run_name: dialogue_lora_smoke
+device: cpu
+log_every: 10

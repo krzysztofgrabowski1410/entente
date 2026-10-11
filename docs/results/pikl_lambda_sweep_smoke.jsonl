@@ -1,0 +1,10 @@
+{"anchor_agreement": 0.875, "human_agreement": 0.6923076923076923, "lam": 0.0, "seat": "FRANCE", "seed": 0, "sos": 0.1724137931034483, "supply_centers": 5, "survived": true}
+{"anchor_agreement": 0.9583333333333334, "human_agreement": 0.6923076923076923, "lam": 0.0, "seat": "FRANCE", "seed": 1, "sos": 0.14792899408284024, "supply_centers": 5, "survived": true}
+{"anchor_agreement": 0.9166666666666666, "human_agreement": 0.7948717948717948, "lam": 0.3, "seat": "FRANCE", "seed": 0, "sos": 0.16778523489932887, "supply_centers": 5, "survived": true}
+{"anchor_agreement": 0.9166666666666666, "human_agreement": 0.7948717948717948, "lam": 0.3, "seat": "FRANCE", "seed": 1, "sos": 0.14450867052023122, "supply_centers": 5, "survived": true}
+{"anchor_agreement": 0.9166666666666666, "human_agreement": 0.7948717948717948, "lam": 1.0, "seat": "FRANCE", "seed": 0, "sos": 0.14792899408284024, "supply_centers": 5, "survived": true}
+{"anchor_agreement": 0.9583333333333334, "human_agreement": 0.7948717948717948, "lam": 1.0, "seat": "FRANCE", "seed": 1, "sos": 0.15625, "supply_centers": 5, "survived": true}
+{"anchor_agreement": 0.875, "human_agreement": 0.7948717948717948, "lam": 3.0, "seat": "FRANCE", "seed": 0, "sos": 0.16447368421052633, "supply_centers": 5, "survived": true}
+{"anchor_agreement": 0.9166666666666666, "human_agreement": 0.7948717948717948, "lam": 3.0, "seat": "FRANCE", "seed": 1, "sos": 0.13513513513513514, "supply_centers": 5, "survived": true}
+{"anchor_agreement": 0.9583333333333334, "human_agreement": 0.7948717948717948, "lam": "inf", "seat": "FRANCE", "seed": 0, "sos": 0.15625, "supply_centers": 5, "survived": true}
+{"anchor_agreement": 0.9166666666666666, "human_agreement": 0.7948717948717948, "lam": "inf", "seat": "FRANCE", "seed": 1, "sos": 0.16025641025641027, "supply_centers": 5, "survived": true}

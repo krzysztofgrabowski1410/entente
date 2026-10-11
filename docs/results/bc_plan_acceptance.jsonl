@@ -1,0 +1,1 @@
+{"held_out_top1": 0.361, "held_out_units": 307721, "target": 0.5, "note": "Plan-scale BC base run, held-out per-unit top-1 as printed by scripts/train_bc.py (train_bc.log, RTX 2060); a MISS vs the >=0.50 target -- recorded, not tuned."}

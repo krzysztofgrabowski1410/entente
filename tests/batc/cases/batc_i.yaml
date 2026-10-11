@@ -1,0 +1,200 @@
+# BATC section I -- Unit-designation strictness (rulebook 4.C.2 choice C).
+# The Beleriand ruleset takes the rulebook's stricter reading: an order whose
+# written kind or strength prefix describes NO unit of the ordering power in
+# the named province is invalid and degrades to Hold (4.E.1) -- never
+# advisorily bound to a mismatched occupant (the standard column keeps DATC
+# 4.C.2 choice b; the knob is beleriand-only). Correct and bare designations,
+# duplicate-text k-th binding, and the 3A(M)/3A(G) designators all still
+# match a unit, so the strict gate never fires on them -- covered at the
+# engine level in tests/engine/test_designation_strictness.py; these YAML
+# cases certify the observable board flip and its controls under both engines.
+# An order the strict gate voids is a Hold, and supports read it so: a
+# support of the order it wrote matches nothing (I.6), and a support-hold
+# holds its unit (I.7).
+section: "BATC I. Unit-designation strictness (4.C.2 choice C)"
+ruleset: beleriand
+cases:
+  - id: BATC.I.1
+    title: a wrong strength prefix in a stack degrades to Hold
+    # DORIATH stacks a Double Army and a single in the Area ANF. The order
+    # "3A ANF - LOT" carries a strength (3) no DORIATH unit in ANF has, so it
+    # is invalid and both units stay. Under the advisory reading (choice b)
+    # the prefix would be ignored and the province-only fallback would bind
+    # the single (sorted first), marching it to the empty Lothlann -- that is
+    # the flip this case freezes out. ANF->LOT is a real army edge (BATC.B.13).
+    phase: S25M
+    units:
+      DORIATH: ["2A ANF", "A ANF"]
+    orders:
+      DORIATH: ["3A ANF - LOT"]
+    expect:
+      resolutions:
+        "3A ANF - LOT": fails
+      units:
+        DORIATH: ["2A ANF", "A ANF"]
+
+  - id: BATC.I.2
+    title: a correct designation in the same stack still moves
+    # The non-flip control: the same ANF stack, but "2A ANF - LOT" names a
+    # strength DORIATH does hold there, so it binds the Double Army exactly
+    # (as it did under choice b) and marches it to Lothlann. Strict binding
+    # invalidates only contradictions, never a matching prefix.
+    phase: S25M
+    units:
+      DORIATH: ["2A ANF", "A ANF"]
+    orders:
+      DORIATH: ["2A ANF - LOT"]
+    expect:
+      resolutions:
+        "2A ANF - LOT": succeeds
+      units:
+        DORIATH: ["A ANF", "2A LOT"]
+
+  - id: BATC.I.3
+    title: a wrong unit kind degrades to Hold
+    # The kind arm of the rule (ANF's stack exercises the strength arm): a
+    # fleet order on a province holding only an army. "F NAR - TAL" matches
+    # no FINROD fleet in Nargothrond, so it is invalid and the army holds.
+    # Under choice b the F would be advisory and the army would take Talath
+    # Dimen (NAR->TAL, BATC.B.1) -- the DATC 6.D.35 shape, here made an
+    # observable move rather than a support subject.
+    phase: S25M
+    units:
+      FINROD: ["A NAR"]
+    orders:
+      FINROD: ["F NAR - TAL"]
+    expect:
+      resolutions:
+        "F NAR - TAL": fails
+      units:
+        FINROD: ["A NAR"]
+
+  - id: BATC.I.4
+    title: a correctly designated order to the same unit still takes place
+    # The rulebook's own clause -- "if an Order with correct designation
+    # exists, then the correct Order is valid and takes place" -- is the 4.D.3
+    # first-legal-wins rule: MORGOTH writes two orders for its lone Anfauglith
+    # army, the sloppy "F ANF - LOT" (no fleet there) and the correct
+    # "A ANF - DNN". The fleet order is the ignored illegal claim; the army
+    # order wins the occurrence and marches to Dorthonion (ANF->DNN, no
+    # barrier, BATC.B.14).
+    phase: S25M
+    units:
+      MORGOTH: ["A ANF"]
+    orders:
+      MORGOTH: ["F ANF - LOT", "A ANF - DNN"]
+    expect:
+      resolutions:
+        "F ANF - LOT": fails
+        "A ANF - DNN": succeeds
+      units:
+        MORGOTH: ["A DNN"]
+
+  - id: BATC.I.5
+    title: a bare spec names the single-strength unit, never a stronger one
+    # Rulebook "Strength and cutting Support": "A Unit type written with no
+    # Strength value before it always means Strength 1: "A" is the same as
+    # "1A", and never stands for an Army of any other Strength." DORIATH
+    # holds only a Double Army in the Area, so the strengthless "A ANF -
+    # LOT" names a unit DORIATH does not have: the designation contradicts
+    # every occupant and the order degrades to Hold (4.E.1) under the
+    # strict 4.C.2-C binding. (The standard column keeps its advisory
+    # fallback; every classic unit is strength 1, so the readings coincide
+    # there.)
+    phase: S25M
+    units:
+      DORIATH: ["2A ANF"]
+    orders:
+      DORIATH: ["A ANF - LOT"]
+    expect:
+      resolutions:
+        "A ANF - LOT": fails
+      units:
+        DORIATH: ["2A ANF"]
+
+  - id: BATC.I.6
+    title: a support of an order voided by its designation matches nothing
+    # Rulebook 4.C.2: "Order, in which a Unit type differs from the actual
+    # one, is considered to be invalid"; "Invalid Orders": "the invalid order
+    # is replaced with a Hold order". DORIATH writes "3A ANF - LOT" for its
+    # army in Anfauglith, which is no 3A, so the order is void and the army
+    # holds. The support from Ladros names that army's Move to Lothlann, an
+    # order it did not receive: the support matches nothing, is invalid and
+    # fails, like any support of an order nobody gave.
+    phase: S25M
+    units:
+      DORIATH: ["A ANF", "A LAD"]
+    orders:
+      DORIATH: ["3A ANF - LOT", "A LAD S DORIATH A ANF - LOT"]
+    expect:
+      resolutions:
+        "3A ANF - LOT": fails
+        "A LAD S DORIATH A ANF - LOT": fails
+      units:
+        DORIATH: ["A ANF", "A LAD"]
+
+  - id: BATC.I.7
+    title: a support-hold of a unit whose order was voided holds it
+    # Rulebook 4.C.2 and "Invalid Orders", as in I.6: the void "3A ANF - LOT"
+    # leaves the army in Anfauglith holding, so the support-hold from Ladros
+    # matches its Hold and adds 1 to its defence. Morgoth's Double Army
+    # attacks it with 2 against 1 + 1 and fails.
+    phase: S25M
+    units:
+      DORIATH: ["A ANF", "A LAD"]
+      MORGOTH: ["2A EIT"]
+    orders:
+      DORIATH: ["3A ANF - LOT", "A LAD S DORIATH A ANF"]
+      MORGOTH: ["2A EIT DIS DORIATH A ANF"]
+    expect:
+      resolutions:
+        "3A ANF - LOT": fails
+        "A LAD S DORIATH A ANF": succeeds
+        "2A EIT DIS DORIATH A ANF": fails
+      dislodged: []
+      units:
+        DORIATH: ["A ANF", "A LAD"]
+        MORGOTH: ["2A EIT"]
+
+  - id: BATC.I.8
+    title: a second order for an army binds no army of another strength
+    # Rulebook ("Strength and cutting Support"): "A Unit type written with no
+    # Strength value before it always means Strength 1: "A" is the same as
+    # "1A", and never stands for an Army of any other Strength."
+    # The first line gives the single army its order; the second, written for
+    # an army of Strength 1 as well, finds every such army already ordered and
+    # binds nothing, so the Double Army keeps its own correctly written Move.
+    phase: S25M
+    units:
+      DORIATH: ["A LOT", "2A LOT"]
+    orders:
+      DORIATH: ["A LOT H", "A LOT - AEL", "2A LOT - NEL"]
+    expect:
+      resolutions:
+        "A LOT H": succeeds
+        "A LOT - AEL": fails
+        "2A LOT - NEL": succeeds
+      units:
+        DORIATH: ["A LOT", "2A NEL"]
+
+  - id: BATC.I.9
+    title: a support the board forbids is ignored and the next order is used
+    # Rulebook ("Invalid Orders"): "Such an Order is ignored: if the same Unit
+    # is given another, valid Order, that Order is executed, and otherwise the
+    # Unit holds."
+    # Ladros does not reach the Northern Ered Wethrim, whatever the Morgoth
+    # army in Eithel Sirion is ordered, so the support is ignored and
+    # FINROD's army moves into Dorthonion.
+    phase: S25M
+    units:
+      FINROD: ["A LAD"]
+      MORGOTH: ["A EIT"]
+    orders:
+      FINROD: ["A LAD S MORGOTH A EIT - NEW", "A LAD - DNN"]
+    expect:
+      resolutions:
+        "A LAD S MORGOTH A EIT - NEW": fails
+        "A LAD - DNN": succeeds
+      units:
+        FINROD: ["A DNN"]
+        MORGOTH: ["A EIT"]

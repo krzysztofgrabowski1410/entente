@@ -1,0 +1,220 @@
+[project]
+name = "entente"
+version = "0.0.1"
+description = "A ruleset-generalized Diplomacy engine and AI research project: adjudication as constraint solving, game-theoretic agents, KL-regularized planning."
+readme = "README.md"
+requires-python = ">=3.11"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "Krzysztof Grabowski" }]
+keywords = ["diplomacy", "board-game", "adjudication", "game-theory", "reinforcement-learning"]
+classifiers = [
+    "Development Status :: 2 - Pre-Alpha",
+    "Intended Audience :: Science/Research",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Games/Entertainment :: Board Games",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Typing :: Typed",
+]
+# The engine core is dependency-free, stdlib only: an adjudicator that answers the
+# same way every time should not be able to break because a third-party package
+# changed. The heavier stacks live in the optional dependency groups below.
+# Two runtime exceptions, both driven by the config and evaluation path a plain
+# `uv sync` has to run (`entente tournament`) rather than by ML: pyyaml, which
+# entente.eval.config parses tournament YAML with, and pydantic, because
+# entente.training.config's typed models are the one config loader the whole
+# project uses and they must therefore import in the non-ML CLI too. The floor
+# is 2.12, the first release with `Field(exclude_if=...)`, with which a model can
+# leave an unset field off the JSON (2.11 writes it as null).
+dependencies = ["pyyaml>=6.0", "pydantic>=2.12"]
+
+[project.scripts]
+entente = "entente.cli:main"
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3",
+    "pytest-cov>=6.0",
+    "pytest-benchmark>=4.0",
+    "hypothesis>=6.115",
+    "mypy>=1.13",
+    "ruff>=0.8",
+    "types-pyyaml>=6.0",
+    "pre-commit>=4.0",
+    "pillow>=10.1",
+]
+# The behavioral-cloning stack. torch and pyarrow are import-guarded: entente.nn.*,
+# entente.training.*, entente.data.{dataset,preprocess} and
+# entente.agents.{bc_agent,pikl_agent} import them, with entente.negotiation's
+# generate/press_eval/finetune pulling torch under its own groups, and every
+# consumer's tests skip without the stack. wandb is optional even within this
+# group: entente.training.tracking imports it lazily and only when WANDB_API_KEY
+# is set, so a `--group ml` install without an account still runs everything.
+# pydantic is not here -- see the core `dependencies` note above. CI installs the
+# default groups only, so none of this reaches the engine's platform matrix.
+ml = ["torch>=2.6", "numpy>=1.26", "pyarrow>=17.0", "wandb>=0.18"]
+# The hosted-model client, isolated so the negotiation prototype stays cuttable.
+# Only entente.negotiation.generate.AnthropicProvider imports it, and lazily, the
+# import deferred to __init__, so entente.negotiation.generate itself --
+# StubProvider included -- imports fine without this group installed.
+llm = ["anthropic>=0.40"]
+# The rendering extra: pillow rasterizes the demo GIF (the engine's own SVG
+# renderer stays stdlib).
+viz = ["pillow>=10.1"]
+# The AGPL `diplomacy` package from git, a dev-time differential oracle ONLY.
+# Nothing under src/ imports it, and a test greps the tree to keep it that way:
+# this project's engine is written from the rules, never derived from another
+# implementation, and the licence must not reach the published code.
+oracle = ["diplomacy"]
+# The QLoRA dialogue fine-tune's stack, isolated like `llm`. Only
+# entente.negotiation.finetune.* and
+# entente.negotiation.generate.LocalLoraProvider import these, the latter
+# deferring the import to __init__ exactly as AnthropicProvider defers
+# `anthropic`. bitsandbytes carries the 4-bit quantization kernels and is marked
+# Linux-only: it has no CPU kernel and real 4-bit loading is a WSL2/CUDA path
+# (docs/setup.md), so the marker stops `uv sync --group finetune --system-certs`
+# on Windows from resolving a package that could not be used there. The CPU smoke
+# path trains a plain, non-quantized LoRA adapter over a tiny model and never
+# needs it.
+finetune = [
+    "transformers>=4.46",
+    "peft>=0.13",
+    "accelerate>=1.0",
+    "bitsandbytes>=0.44; sys_platform == 'linux'",
+    "truststore>=0.10.4",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "C4", "RUF", "D"]
+# D105 (magic methods) and D107 (__init__) are never required: a protocol dunder is
+# documented by the protocol, and __init__'s parameters are described in the class
+# docstring.
+ignore = ["D105", "D107"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "pep257"
+
+[tool.ruff.lint.per-file-ignores]
+# Permanent: test functions and methods are documented by their names.
+"tests/**" = ["D102", "D103"]
+
+[tool.mypy]
+strict = true
+python_version = "3.11"
+files = ["src"]
+
+# torch / pyarrow / wandb live in the `ml` group, which CI does not install; mypy runs
+# in the default env, so their imports must resolve to `Any` there (and the modules that
+# use them stay checkable with or without the group present).
+# The `ml` stacks are treated as untyped (Any): with the group absent (CI) their
+# imports are simply missing; with it present, mypy skips analyzing their stubs
+# rather than typechecking against them. follow_imports=skip is load-bearing for
+# numpy specifically -- a transitive dep whose 2.x stubs use PEP 695 `type`
+# statements mypy rejects under python_version 3.11 (and which torch's stubs pull
+# in). src/ imports none of these directly; the nn/training relaxations below
+# absorb the resulting Any.
+[[tool.mypy.overrides]]
+module = [
+    "torch.*",
+    "numpy",
+    "numpy.*",
+    "pyarrow.*",
+    "wandb.*",
+    "anthropic.*",
+    "PIL.*",
+    "transformers.*",
+    "peft.*",
+    "accelerate.*",
+    "bitsandbytes.*",
+    "truststore.*",
+]
+ignore_missing_imports = true
+follow_imports = "skip"
+
+# Per-module relaxations for the ML surface; the engine stays fully strict. With
+# torch absent it resolves to `Any`, so subclassing `nn.Module`, calling torch
+# functions and returning tensors all trip strict's Any-guards, and these four
+# flags are exactly what that costs. Everything else -- this project's own
+# signatures, optional handling, the untyped-def ban -- stays strict, so the
+# modules below still type their own public API. entente.viz.gif is the PIL
+# analogue of the same situation, PIL.* resolving to Any under follow_imports=skip
+# above.
+[[tool.mypy.overrides]]
+module = [
+    "entente.nn.*",
+    "entente.training.*",
+    "entente.data.*",
+    "entente.agents.bc_agent",
+    "entente.agents.pikl_agent",
+    "entente.viz.gif",
+    "entente.negotiation.finetune.*",
+]
+disallow_subclassing_any = false
+disallow_untyped_calls = false
+disallow_untyped_decorators = false
+warn_return_any = false
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra --strict-markers"
+markers = [
+    "datc: DATC conformance cases (standard ruleset)",
+    "batc: Beleriand adjudicator test cases (Layer-1 variant ruleset)",
+    "slow: long-running property/differential soaks; run in every suite, but far deeper under HYPOTHESIS_PROFILE=nightly (see tests/conftest.py)",
+    "gpu: requires CUDA",
+    "ml: requires the `ml` dependency group (torch, pyarrow); skipped in the default CI env",
+    "oracle: differential tests against the external AGPL oracle (dev-only group)",
+    "llm: requires the `llm` dependency group (anthropic) and network access; skipped in the default CI env",
+    "finetune: requires the `finetune` dependency group (transformers, peft, accelerate) and network access to fetch a tiny HF test model; skipped in the default CI env",
+]
+
+[tool.coverage.run]
+source = ["entente"]
+# The `ml`-group modules (torch/pyarrow imports) are exercised only by
+# `ml`-marked tests, which CI does not run -- counting them would report 0% in the
+# default env and sink the total below the gate. They are omitted so the coverage
+# gate measures the plain-`uv sync` codebase consistently in CI and locally; the
+# torch-free ml modules (order_vocab, config, tracking, paquette, synthetic) stay
+# counted, so the gate still covers everything the default environment can run.
+omit = [
+    "*/entente/nn/features.py",
+    "*/entente/nn/encoder.py",
+    "*/entente/nn/heads.py",
+    "*/entente/nn/model.py",
+    "*/entente/training/bc.py",
+    "*/entente/data/preprocess.py",
+    "*/entente/data/dataset.py",
+    "*/entente/agents/bc_agent.py",
+    "*/entente/agents/pikl_agent.py",
+    "*/entente/viz/gif.py",
+    "*/entente/negotiation/finetune/data.py",
+    "*/entente/negotiation/finetune/train.py",
+    "*/entente/negotiation/press_eval.py",
+]
+
+[tool.coverage.report]
+fail_under = 85
+show_missing = true
+
+[tool.codespell]
+# Skipped: the lock file, binaries and generated figures are not typed prose.
+skip = "uv.lock,.git,*.svg,*.docx,*.pdf,*.bak"
+# Ignored words: province codes (THA, VIE, HEL, SER, AER), einsum subscripts, and English
+# the dictionary misreads.
+ignore-words-list = "tha,vie,hel,ser,aer,nd,unparseable"
+# LaTeX control words (`\emph`, `\cref`, `\tfrac`) are markup, not prose: blanked before the
+# spell check, so the .tex sources stay checked without a skip that would hide their text.
+ignore-regex = '\\[A-Za-z]+'
+
+[tool.uv.sources]
+diplomacy = { git = "https://github.com/diplomacy/diplomacy.git" }

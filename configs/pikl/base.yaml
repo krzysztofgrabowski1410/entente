@@ -1,0 +1,21 @@
+# piKL agent, full-size defaults: 8-16 candidates and 64-256 hedge iterations,
+# the range the search converges over (docs/pikl.tex Sec. 7). `checkpoint` must point
+# at a trained BC model -- the anchor policy and value net; the committed
+# default is the WSL2/CUDA base-run path (docs/setup.md). No trained
+# checkpoint is committed to the repo.
+checkpoint: checkpoints/bc/bc.pt
+device: cpu
+fallback: greedy
+seed: 0
+search:
+  k: 12
+  attempts: 48
+  iterations: 128
+  lam: 1.0
+  eta:
+    mode: adaptive
+    scale: 3.3333333333333335
+  temperature: 0.5
+  top_p: 0.95
+  include_greedy: true
+  play: sample

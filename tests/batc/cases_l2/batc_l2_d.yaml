@@ -1,0 +1,351 @@
+# BATC-L2 section D -- Devastate and devastation passability (rulebook
+# "Glaurung Unit and Devastation").
+section: "BATC-L2 D. Devastation"
+cases:
+  - id: BATC-L2.D.1
+    title: Glaurung devastates the province he stands in
+    start:
+      phase: S25M
+      units:
+        MORGOTH: ["3A HIT"]
+      l2:
+        morgoth_unit: null
+        glaurung: HIT
+    script:
+      - phase: S25M
+        orders:
+          MORGOTH: ["3A(G) HIT DEV"]
+    expect:
+      resolutions: {"3A(G) HIT DEV": succeeds}
+      events: ["Glaurung devastates HIT"]
+      devastated: [HIT]
+
+  - id: BATC-L2.D.2
+    title: the Morgoth unit is not Glaurung — it devastates nothing
+    start:
+      phase: S25M
+      units:
+        MORGOTH: ["3A HIT"]
+    script:
+      - phase: S25M
+        orders:
+          MORGOTH: ["3A(M) HIT DEV"]
+    expect:
+      resolutions: {"3A(M) HIT DEV": fails}
+      devastated: []
+
+  - id: BATC-L2.D.3
+    title: devastated ground bars entry — except Morgoth's own units
+    start:
+      phase: S25M
+      units:
+        DORIATH: ["A FOR"]
+        MORGOTH: ["A NEB"]
+      l2:
+        devastated: [EST]
+    script:
+      - phase: S25M
+        orders:
+          DORIATH: ["A FOR - EST"]
+          MORGOTH: ["A NEB - EST"]
+    expect:
+      resolutions:
+        "A FOR - EST": fails
+        "A NEB - EST": succeeds
+      units:
+        DORIATH: ["A FOR"]
+        MORGOTH: ["A EST"]
+
+  - id: BATC-L2.D.4
+    title: retreats into devastated ground are barred — the unit disbands
+    # (The supporter stands in HID: HID reaches EST on the board, DDI does
+    # not.)
+    start:
+      phase: S25M
+      units:
+        FINROD: ["A EST"]
+        DORIATH: ["A FOR", "A HID"]
+      l2:
+        devastated: [NEB]
+    script:
+      - phase: S25M
+        orders:
+          DORIATH:
+            - "A FOR - EST"
+            - "A HID S A FOR - EST"
+      - phase: S25R
+        orders:
+          FINROD: ["A EST - NEB"]
+    expect:
+      resolutions: {"A EST - NEB": fails}
+      units:
+        FINROD: []
+        DORIATH: ["A HID", "A EST"]
+      phase: F25M
+
+  - id: BATC-L2.D.5
+    title: a masked unit may capture a devastated center (single-Autumn timing)
+    start:
+      phase: S25M
+      units:
+        FINGOLFIN: ["A NEV"]
+      l2:
+        devastated: [VIN]
+        masks: {"FINGOLFIN A NEV": 1}
+    script:
+      - phase: S25M
+        orders:
+          FINGOLFIN: ["A NEV - VIN"]
+      - phase: F25M
+    expect:
+      ownership: {VIN: FINGOLFIN}
+      masks: {"FINGOLFIN A VIN": 1}
+
+  - id: BATC-L2.D.6
+    title: an unmasked unit neither enters nor captures devastated ground
+    start:
+      phase: S25M
+      units:
+        FINGOLFIN: ["A NEV"]
+      l2:
+        devastated: [VIN]
+    script:
+      - phase: S25M
+        orders:
+          FINGOLFIN: ["A NEV - VIN"]
+      - phase: F25M
+        orders:
+          FINGOLFIN: ["A NEV - VIN"]
+    expect:
+      resolutions: {"A NEV - VIN": fails}
+      ownership: {VIN: null}
+      units:
+        FINGOLFIN: ["A NEV"]
+
+  - id: BATC-L2.D.7
+    title: devastated and owned four years — the center becomes a Morgoth home
+    # (EIT is a neutral SC bordering Morgoth's home Area ANF, which the unit
+    # steps out to; EST is not a supply center.)
+    start:
+      phase: S25M
+      units:
+        MORGOTH: ["A EIT"]
+      ownership: {EIT: MORGOTH}
+      l2:
+        devastated: [EIT]
+        devastation_years: {EIT: 3}
+    script:
+      - phase: S25M
+        orders:
+          MORGOTH: ["A EIT - ANF"]
+      - phase: F25M
+      - phase: W25A
+        orders:
+          MORGOTH: ["Build A EIT"]
+    expect:
+      resolutions: {"Build A EIT": succeeds}
+      events: ["EIT becomes a Morgoth home center (devastated and owned four years)"]
+      converted_homes: [EIT]
+      units:
+        MORGOTH: ["A EIT", "A ANF"]
+
+  # The rulebook: units standing in a Province the moment it is Devastated
+  # -- except Morgoth's own and masked units -- are Dislodged and must
+  # Retreat. D.1-D.7 above never co-locate a foreign unit with Glaurung at
+  # live-Devastate time (D.3/D.4/D.5/D.6/D.7 set `devastated` as a start
+  # override with nothing else standing there; D.1's sole occupant is
+  # Glaurung himself), so D.8-D.15 alone exercise the expulsion.
+
+  - id: BATC-L2.D.8
+    title: devastate dislodges a co-located foreign unmasked unit
+    start:
+      phase: S25M
+      units:
+        MORGOTH: ["3A HIT"]
+        FEANORIANS: ["A HIT"]
+      l2:
+        morgoth_unit: null
+        glaurung: HIT
+    script:
+      - phase: S25M
+        orders:
+          MORGOTH: ["3A(G) HIT DEV"]
+    expect:
+      resolutions: {"3A(G) HIT DEV": succeeds}
+      devastated: [HIT]
+      events:
+        - "Glaurung devastates HIT"
+        - "Glaurung's devastation dislodges FEANORIANS A HIT"
+      units:
+        MORGOTH: ["3A HIT"]
+        FEANORIANS: []
+
+  - id: BATC-L2.D.9
+    title: the devastation-dislodged unit retreats out of the Area
+    start:
+      phase: S25M
+      units:
+        MORGOTH: ["3A HIT"]
+        FEANORIANS: ["A HIT"]
+      l2:
+        morgoth_unit: null
+        glaurung: HIT
+    script:
+      - phase: S25M
+        orders:
+          MORGOTH: ["3A(G) HIT DEV"]
+      - phase: S25R
+        orders:
+          FEANORIANS: ["A HIT - CNI"]
+    expect:
+      resolutions: {"A HIT - CNI": succeeds}
+      units:
+        FEANORIANS: ["A CNI"]
+      phase: F25M
+
+  - id: BATC-L2.D.10
+    title: a masked twin stands fast while its unmasked twin falls (claim discipline)
+    start:
+      phase: S25M
+      units:
+        MORGOTH: ["3A HIT"]
+        NAUGRIM: ["A HIT", "A HIT"]
+      l2:
+        morgoth_unit: null
+        glaurung: HIT
+        masks: {"NAUGRIM A HIT": 1}   # int -> only the first-created twin is masked
+    script:
+      - phase: S25M
+        orders:
+          MORGOTH: ["3A(G) HIT DEV"]
+      - phase: S25R
+        orders:
+          NAUGRIM: ["A HIT - CNI"]
+    expect:
+      resolutions: {"A HIT - CNI": succeeds}
+      units:
+        NAUGRIM: ["A HIT", "A CNI"]
+      masks: {"NAUGRIM A HIT": 1}   # the masked identity never left HIT
+      phase: F25M
+
+  - id: BATC-L2.D.11
+    title: Morgoth's own units are exempt from his Devastate's dislodgement
+    start:
+      phase: S25M
+      units:
+        MORGOTH: ["3A HIT", "A HIT"]
+      l2:
+        morgoth_unit: null
+        glaurung: HIT
+    script:
+      - phase: S25M
+        orders:
+          MORGOTH: ["3A(G) HIT DEV"]
+    expect:
+      resolutions: {"3A(G) HIT DEV": succeeds}
+      devastated: [HIT]
+      units:
+        MORGOTH: ["3A HIT", "A HIT"]
+
+  - id: BATC-L2.D.12
+    title: a unit dislodged elsewhere still cannot retreat into fresh devastation
+    start:
+      phase: S25M
+      units:
+        MORGOTH: ["3A HIT", "2A SEW"]
+        NAUGRIM: ["A MIT"]
+      l2:
+        morgoth_unit: null
+        glaurung: HIT
+    script:
+      - phase: S25M
+        orders:
+          MORGOTH:
+            - "3A(G) HIT DEV"
+            - "2A SEW - MIT"
+      - phase: S25R
+        orders:
+          NAUGRIM: ["A MIT - HIT"]
+    expect:
+      resolutions:
+        "A MIT - HIT": fails
+      units:
+        NAUGRIM: []
+      phase: F25M
+
+  - id: BATC-L2.D.13
+    title: a devastation-dislodged unit's mask acceptance fails that phase
+    start:
+      phase: S25M
+      units:
+        MORGOTH: ["3A HIT"]
+        NAUGRIM: ["A DLN"]
+        FEANORIANS: ["A HIT"]
+      l2:
+        morgoth_unit: null
+        glaurung: HIT
+        masks: {"NAUGRIM A DLN": 1}
+    script:
+      - phase: S25M
+        orders:
+          MORGOTH: ["3A(G) HIT DEV"]
+          NAUGRIM: ["A DLN GIVES MASK TO FEANORIANS A HIT"]
+          FEANORIANS: ["A HIT ACCEPTS MASK FROM NAUGRIM A DLN"]
+    expect:
+      resolutions:
+        "3A(G) HIT DEV": succeeds
+        "A DLN GIVES MASK TO FEANORIANS A HIT": fails
+        "A HIT ACCEPTS MASK FROM NAUGRIM A DLN": fails
+      events: ["Glaurung's devastation dislodges FEANORIANS A HIT"]
+      masks: {"NAUGRIM A DLN": 1}
+      units:
+        FEANORIANS: []
+
+  - id: BATC-L2.D.14
+    title: two devastation-fallen units contesting one retreat destination disband
+    start:
+      phase: S25M
+      units:
+        MORGOTH: ["3A HIT"]
+        FEANORIANS: ["A HIT"]
+        NAUGRIM: ["A HIT"]
+      l2:
+        morgoth_unit: null
+        glaurung: HIT
+    script:
+      - phase: S25M
+        orders:
+          MORGOTH: ["3A(G) HIT DEV"]
+      - phase: S25R
+        orders:
+          FEANORIANS: ["A HIT - CNI"]
+          NAUGRIM: ["A HIT - CNI"]
+    expect:
+      resolutions: {"A HIT - CNI": fails}
+      units:
+        FEANORIANS: []
+        NAUGRIM: []
+      phase: F25M
+
+  - id: BATC-L2.D.15
+    title: a same-phase arrival into the Area falls with the rest
+    start:
+      phase: S25M
+      units:
+        MORGOTH: ["3A HIT"]
+        NAUGRIM: ["A MIT"]
+      l2:
+        morgoth_unit: null
+        glaurung: HIT
+    script:
+      - phase: S25M
+        orders:
+          MORGOTH: ["3A(G) HIT DEV"]
+          NAUGRIM: ["A MIT - HIT"]
+    expect:
+      resolutions:
+        "3A(G) HIT DEV": succeeds
+        "A MIT - HIT": succeeds
+      events: ["Glaurung's devastation dislodges NAUGRIM A HIT"]
+      units:
+        NAUGRIM: []

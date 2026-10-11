@@ -1,0 +1,53 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+
+# Environments & tooling caches
+.venv/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+.hypothesis/
+.coverage
+.coverage.*
+htmlcov/
+# The junit report the CI datc job writes (reproducible locally), and the
+# pytest-benchmark autosave directory. A comment has to stand on its own line:
+# git reads everything after a pattern as part of the pattern.
+datc-results.xml
+.benchmarks/
+
+# Datasets, experiment artifacts (repo stays code + small data only).
+# Ignore the directory's contents but keep its README (exclude the dir itself and
+# git cannot re-include a file within it -- hence /data/* not /data/).
+/data/*
+!/data/README.md
+wandb/
+checkpoints/
+*.ckpt
+*.pt
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+.idea/
+*.bak
+
+# Word lock files (rulebook lives here as a source document)
+~$*.docx
+
+# External reference documents (read as specification only; never committed)
+docs/references/
+
+# LaTeX build files: latexmk builds docs/*.tex in place and scripts/build_specs.py
+# removes these afterwards; only the .tex and the .pdf are source.
+docs/*.aux
+docs/*.log
+docs/*.out
+docs/*.fls
+docs/*.fdb_latexmk
+docs/*.synctex.gz
+docs/*.toc

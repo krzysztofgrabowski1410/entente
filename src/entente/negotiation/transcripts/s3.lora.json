@@ -1,0 +1,24 @@
+{
+  "adapter_dir": "checkpoints/dialogue_lora/dialogue_lora",
+  "base_model": "HuggingFaceTB/SmolLM3-3B",
+  "incoming_message": "PROPOSAL from AUSTRIA to ITALY for S1901M: AUSTRIA orders [A VIE - GAL, A BUD - SER, F TRI - ALB]; ITALY orders [F NAP - ION, A ROM - APU, A VEN H]. Nothing but the Balkans from me this year -- go ahead and develop south.",
+  "parsed_intent": {
+    "ally": "ITALY",
+    "ally_action": [
+      "F NAP - ION",
+      "A ROM - APU",
+      "A VEN H"
+    ],
+    "phase": "S1901M",
+    "proposer": "AUSTRIA",
+    "proposer_action": [
+      "A VIE - GAL",
+      "A BUD - SER",
+      "F TRI - ALB"
+    ],
+    "rationale": "Nothing but the Balkans from me this year -- go ahead and develop south."
+  },
+  "provider": "lora",
+  "regenerated_message": "",
+  "scenario": "s3"
+}

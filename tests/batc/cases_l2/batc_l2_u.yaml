@@ -1,0 +1,145 @@
+# BATC-L2 section U -- Ulmo's wrath (rulebook "Ulmo's wrath").
+# Delays are overridden per case so the scenario is dice-independent; the
+# seeded-dice determinism itself is property-tested. One exception: U.6
+# shows Ered Lomin is in the list on ELO's own seed-0 die, override-free.
+section: "BATC-L2 U. Ulmo's wrath"
+cases:
+  - id: BATC-L2.U.1
+    title: delay 1 — the wrath falls at the start of the next Diplomacy phase
+    start:
+      phase: S25M
+      units:
+        MORGOTH: ["A NLA-HIT", "A ANF"]
+      l2:
+        ulmo_delays: {NLA: 1}
+    script:
+      - phase: S25M
+        orders:
+          MORGOTH: ["A NLA-HIT - NLA"]
+      - phase: F25M
+    expect:
+      events: ["Ulmo's wrath annihilates MORGOTH A NLA in NLA"]
+      units:
+        MORGOTH: ["A ANF"]
+
+  - id: BATC-L2.U.2
+    title: delay 2 — the unit survives the Autumn and dies next Spring
+    start:
+      phase: S25M
+      units:
+        MORGOTH: ["A NLA-HIT", "A ANF"]
+      l2:
+        ulmo_delays: {NLA: 2}
+    script:
+      - phase: S25M
+        orders:
+          MORGOTH: ["A NLA-HIT - NLA"]
+      - phase: F25M
+      - phase: W25A
+      - phase: S24M
+    expect:
+      events: ["Ulmo's wrath annihilates MORGOTH A NLA in NLA"]
+      units:
+        MORGOTH: ["A ANF"]
+
+  - id: BATC-L2.U.3
+    title: leaving the coast before the wrath falls escapes it
+    # (A NLA - ELO climbs the penalized NLA->ELO direction at 1/2 into empty
+    # Ered Lomin; the escape is about timing, not strength.)
+    # ELO is in the wrath list itself, so the escape destination arms a
+    # timer too; the ELO: 3 override keeps the case dice-independent --
+    # armed on the F25M arrival (ordinal 1), it would fire at S23M (ordinal
+    # 4), beyond the script. The escape under test is NLA's.
+    start:
+      phase: S25M
+      units:
+        MORGOTH: ["A NLA-HIT", "A ANF"]
+      l2:
+        ulmo_delays: {NLA: 2, ELO: 3}
+    script:
+      - phase: S25M
+        orders:
+          MORGOTH: ["A NLA-HIT - NLA"]
+      - phase: F25M
+        orders:
+          MORGOTH: ["A NLA - ELO"]
+      - phase: W25A
+      - phase: S24M
+    expect:
+      units:
+        MORGOTH: ["A ANF", "A ELO"]
+
+  - id: BATC-L2.U.4
+    title: the Morgoth unit annihilated by Ulmo — defeat and civil disorder
+    # (The disorder-probe move goes ANF -> EIT, an edge of the board --
+    # ANF-AEL is not; it must be a LEGAL move that civil disorder refuses,
+    # or the case would pass vacuously.)
+    start:
+      phase: S25M
+      units:
+        MORGOTH: ["3A NLA-HIT", "A ANF"]
+      l2:
+        ulmo_delays: {NLA: 1}
+    script:
+      - phase: S25M
+        orders:
+          MORGOTH: ["3A(M) NLA-HIT - NLA"]
+      - phase: F25M
+        orders:
+          MORGOTH: ["A ANF - EIT"]
+    expect:
+      resolutions: {"A ANF - EIT": fails}
+      events:
+        - "Ulmo's wrath annihilates MORGOTH 3A(M) NLA in NLA"
+        - "MORGOTH is defeated (the Morgoth unit is annihilated by Ulmo); his units stand in civil disorder"
+      morgoth_defeated: true
+      units:
+        MORGOTH: ["A ANF"]
+
+  - id: BATC-L2.U.5
+    title: the wrath is Morgoth's alone — other powers keep the coast
+    start:
+      phase: S25M
+      units:
+        FINGOLFIN: ["A NEV"]
+      l2:
+        ulmo_delays: {VIN: 1}
+    script:
+      - phase: S25M
+        orders:
+          FINGOLFIN: ["A NEV - VIN"]
+      - phase: F25M
+      - phase: W25A
+      - phase: S24M
+    expect:
+      units:
+        FINGOLFIN: ["A VIN"]
+
+  - id: BATC-L2.U.6
+    title: Ered Lomin is in the wrath list (correction 2026-07-09) — the seeded die
+      schedules the strike
+    # NO delay override: the case uses ELO's own die from the
+    # fifteen-province seed-0 stream. Verified against the stream by
+    # independent replication:
+    # ELO (6th draw in sorted order) rolls a 4 -> delay 2, the rulebook's
+    # 3-4 band ("the reaction of Ulmo takes place in the Diplomacy Phase
+    # after the following one (i. e. after a whole Year)") -- the Spring-25
+    # arrival dies at the start of Spring 24, the schedule the rulebook's
+    # Eglarest example implies for that band. Placement in NLA is not an
+    # arrival, so NLA's own timer never arms; the move climbs the proven
+    # NLA->ELO direction (U.3) into empty Ered Lomin.
+    start:
+      phase: S25M
+      units:
+        MORGOTH: ["A NLA", "A ANF"]
+    script:
+      - phase: S25M
+        orders:
+          MORGOTH: ["A NLA - ELO"]
+      - phase: F25M
+      - phase: W25A
+      - phase: S24M
+    expect:
+      events: ["Ulmo's wrath annihilates MORGOTH A ELO in ELO"]
+      units:
+        MORGOTH: ["A ANF"]

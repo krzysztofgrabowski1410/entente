@@ -1,0 +1,28 @@
+{
+  "phase": "S1901M",
+  "self_power": "FRANCE",
+  "proposer": "GERMANY",
+  "ally": "RUSSIA",
+  "true_move_index": 0,
+  "note": "Truthful: GERMANY's announced move is its actual scripted move. The classic Silesia bounce point -- GERMANY claims it, asks RUSSIA to redirect to Galicia.",
+  "message": "PROPOSAL from GERMANY to RUSSIA for S1901M: GERMANY orders [A BER - SIL, F KIE - DEN, A MUN H]; RUSSIA orders [A WAR - GAL, A MOS - UKR, F STP/SC - BOT, F SEV H]. Silesia is mine this year -- take Galicia and we stay out of each other's way.",
+  "candidates": {
+    "GERMANY": {
+      "order_sets": [
+        ["A BER - SIL", "F KIE - DEN", "A MUN H"],
+        ["A BER H", "F KIE - HOL", "A MUN - RUH"],
+        ["A BER H", "F KIE H", "A MUN H"]
+      ],
+      "anchor": [0.3, 0.4, 0.3]
+    },
+    "RUSSIA": {
+      "order_sets": [
+        ["A WAR - GAL", "A MOS - UKR", "F STP/SC - BOT", "F SEV H"],
+        ["A WAR - SIL", "A MOS - UKR", "F STP/SC H", "F SEV H"],
+        ["A WAR H", "A MOS H", "F STP/SC H", "F SEV H"]
+      ],
+      "anchor": [0.34, 0.33, 0.33]
+    }
+  },
+  "pikl": {"lam": 1.0, "iterations": 64}
+}

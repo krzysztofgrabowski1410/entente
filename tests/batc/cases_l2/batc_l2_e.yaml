@@ -1,0 +1,440 @@
+# BATC-L2 section E -- elven two-step ownership and Double Units (rulebook
+# "Gaining Ownership of Supply Centres", "Double Units").
+section: "BATC-L2 E. Elven ownership and doubles"
+cases:
+  - id: BATC-L2.E.1
+    title: spring entry held through Autumn — full ownership, builds at once
+    start:
+      phase: S25M
+      units:
+        DORIATH: ["A FOR"]
+    # (NEB is the neutral SC adjacent to FOR; EST is not a supply center. A
+    # single occupant of the Area owns it by the sole-power rule, so only
+    # the two-step timing is under test.)
+    script:
+      - phase: S25M
+        orders:
+          DORIATH: ["A FOR - NEB"]
+      - phase: F25M
+      - phase: W25A
+        orders:
+          DORIATH: ["Build A MEN"]
+    expect:
+      resolutions: {"Build A MEN": succeeds}
+      ownership: {NEB: DORIATH}
+      units:
+        DORIATH: ["A NEB", "A MEN"]
+
+  - id: BATC-L2.E.2
+    title: autumn entry owns but supplies no build until after the following Autumn
+    start:
+      phase: S25M
+      units:
+        DORIATH: ["A FOR"]
+    # (NEB is the neutral SC by FOR, as in E.1.)
+    script:
+      - phase: S25M
+      - phase: F25M
+        orders:
+          DORIATH: ["A FOR - NEB"]
+      - phase: W25A
+        orders:
+          DORIATH: ["Build A MEN", "Build A FON", "Build A FOR"]
+    expect:
+      resolutions:
+        "Build A MEN": succeeds
+        "Build A FON": succeeds
+        "Build A FOR": fails
+      ownership: {NEB: DORIATH}
+
+  - id: BATC-L2.E.3
+    title: the spring-entered unit that leaves again gains nothing
+    # (The fall departure returns EST -> FOR; EST-DDI is not an edge of the
+    # board. Any successful departure serves -- only the Autumn absence
+    # matters.)
+    start:
+      phase: S25M
+      units:
+        DORIATH: ["A FOR"]
+    script:
+      - phase: S25M
+        orders:
+          DORIATH: ["A FOR - EST"]
+      - phase: F25M
+        orders:
+          DORIATH: ["A EST - FOR"]
+    expect:
+      ownership: {EST: null}
+
+  - id: BATC-L2.E.4
+    title: a different unit at Autumn is an autumn entry — supply delayed
+    # (This case needs a capacity-1 center so the autumn entry is tracked
+    # per unit -- in an Area, continuous power occupation would grant the
+    # build regardless of which unit stands there. N-T is a cap-1 neutral
+    # SC; Doriath stages two units in its non-SC neighbours FSI and FOS. The
+    # spring occupant returns to FSI while a different unit enters from FOS
+    # in Autumn -> autumn entry, build delayed.)
+    start:
+      phase: S25M
+      units:
+        DORIATH: ["A FSI", "A FOS"]
+    script:
+      - phase: S25M
+        orders:
+          DORIATH: ["A FSI - N-T"]
+      - phase: F25M
+        orders:
+          DORIATH: ["A N-T - FSI", "A FOS - N-T"]
+      - phase: W25A
+        orders:
+          DORIATH: ["Build A MEN", "Build A FON"]
+    expect:
+      resolutions:
+        "Build A MEN": succeeds
+        "Build A FON": fails
+      ownership: {"N-T": DORIATH}
+
+  - id: BATC-L2.E.5
+    title: non-elven powers gain centers on the single Autumn (and build from them)
+    # (NOG, a Naugrim home undefended here, is the SC Men reaches from ELA
+    # in one Autumn; NEL is not a supply center. Non-elven single-Autumn
+    # ownership is the mechanic under test.)
+    start:
+      phase: S25M
+      units:
+        MEN: ["A ELA"]
+    script:
+      - phase: S25M
+      - phase: F25M
+        orders:
+          MEN: ["A ELA - NOG"]
+      - phase: W25A
+        orders:
+          MEN: ["Build A ELA"]
+    expect:
+      resolutions: {"Build A ELA": succeeds}
+      ownership: {NOG: MEN}
+
+  - id: BATC-L2.E.6
+    title: a clean year earns a Double Army bound to its center
+    start:
+      phase: S25M
+      units:
+        FINROD: ["A RON"]
+    script:
+      - phase: S25M
+      - phase: F25M
+      - phase: W25A
+        orders:
+          FINROD: ["Build 2A NAR BOUND NAR"]
+    expect:
+      resolutions: {"Build 2A NAR BOUND NAR": succeeds}
+      units:
+        FINROD: ["2A NAR", "A RON"]
+      double_bindings: {NAR: FINROD}
+
+  - id: BATC-L2.E.7
+    title: an unwritten binding takes the canonically first eligible center
+    # (Supply attribution shapes the eligible set: in this hand-built position
+    # -- one unit, six owned homes -- the lone army is supplied by RON, the
+    # centre it starts on, which therefore drops out of it, so the omitted
+    # binding takes DNN, the first ELIGIBLE center in map-code order. Scan:
+    # spent_supply {RON: 1}, free points RON 0 / DNN LAD NAR NWB TOL 1,
+    # double_eligible [DNN, LAD, NAR, NWB, TOL].)
+    start:
+      phase: S25M
+      units:
+        FINROD: ["A RON"]
+    script:
+      - phase: S25M
+      - phase: F25M
+      - phase: W25A
+        orders:
+          FINROD: ["Build 2A NAR"]
+    expect:
+      resolutions: {"Build 2A NAR": succeeds}
+      double_bindings: {DNN: FINROD}
+
+  - id: BATC-L2.E.8
+    title: capture of the bound center disbands the double wherever it stands
+    # (A RON - NAR climbs the penalized RON->NAR direction at 1/2 -- inert:
+    # it enters the vacated center uncontested, and the disband keys on
+    # ownership, not strength. NAR->TAL rides free.)
+    start:
+      phase: S25M
+      units:
+        FINROD: ["2A NAR"]
+        FEANORIANS: ["A RON"]
+    script:
+      - phase: S25M
+        orders:
+          FINROD: ["2A NAR - TAL"]
+      - phase: F25M
+        orders:
+          FEANORIANS: ["A RON - NAR"]
+      - phase: W25A
+    expect:
+      events: ["FINROD 2A TAL disbands (NAR was captured by FEANORIANS)"]
+      units:
+        FINROD: []
+      double_bindings: {}
+      ownership: {NAR: FEANORIANS}
+
+  - id: BATC-L2.E.9
+    title: a foreign entry during the year blocks double eligibility
+    # (The intrusion A TAL - NAR crosses the penalized TAL->NAR direction
+    # at 1/2 and still enters the empty center; eligibility keys on the
+    # entry having happened, not on its strength.)
+    start:
+      phase: S25M
+      units:
+        FINROD: ["A RON"]
+        FEANORIANS: ["A TAL"]
+    script:
+      - phase: S25M
+        orders:
+          FEANORIANS: ["A TAL - NAR"]
+      - phase: F25M
+        orders:
+          FEANORIANS: ["A NAR - TAL"]
+      - phase: W25A
+        orders:
+          FINROD: ["Build 2A NAR BOUND NAR", "Build A NAR"]
+    expect:
+      resolutions:
+        "Build 2A NAR BOUND NAR": fails
+        "Build A NAR": succeeds
+
+  - id: BATC-L2.E.10
+    title: Ossiriand may not build Double Units
+    # (The ban is exercised at TGA, a genuine Ossiriand home center, so the
+    # double build fails on the ban rather than on an invalid location.)
+    start:
+      phase: S25M
+      units:
+        OSSIRIAND: ["A NOS"]
+    script:
+      - phase: S25M
+      - phase: F25M
+      - phase: W25A
+        orders:
+          OSSIRIAND: ["Build 2A TGA", "Build A SOS"]
+    expect:
+      resolutions:
+        "Build 2A TGA": fails
+        "Build A SOS": succeeds
+
+  - id: BATC-L2.E.11
+    title: Area centers follow power-level control through the two-step
+    # (NEB is the Area SC bordering Feanorian homes GEL and THA; HIT is not
+    # a supply center. Two units take the Area in Spring and one stays
+    # through Autumn -- sole-power control across the two-step earns
+    # ownership.)
+    start:
+      phase: S25M
+      units:
+        FEANORIANS: ["A GEL", "A THA"]
+    script:
+      - phase: S25M
+        orders:
+          FEANORIANS: ["A GEL - NEB", "A THA - NEB"]
+      - phase: F25M
+        orders:
+          FEANORIANS: ["A NEB - THA"]
+    expect:
+      ownership: {NEB: FEANORIANS}
+
+  # -- a supply center funds exactly one unit (rulebook "Double Units") --
+  # "A Player may Build a Double Army after a Year in which no other Power has
+  # entered the Supply Centre, and the Supply Centre was Owned by the Player
+  # for the whole Year, and the Player has not Built a single Unit supplied by
+  # that Supply Centre. Every Supply Centre supplies one Unit at a time".
+  # Doriath opens these three at quota (three units on its three home
+  # centers), so the only unspent supply is whatever it captures.
+
+  - id: BATC-L2.E.12
+    title: a center spent on a plain army can no longer bind a Double
+    start:
+      phase: S25M
+      units:
+        DORIATH: ["A FON", "A FOR", "A MEN"]
+    script:
+      - phase: S25M
+        orders:
+          DORIATH: ["A FOR - NEB", "A FON H", "A MEN H"]
+      - phase: F25M
+        orders:
+          DORIATH: ["A NEB H", "A FON H", "A MEN H"]
+      - phase: W25A                      # NEB is the sole unspent center...
+        orders:
+          DORIATH: ["Build A FOR"]       # ...and this army spends it
+      - phase: S24M
+        orders:
+          DORIATH: ["A FON - DIM", "A NEB H", "A FOR H", "A MEN H"]
+      - phase: F24M                      # DIM's two-step supplies the W24A build
+        orders:
+          DORIATH: ["A DIM H", "A NEB H", "A FOR H", "A MEN H"]
+      - phase: W24A
+        orders:
+          DORIATH: ["Build 2A FON BOUND NEB", "Build A FON"]
+    expect:
+      resolutions:
+        "Build 2A FON BOUND NEB": fails   # NEB already supplies the W25A army
+        "Build A FON": succeeds
+      double_bindings: {}
+      ownership: {NEB: DORIATH, DIM: DORIATH}
+
+  - id: BATC-L2.E.13
+    title: waiving keeps the captured center free to bind a Double next year
+    # The unit that took NEB leaves during the quiet year -- ownership (and the
+    # eligibility clock) survive its departure, only a foreign entry resets it.
+    start:
+      phase: S25M
+      units:
+        DORIATH: ["A FON", "A FOR", "A MEN"]
+    script:
+      - phase: S25M
+        orders:
+          DORIATH: ["A FOR - NEB", "A FON H", "A MEN H"]
+      - phase: F25M
+        orders:
+          DORIATH: ["A NEB H", "A FON H", "A MEN H"]
+      - phase: W25A
+        orders:
+          DORIATH: ["Waive"]
+      - phase: S24M
+        orders:
+          DORIATH: ["A NEB - EST", "A FON H", "A MEN H"]
+      - phase: F24M
+        orders:
+          DORIATH: ["A EST H", "A FON H", "A MEN H"]
+      - phase: W24A
+        orders:
+          DORIATH: ["Build 2A FOR BOUND NEB"]
+    expect:
+      resolutions: {"Build 2A FOR BOUND NEB": succeeds}
+      double_bindings: {NEB: DORIATH}
+      ownership: {NEB: DORIATH}
+
+  - id: BATC-L2.E.14
+    title: an autumn capture waits a year, then offers the plain army or the Double
+    # The rulebook's second route: "If an elven Power enters a Supply Centre
+    # in Autumn, then the Supply Centre is Owned by the Elven Power, but the
+    # Power may not Build a Unit supplied by it until the following Autumn
+    # (if no other Power enter the Supply Centre during the next Year, the
+    # Power may Build a Double Unit)." W25A never opens -- the delayed center
+    # supplies nothing that winter, so the phase has no decision.
+    start:
+      phase: S25M
+      units:
+        DORIATH: ["A FON", "A FOR", "A MEN"]
+    script:
+      - phase: S25M
+        orders:
+          DORIATH: ["A FOR H", "A FON H", "A MEN H"]
+      - phase: F25M
+        orders:
+          DORIATH: ["A FOR - NEB", "A FON H", "A MEN H"]
+      - phase: S24M
+        orders:
+          DORIATH: ["A NEB H", "A FON H", "A MEN H"]
+      - phase: F24M
+        orders:
+          DORIATH: ["A NEB H", "A FON H", "A MEN H"]
+      - phase: W24A
+        orders:
+          DORIATH: ["Build 2A FOR BOUND NEB"]
+    expect:
+      resolutions: {"Build 2A FOR BOUND NEB": succeeds}
+      double_bindings: {NEB: DORIATH}
+
+  # -- a two-Centre province carries two Double Units, one per Centre
+  # (rulebook "Provinces with two Supply Centres") -- binding exclusivity is
+  # per supply POINT, not per province. FINROD owns South Ossiriand (SOS,
+  # weight 2) from turn one via a hand-set ownership override (Ossiriand
+  # itself may never build a Double, so the rulebook's own two-Centre example
+  # is easiest to exercise through a different owner); FINROD starts with no
+  # plain units so neither of SOS's two points is pre-spent by the
+  # player-favouring attribution ordinary armies get (BATC-L2.E.7's DNN case).
+
+  - id: BATC-L2.E.15
+    title: a two-Centre province earns a second Double a year after the first
+    start:
+      phase: S25M
+      units: {}
+      ownership: {NAR: FINROD, RON: FINROD, SOS: FINROD}
+    # A completely empty board has nothing to decide in a movement phase, so
+    # the single adjudicate() call at S25M runs straight through F25M to
+    # W25A; once the first Double stands, S24M/F24M are not vacuous (a
+    # standing unit defaults to Hold) and need their own checkpoints.
+    script:
+      - phase: S25M
+      - phase: W25A
+        orders:
+          FINROD: ["Build 2A NAR BOUND SOS"]
+      - phase: S24M
+      - phase: F24M
+      - phase: W24A
+        orders:
+          FINROD: ["Build 2A RON BOUND SOS"]
+    expect:
+      # only the last executed record's resolutions are checked; year one's
+      # "Build 2A NAR BOUND SOS" succeeding is proven by its unit surviving
+      # into the final "units" assertion below instead.
+      resolutions:
+        "Build 2A RON BOUND SOS": succeeds
+      units:
+        FINROD: ["2A NAR", "2A RON"]
+      double_bindings: {SOS: [FINROD, FINROD]}
+
+  - id: BATC-L2.E.16
+    title: a two-Centre province binds two Doubles in one winter; a third is refused
+    start:
+      phase: S25M
+      units: {}
+      ownership: {NAR: FINROD, RON: FINROD, NWB: FINROD, SOS: FINROD}
+    script:
+      - phase: S25M
+      - phase: W25A
+        orders:
+          FINROD:
+            - "Build 2A NAR BOUND SOS"
+            - "Build 2A RON BOUND SOS"
+            - "Build 2A NWB BOUND SOS"
+    expect:
+      resolutions:
+        "Build 2A NAR BOUND SOS": succeeds
+        "Build 2A RON BOUND SOS": succeeds
+        "Build 2A NWB BOUND SOS": fails
+      units:
+        FINROD: ["2A NAR", "2A RON"]
+      double_bindings: {SOS: [FINROD, FINROD]}
+
+  - id: BATC-L2.E.17
+    title: capturing a two-Centre province disbands every Double bound to it
+    # Both doubles stand away from SOS itself (their physical siting is
+    # independent of their bound center -- rulebook "they are built in Home
+    # Supply Centres"), so Feanorians can take the empty, uncontested Area in
+    # one clean Spring-held-through-Autumn step (BATC-L2.E.1's pattern).
+    start:
+      phase: S25M
+      units:
+        FINROD: ["2A NAR", "2A RON", "A TOL"]
+        FEANORIANS: ["A MOS"]
+      ownership: {SOS: FINROD}
+      l2:
+        bound_to: {"FINROD 2A NAR": SOS, "FINROD 2A RON": SOS}
+    script:
+      - phase: S25M
+        orders:
+          FEANORIANS: ["A MOS - SOS"]
+      - phase: F25M
+      - phase: W25A
+    expect:
+      events:
+        - "FINROD 2A NAR disbands (SOS was captured by FEANORIANS)"
+        - "FINROD 2A RON disbands (SOS was captured by FEANORIANS)"
+      units:
+        FINROD: ["A TOL"]
+      double_bindings: {}
+      ownership: {SOS: FEANORIANS}

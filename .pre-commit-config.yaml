@@ -1,0 +1,28 @@
+# Fast per-commit hygiene; mypy runs in CI (too slow for the commit loop).
+# After cloning: `uv run pre-commit install`; refresh pins: `pre-commit autoupdate`.
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-added-large-files
+        # The typeset specifications (docs/*.pdf) embed their fonts and run past the 500 kB
+        # default; a megabyte still catches a stray dataset or checkpoint.
+        args: [--maxkb=1024]
+      - id: check-merge-conflict
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.15.20 # keep in step with uv.lock's ruff, or the hook and CI format-check disagree
+    hooks:
+      - id: ruff
+        args: [--fix]
+      - id: ruff-format
+  - repo: https://github.com/codespell-project/codespell
+    rev: v2.3.0
+    hooks:
+      - id: codespell
+  - repo: https://github.com/astral-sh/uv-pre-commit
+    rev: 0.11.2 # match the uv that wrote uv.lock (revision 3); 0.5.x predates the format
+    hooks:
+      - id: uv-lock

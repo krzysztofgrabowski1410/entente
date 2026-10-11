@@ -1,0 +1,429 @@
+# BATC section D -- Bar: targeted entry denial inside Areas.
+# Rulebook: "Barring order", "Stopping a Unit from entering an Area" third
+# instance. The tie goes to the Bar -- the rulebook's example stops an
+# unsupported equal-strength move, and the third instance says so outright
+# ("a tie favours the Barring Order").
+# D.10 to D.14 pin what a Support given to a Bar is ("Barring order", last
+# sentence; twins rule 4): it is cut as any other Support -- by everybody but
+# the Unit the Bar is given against -- and it is not lost when its giver is
+# Dislodged in the same Phase. D.10 is the position the rule was written for
+# and D.11 its control; D.12 and D.13 are the full and the partial cut; D.14
+# holds the other side, a Dislodge that the Bar stops and that cuts all the
+# same.
+section: "BATC D. Bar contests"
+ruleset: beleriand
+cases:
+  - id: BATC.D.1
+    title: an unsupported bar stops an equal unsupported move
+    # The rulebook's example: "A(NEB) bars Doriath's A(FoR)-NEB. In such
+    # case the Doriath's Unit would fail to Move (unless it got Supported)."
+    phase: S25M
+    units:
+      MORGOTH: ["A NEB"]
+      DORIATH: ["A FOR"]
+    orders:
+      MORGOTH: ["A NEB BAR DORIATH A FOR - NEB"]
+      DORIATH: ["A FOR - NEB"]
+    expect:
+      resolutions:
+        "A NEB BAR DORIATH A FOR - NEB": succeeds
+        "A FOR - NEB": fails
+      units:
+        MORGOTH: ["A NEB"]
+        DORIATH: ["A FOR"]
+
+  - id: BATC.D.2
+    title: a supported move breaks through the bar
+    phase: S25M
+    units:
+      MORGOTH: ["A NEB"]
+      DORIATH: ["A FOR", "A EST"]
+    orders:
+      MORGOTH: ["A NEB BAR DORIATH A FOR - NEB"]
+      DORIATH: ["A FOR - NEB", "A EST S A FOR - NEB"]
+    expect:
+      resolutions:
+        "A NEB BAR DORIATH A FOR - NEB": fails
+        "A FOR - NEB": succeeds
+        "A EST S A FOR - NEB": succeeds
+      units:
+        MORGOTH: ["A NEB"]
+        DORIATH: ["A NEB", "A EST"]
+
+  - id: BATC.D.3
+    title: a supported bar holds the line against a supported move
+    # Rulebook support example: "A(Est) sup 3A(M)(NEB) bar Doriath's
+    # 2A(FOR)-NEB" (here at strengths 2 vs 2 -- the Bar wins the tie).
+    # (The bar's supporter stands in THA: THA-NEB is an edge of the board,
+    # GVA-NEB is not.)
+    phase: S25M
+    units:
+      MORGOTH: ["A NEB", "A THA"]
+      DORIATH: ["A FOR", "A EST"]
+    orders:
+      MORGOTH: ["A NEB BAR DORIATH A FOR - NEB", "A THA S MORGOTH A NEB BAR DORIATH A FOR - NEB"]
+      DORIATH: ["A FOR - NEB", "A EST S A FOR - NEB"]
+    expect:
+      resolutions:
+        "A NEB BAR DORIATH A FOR - NEB": succeeds
+        "A THA S MORGOTH A NEB BAR DORIATH A FOR - NEB": succeeds
+        "A FOR - NEB": fails
+        "A EST S A FOR - NEB": succeeds
+      units:
+        MORGOTH: ["A NEB", "A THA"]
+        DORIATH: ["A FOR", "A EST"]
+
+  - id: BATC.D.4
+    title: a bar blocks only the unit it names
+    phase: S25M
+    units:
+      MORGOTH: ["A NEB"]
+      DORIATH: ["A FOR"]
+      OSSIRIAND: ["A NOS"]
+    orders:
+      MORGOTH: ["A NEB BAR DORIATH A FOR - NEB"]
+      DORIATH: ["A FOR - NEB"]
+      OSSIRIAND: ["A NOS - NEB"]
+    expect:
+      resolutions:
+        "A NEB BAR DORIATH A FOR - NEB": succeeds
+        "A FOR - NEB": fails
+        "A NOS - NEB": succeeds
+      units:
+        DORIATH: ["A FOR"]
+        OSSIRIAND: ["A NEB"]
+
+  - id: BATC.D.5
+    title: a bar fires even as its unit is dislodged
+    # Twins rule 4 (rulebook "Indistinguishable Units (twins)"):
+    # "A Barring Order is not a Support: it is not cut by Attacks, and it
+    # takes effect even if the barring Unit is Dislodged in the same Phase.
+    # All Orders happen at the same time -- in the same moment in which the
+    # Unit is Dislodged, it bars the entrance of the barred attacker, so
+    # both happen." The barred move stays out while the dislodger takes the
+    # barring unit's slot. (Voiding a dislodged barring unit's bar would let
+    # the barred move enter; the simultaneity reading forbids it.) (The AER
+    # support projects AER->NEB, the free direction -- the table penalizes
+    # NEB->AER -- so the dislodge carries a whole 2 > 1.)
+    # (The dislodge's supporter stands in AER: AER-NEB is an edge of the
+    # board, GVA-NEB is not.)
+    phase: S25M
+    units:
+      MORGOTH: ["A NEB"]
+      DORIATH: ["A FOR"]
+      OSSIRIAND: ["A NOS", "A AER"]
+    orders:
+      MORGOTH: ["A NEB BAR DORIATH A FOR - NEB"]
+      DORIATH: ["A FOR - NEB"]
+      OSSIRIAND: ["A NOS DIS MORGOTH A NEB", "A AER S A NOS DIS MORGOTH A NEB"]
+    expect:
+      resolutions:
+        "A NEB BAR DORIATH A FOR - NEB": succeeds
+        "A FOR - NEB": fails
+        "A NOS DIS MORGOTH A NEB": succeeds
+      dislodged: ["MORGOTH A NEB"]
+      units:
+        DORIATH: ["A FOR"]
+        OSSIRIAND: ["A NEB", "A AER"]
+
+  - id: BATC.D.6
+    title: a barred move still contests the slots it cannot take
+    # Five stayers, one slot, two strength-1 entrants; one is barred. The
+    # barred move fails at the Bar but keeps its prevent (a bounced move
+    # blocks like any other) -- the tied class overflows and
+    # the unbarred entrant bounces too.
+    phase: S25M
+    units:
+      MORGOTH: ["A NEB", "A NEB", "A NEB"]
+      FEANORIANS: ["A NEB", "A NEB"]
+      DORIATH: ["A FOR"]
+      OSSIRIAND: ["A NOS"]
+    orders:
+      MORGOTH: ["A NEB BAR DORIATH A FOR - NEB"]
+      DORIATH: ["A FOR - NEB"]
+      OSSIRIAND: ["A NOS - NEB"]
+    expect:
+      resolutions:
+        "A NEB BAR DORIATH A FOR - NEB": succeeds
+        "A FOR - NEB": fails
+        "A NOS - NEB": fails
+      units:
+        DORIATH: ["A FOR"]
+        OSSIRIAND: ["A NOS"]
+
+  - id: BATC.D.7
+    title: a bar blocks a dislodge the support-hold wall cannot
+    # Rulebook "Stopping a Unit from entering an Area", third instance: "A
+    # Dislodge Order must therefore have more Strength than the defence of
+    # the Unit it attacks and more Strength than the Barring Order standing
+    # against it: if it has more Strength than the defence but not than the
+    # Bar, it fails entirely -- the attacked Unit stands and the Dislodging
+    # Unit stays in its Province." Naming the unit suffices (the entry
+    # target is the barring unit's own Area). The supported dislodge (2)
+    # beats the lone victim's defence (1), but the victim's own supported
+    # Bar (1 + 1 = 2) gates the entry and the tie favours the Bar: the
+    # dislodge fails wholly. (A bar that bound plain Moves only would let
+    # this dislodge through.)
+    phase: S25M
+    units:
+      MORGOTH: ["A NEB", "A THA"]
+      DORIATH: ["A FOR", "A EST"]
+    orders:
+      MORGOTH:
+        - "A NEB BAR DORIATH A FOR - NEB"
+        - "A THA S MORGOTH A NEB BAR DORIATH A FOR - NEB"
+      DORIATH:
+        - "A FOR DIS MORGOTH A NEB"
+        - "A EST S A FOR DIS MORGOTH A NEB"
+    expect:
+      resolutions:
+        "A FOR DIS MORGOTH A NEB": fails
+        "A EST S A FOR DIS MORGOTH A NEB": succeeds
+        "A NEB BAR DORIATH A FOR - NEB": succeeds
+        "A THA S MORGOTH A NEB BAR DORIATH A FOR - NEB": succeeds
+      dislodged: []
+      units:
+        MORGOTH: ["A NEB", "A THA"]
+        DORIATH: ["A FOR", "A EST"]
+
+  - id: BATC.D.8
+    title: a dislodge beating wall AND bar still enters (control for D.7)
+    # The same shape with a Double-Army supporter: the dislodge carries
+    # 1 + 2 = 3, strictly more than both the victim's defence (1) and the
+    # bar (2), so the ruling's gate is passed and the classic outcome
+    # returns -- the victim falls and the dislodger takes the freed slot.
+    phase: S25M
+    units:
+      MORGOTH: ["A NEB", "A THA"]
+      DORIATH: ["A FOR", "2A EST"]
+    orders:
+      MORGOTH:
+        - "A NEB BAR DORIATH A FOR - NEB"
+        - "A THA S MORGOTH A NEB BAR DORIATH A FOR - NEB"
+      DORIATH:
+        - "A FOR DIS MORGOTH A NEB"
+        - "2A EST S A FOR DIS MORGOTH A NEB"
+    expect:
+      resolutions:
+        "A FOR DIS MORGOTH A NEB": succeeds
+        "2A EST S A FOR DIS MORGOTH A NEB": succeeds
+        "A NEB BAR DORIATH A FOR - NEB": fails
+      dislodged: ["MORGOTH A NEB"]
+      units:
+        MORGOTH: ["A THA"]
+        DORIATH: ["A NEB", "2A EST"]
+
+  - id: BATC.D.9
+    title: a duplicate bar always converts - its support feeds the standing bar
+    # Twins rule 3: "Only one Barring Order of a Power stands against the
+    # same barred Order ... This holds against every barred Order alike,
+    # whether it is a wave, a single Move or a Dislodge." The conversion
+    # applies to EVERY shared target, lone movers included, and that is
+    # exactly what makes the duplicate's supports matter. Morgoth bars the
+    # same move twice (differently worded: 2A and A); the A bar converts to
+    # Hold, its support redirects to the standing strongest bar (2 + 1 = 3),
+    # and the supported move at 3 ties the merged gate and is stopped. Under
+    # independent bars the gates would be 2 and 2 and the move would walk
+    # in.
+    phase: S25M
+    units:
+      MORGOTH: ["2A NEB", "A NEB", "A THA"]
+      DORIATH: ["A FOR", "2A EST"]
+    orders:
+      MORGOTH:
+        - "2A NEB BAR DORIATH A FOR - NEB"
+        - "A NEB BAR DORIATH A FOR - NEB"
+        - "A THA S MORGOTH A NEB BAR DORIATH A FOR - NEB"
+      DORIATH:
+        - "A FOR - NEB"
+        - "2A EST S A FOR - NEB"
+    expect:
+      resolutions:
+        "A FOR - NEB": fails
+        "2A NEB BAR DORIATH A FOR - NEB": succeeds
+        "A NEB BAR DORIATH A FOR - NEB": fails
+        "A THA S MORGOTH A NEB BAR DORIATH A FOR - NEB": succeeds
+        "2A EST S A FOR - NEB": succeeds
+      dislodged: []
+      units:
+        MORGOTH: ["2A NEB", "A NEB", "A THA"]
+        DORIATH: ["A FOR", "2A EST"]
+
+  - id: BATC.D.10
+    title: the victim of a dislodge backs the bar that gates it - the bar holds
+    # Rulebook "Barring order": "A Support given to a Barring Order is cut as
+    # any other Support, but it is not lost when the Unit giving it is
+    # Dislodged in the same Phase: in the same moment in which that Unit is
+    # Dislodged, it Supports the Bar, so both happen." Nobody attacks LAD, so
+    # the attack is 2 + 1 = 3. The one attacker of A ANF is the unit the Bar
+    # names, and a Support cannot be broken by the Unit it is given against
+    # ("Strength and cutting Support"), so the backer's support is not cut.
+    # The Bar is 2 + 1 = 3 whatever becomes of A ANF, and 3 is not more than
+    # 3: a tie favours the Barring Order. The Dislodge fails wholly and
+    # nobody is dislodged.
+    # (Were the support lost with its giver, the position would have two
+    # consistent outcomes -- the Dislodge fails and the Bar stands at 3, or
+    # it succeeds, the backer falls and the Bar stands at 2 -- and nothing
+    # in the rules to choose between them. Every crossing used here and in
+    # D.11 to D.14 is a free one.)
+    phase: S25M
+    units:
+      FINROD: ["2A DNN", "A LAD"]
+      MORGOTH: ["A ANF", "2A ANF"]
+    orders:
+      FINROD:
+        - "2A DNN DIS MORGOTH A ANF"
+        - "A LAD S 2A DNN DIS MORGOTH A ANF"
+      MORGOTH:
+        - "2A ANF BAR FINROD 2A DNN - ANF"
+        - "A ANF S 2A ANF BAR FINROD 2A DNN - ANF"
+    expect:
+      resolutions:
+        "2A DNN DIS MORGOTH A ANF": fails
+        "A LAD S 2A DNN DIS MORGOTH A ANF": succeeds
+        "2A ANF BAR FINROD 2A DNN - ANF": succeeds
+        "A ANF S 2A ANF BAR FINROD 2A DNN - ANF": succeeds
+      dislodged: []
+      units:
+        FINROD: ["2A DNN", "A LAD"]
+        MORGOTH: ["A ANF", "2A ANF"]
+
+  - id: BATC.D.11
+    title: a backer that falls has still delivered (control for D.10)
+    # D.10 with one more supporter: the attack is 2 + 1 + 1 = 4, more than
+    # the Bar (2 + 1 = 3) and more than the victim's defence (1). The
+    # Dislodge goes in, A ANF is dislodged and the 2A takes its slot. The
+    # backer's support was not cut and it counted -- the Bar stood at 3, not
+    # at 2 -- so its row succeeds although its unit fell: "in the same moment
+    # in which that Unit is Dislodged, it Supports the Bar, so both happen",
+    # as twins rule 4 says of the Bar itself. The Bar's row fails: the unit
+    # it names got in.
+    phase: S25M
+    units:
+      FINROD: ["2A DNN", "A LAD", "A RIV"]
+      MORGOTH: ["A ANF", "2A ANF"]
+    orders:
+      FINROD:
+        - "2A DNN DIS MORGOTH A ANF"
+        - "A LAD S 2A DNN DIS MORGOTH A ANF"
+        - "A RIV S 2A DNN DIS MORGOTH A ANF"
+      MORGOTH:
+        - "2A ANF BAR FINROD 2A DNN - ANF"
+        - "A ANF S 2A ANF BAR FINROD 2A DNN - ANF"
+    expect:
+      resolutions:
+        "2A DNN DIS MORGOTH A ANF": succeeds
+        "A LAD S 2A DNN DIS MORGOTH A ANF": succeeds
+        "A RIV S 2A DNN DIS MORGOTH A ANF": succeeds
+        "2A ANF BAR FINROD 2A DNN - ANF": fails
+        "A ANF S 2A ANF BAR FINROD 2A DNN - ANF": succeeds
+      dislodged: ["MORGOTH A ANF"]
+      units:
+        FINROD: ["2A ANF", "A LAD", "A RIV"]
+        MORGOTH: ["2A ANF"]
+
+  - id: BATC.D.12
+    title: a second attacker still cuts the bar's support
+    # "A Support given to a Barring Order is cut as any other Support": the
+    # exception protects it from the Unit the Bar is given against and from
+    # nobody else. A EIT is not that Unit, so its Attack cuts the backer's
+    # support, 1 - 1 = 0. The Bar is 2, less than the attack of 2 + 1 = 3;
+    # 2A DNN also has more Strength than its rival (1) and than the victim's
+    # defence (1), so it dislodges A ANF. A EIT, 1 against a rival of 3,
+    # fails. The backer's row fails because it was fully cut -- the classic
+    # counter to a supported defence works against a supported Bar too.
+    phase: S25M
+    units:
+      FINROD: ["2A DNN", "A LAD", "A EIT"]
+      MORGOTH: ["A ANF", "2A ANF"]
+    orders:
+      FINROD:
+        - "2A DNN DIS MORGOTH A ANF"
+        - "A LAD S 2A DNN DIS MORGOTH A ANF"
+        - "A EIT DIS MORGOTH A ANF"
+      MORGOTH:
+        - "2A ANF BAR FINROD 2A DNN - ANF"
+        - "A ANF S 2A ANF BAR FINROD 2A DNN - ANF"
+    expect:
+      resolutions:
+        "2A DNN DIS MORGOTH A ANF": succeeds
+        "A LAD S 2A DNN DIS MORGOTH A ANF": succeeds
+        "A EIT DIS MORGOTH A ANF": fails
+        "2A ANF BAR FINROD 2A DNN - ANF": fails
+        "A ANF S 2A ANF BAR FINROD 2A DNN - ANF": fails
+      dislodged: ["MORGOTH A ANF"]
+      units:
+        FINROD: ["2A ANF", "A LAD", "A EIT"]
+        MORGOTH: ["2A ANF"]
+
+  - id: BATC.D.13
+    title: a partly cut support of a bar delivers what is left of it
+    # "The Strength of a Support is: base Strength diminished by the combined
+    # Strength of all Support-cutting Attacks." The backer is a 3A; the unit
+    # the Bar names cannot cut it, A EIT cuts it by 1, so it gives 3 - 1 = 2
+    # and the Bar is 2 + 2 = 4. The attack is 2 + 1 + 1 = 4, not more than 4,
+    # and the tie favours the Bar: 2A DNN fails wholly. A EIT fails too, 1
+    # against a rival of 4 and a defence of 3. The backer's row succeeds: 2
+    # of its 3 were delivered.
+    # (Were the support lost with its giver, the second consistent outcome
+    # would be there again: the 3A falls, the Bar stands at 2, and 4 passes.)
+    phase: S25M
+    units:
+      FINROD: ["2A DNN", "A LAD", "A RIV", "A EIT"]
+      MORGOTH: ["3A ANF", "2A ANF"]
+    orders:
+      FINROD:
+        - "2A DNN DIS MORGOTH 3A ANF"
+        - "A LAD S 2A DNN DIS MORGOTH 3A ANF"
+        - "A RIV S 2A DNN DIS MORGOTH 3A ANF"
+        - "A EIT DIS MORGOTH 3A ANF"
+      MORGOTH:
+        - "3A ANF S 2A ANF BAR FINROD 2A DNN - ANF"
+        - "2A ANF BAR FINROD 2A DNN - ANF"
+    expect:
+      resolutions:
+        "2A DNN DIS MORGOTH 3A ANF": fails
+        "A LAD S 2A DNN DIS MORGOTH 3A ANF": succeeds
+        "A RIV S 2A DNN DIS MORGOTH 3A ANF": succeeds
+        "A EIT DIS MORGOTH 3A ANF": fails
+        "3A ANF S 2A ANF BAR FINROD 2A DNN - ANF": succeeds
+        "2A ANF BAR FINROD 2A DNN - ANF": succeeds
+      dislodged: []
+      units:
+        FINROD: ["2A DNN", "A LAD", "A RIV", "A EIT"]
+        MORGOTH: ["3A ANF", "2A ANF"]
+
+  - id: BATC.D.14
+    title: a dislodge the bar stops has still attacked and still cuts
+    # "A Support is cut, when a Unit giving Support is being Attacked" -- and
+    # a Dislodge Order Attacks its victim whether or not it gets in. 2A DNN,
+    # 2 against a Bar of 2, is stopped; it has still Attacked A ANF, whose
+    # Support Hold is directed against nobody and is cut to 0. So 2A ANF
+    # defends at its own 2, the attack of 2 + 1 = 3 dislodges it, and its
+    # Bar took effect all the same (twins rule 4: "it takes effect even if
+    # the barring Unit is Dislodged in the same Phase"). Only a Support given
+    # to the Bar is spared by dislodgement; a Support Hold of the barring
+    # Unit is an ordinary one.
+    phase: S25M
+    units:
+      FINROD: ["2A DNN", "2A EIT", "A FSE"]
+      MORGOTH: ["A ANF", "2A ANF"]
+    orders:
+      FINROD:
+        - "2A DNN DIS MORGOTH A ANF"
+        - "2A EIT DIS MORGOTH 2A ANF"
+        - "A FSE S 2A EIT DIS MORGOTH 2A ANF"
+      MORGOTH:
+        - "2A ANF BAR FINROD 2A DNN - ANF"
+        - "A ANF S 2A ANF"
+    expect:
+      resolutions:
+        "2A DNN DIS MORGOTH A ANF": fails
+        "2A EIT DIS MORGOTH 2A ANF": succeeds
+        "A FSE S 2A EIT DIS MORGOTH 2A ANF": succeeds
+        "2A ANF BAR FINROD 2A DNN - ANF": succeeds
+        "A ANF S 2A ANF": fails
+      dislodged: ["MORGOTH 2A ANF"]
+      units:
+        FINROD: ["2A DNN", "2A ANF", "A FSE"]
+        MORGOTH: ["A ANF"]

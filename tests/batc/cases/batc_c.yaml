@@ -1,0 +1,587 @@
+# BATC section C -- targeted Dislodge: the pseudo-province contest, Area
+# support cutting, sheet-sequence victim selection, mis-targets.
+# Rulebook: "Dislodge Order", "Cutting Support in an Area".
+section: "BATC C. Dislodge contests and Area cut targeting"
+ruleset: beleriand
+cases:
+  - id: BATC.C.1
+    title: an unsupported dislodge fails against an equal hold
+    phase: S25M
+    units:
+      DORIATH: ["A FOR"]
+      MORGOTH: ["A NEB"]
+    orders:
+      DORIATH: ["A FOR DIS MORGOTH A NEB"]
+    expect:
+      resolutions:
+        "A FOR DIS MORGOTH A NEB": fails
+      units:
+        DORIATH: ["A FOR"]
+        MORGOTH: ["A NEB"]
+
+  - id: BATC.C.2
+    title: the rulebook dislodge example, supported and successful
+    # "A(FoR) dis Morgoth's A(NEB) and A(Est) support A(FoR) dislodge
+    # Morgoth's A(NEB)" -- the winner takes the victim's freed slot.
+    phase: S25M
+    units:
+      DORIATH: ["A FOR", "A EST"]
+      MORGOTH: ["A NEB"]
+    orders:
+      DORIATH: ["A FOR DIS MORGOTH A NEB", "A EST S A FOR DIS MORGOTH A NEB"]
+    expect:
+      resolutions:
+        "A FOR DIS MORGOTH A NEB": succeeds
+        "A EST S A FOR DIS MORGOTH A NEB": succeeds
+      dislodged: ["MORGOTH A NEB"]
+      units:
+        DORIATH: ["A NEB", "A EST"]
+
+  - id: BATC.C.3
+    title: a failed dislodge attempt still cuts the victim's support
+    # "Units Attacked within an Area, by an attempt to Dislodge them, have
+    # Support cut" -- by the attack's full strength, success or not.
+    # (The supported unit stands in THA: THA-NEB is an edge of the board,
+    # GVA-NEB is not, and the support must be a legal order or the case
+    # would pass vacuously.)
+    phase: S25M
+    units:
+      DORIATH: ["A FOR"]
+      MORGOTH: ["A NEB", "A THA"]
+    orders:
+      DORIATH: ["A FOR DIS MORGOTH A NEB"]
+      MORGOTH: ["A NEB S MORGOTH A THA"]
+    expect:
+      resolutions:
+        "A FOR DIS MORGOTH A NEB": fails
+        "A NEB S MORGOTH A THA": fails
+
+  - id: BATC.C.4
+    title: the victim's support against its own dislodger is protected
+    # Per-unit exception (docs/adjudication.tex Sec. 3.1, 4.2): the support
+    # NEB gives against FOR's unit is not cut by FOR's dislodge attempt; the
+    # supported attack then throws the failed dislodger out of its own
+    # province.
+    phase: S25M
+    units:
+      DORIATH: ["A FOR"]
+      MORGOTH: ["A NEB", "A EST"]
+    orders:
+      DORIATH: ["A FOR DIS MORGOTH A NEB"]
+      MORGOTH: ["A EST - FOR", "A NEB S MORGOTH A EST - FOR"]
+    expect:
+      resolutions:
+        "A FOR DIS MORGOTH A NEB": fails
+        "A EST - FOR": succeeds
+        "A NEB S MORGOTH A EST - FOR": succeeds
+      dislodged: ["DORIATH A FOR"]
+      units:
+        MORGOTH: ["A FOR", "A NEB"]
+
+  - id: BATC.C.5
+    title: rival dislodgers of one victim stand each other off
+    # Two supported dislodges name the same unit: neither strictly beats the
+    # other's prevent, both fail, the victim survives (docs/adjudication.tex
+    # Sec. 4.2). The AER support projects AER->NEB, the free direction of
+    # that barrier (the table penalizes NEB->AER) -- both dislodges tie at a
+    # whole 2. (Ossiriand's supporter stands in AER: AER-NEB is an edge of
+    # the board, GVA-NEB is not.)
+    phase: S25M
+    units:
+      DORIATH: ["A FOR", "A EST"]
+      OSSIRIAND: ["A NOS", "A AER"]
+      MORGOTH: ["A NEB"]
+    orders:
+      DORIATH: ["A FOR DIS MORGOTH A NEB", "A EST S A FOR DIS MORGOTH A NEB"]
+      OSSIRIAND: ["A NOS DIS MORGOTH A NEB", "A AER S A NOS DIS MORGOTH A NEB"]
+    expect:
+      resolutions:
+        "A FOR DIS MORGOTH A NEB": fails
+        "A NOS DIS MORGOTH A NEB": fails
+      units:
+        MORGOTH: ["A NEB"]
+        DORIATH: ["A FOR", "A EST"]
+        OSSIRIAND: ["A NOS", "A AER"]
+
+  - id: BATC.C.6
+    title: an unnamed victim is the first mentioned in the victim sheet
+    # Morgoth writes the supporting army first, so the dislodge binds to it
+    # (rulebook: "the first mentioned (in the Attacked Power's orders) Unit
+    # ... has its Support cut"); the second army's move is untouched -- it
+    # departs over the penalized NEB->RAM crossing at 1/2, which an
+    # uncontested entry into empty RAM never notices. (The supported unit
+    # stands in THA: THA-NEB is an edge of the board, GVA-NEB is not, and
+    # the support under cut must be a legal order or the case would pass
+    # vacuously.)
+    phase: S25M
+    units:
+      DORIATH: ["A FOR", "A EST"]
+      MORGOTH: ["A NEB", "A NEB", "A THA"]
+    orders:
+      DORIATH: ["A FOR DIS MORGOTH A NEB", "A EST S A FOR DIS MORGOTH A NEB"]
+      MORGOTH: ["A NEB S MORGOTH A THA", "A NEB - RAM"]
+    expect:
+      resolutions:
+        "A FOR DIS MORGOTH A NEB": succeeds
+        "A NEB S MORGOTH A THA": fails
+        "A NEB - RAM": succeeds
+      dislodged: ["MORGOTH A NEB"]
+      units:
+        DORIATH: ["A NEB", "A EST"]
+        MORGOTH: ["A RAM", "A THA"]
+
+  - id: BATC.C.7
+    title: flipping the victim sheet redirects the victim, not the cut
+    # The same position with Morgoth's orders swapped: the unnamed dislodge
+    # engages the first-listed twin (the departing army), so the contest
+    # collapses into plain entry -- but the CUT does not follow the victim.
+    # Twins rule 6 (rulebook "Indistinguishable Units (twins)"):
+    # "Support cutting is unchanged and runs on its own list ...: Attacks cut
+    # the attacked Player's written Supports from the first listed downward,
+    # one per Attack. The victim of an unnamed Attack and the Unit whose
+    # Support it cuts may therefore be different twins -- this is intended."
+    # The stack's only written support is cut at the attack's strength 2 and
+    # fails. (A victim-coupled cut would let the sheet flip save the
+    # support; rule 6 forbids it.)
+    # (The victim's own departure rides NEB->RAM at 1/2 -- uncontested, so
+    # the halving is inert here.)
+    # (THA supplies the supported unit, as in C.6.)
+    phase: S25M
+    units:
+      DORIATH: ["A FOR", "A EST"]
+      MORGOTH: ["A NEB", "A NEB", "A THA"]
+    orders:
+      DORIATH: ["A FOR DIS MORGOTH A NEB", "A EST S A FOR DIS MORGOTH A NEB"]
+      MORGOTH: ["A NEB - RAM", "A NEB S MORGOTH A THA"]
+    expect:
+      resolutions:
+        "A FOR DIS MORGOTH A NEB": succeeds
+        "A NEB S MORGOTH A THA": fails
+        "A NEB - RAM": succeeds
+      units:
+        DORIATH: ["A NEB", "A EST"]
+        MORGOTH: ["A RAM", "A THA", "A NEB"]
+
+  - id: BATC.C.8
+    title: naming the victim's action overrides sheet order
+    # "A Power may specify the Dislodgment of a specific Unit, by naming its
+    # action" -- the dislodge binds the mover although the supporter is
+    # mentioned first. (As in C.7, the named NEB->RAM departure is halved
+    # to 1/2 by the barrier and enters empty RAM regardless.)
+    # (THA supplies the supported unit, as in C.6.)
+    phase: S25M
+    units:
+      DORIATH: ["A FOR"]
+      MORGOTH: ["A NEB", "A NEB", "A THA"]
+    orders:
+      DORIATH: ["A FOR DIS MORGOTH A NEB - RAM"]
+      MORGOTH: ["A NEB S MORGOTH A THA", "A NEB - RAM"]
+    expect:
+      resolutions:
+        "A FOR DIS MORGOTH A NEB - RAM": succeeds
+        "A NEB S MORGOTH A THA": succeeds
+        "A NEB - RAM": succeeds
+      units:
+        DORIATH: ["A NEB"]
+        MORGOTH: ["A RAM", "A THA", "A NEB"]
+
+  - id: BATC.C.9
+    title: a dislodge naming an order nobody has fails and cuts nothing
+    # "If there is no Unit with such order, then no Unit's Support is cut,
+    # and the Move fails."
+    # (THA supplies the supported unit, as in C.6.)
+    phase: S25M
+    units:
+      DORIATH: ["A FOR"]
+      MORGOTH: ["A NEB", "A THA"]
+    orders:
+      DORIATH: ["A FOR DIS MORGOTH A NEB - EST"]
+      MORGOTH: ["A NEB S MORGOTH A THA"]
+    expect:
+      resolutions:
+        "A FOR DIS MORGOTH A NEB - EST": fails
+        "A NEB S MORGOTH A THA": succeeds
+      units:
+        DORIATH: ["A FOR"]
+        MORGOTH: ["A NEB", "A THA"]
+
+  - id: BATC.C.10
+    title: the rulebook action-naming example, verbatim, over the NEB-THA edge
+    # "For example, Doriath could order: A(Est) dis Morgoth's A(NEB) sup
+    # A(Gel)-Tha." -- the dislodge names the support, cutting it to 0 at the
+    # attack's full strength; the unsupported move then bounces off THA and
+    # the 1v1 dislodge itself fails. This case also certifies the NEB-THA
+    # army adjacency the example requires (without it the example's support
+    # would be Phase-0 invalid).
+    phase: S25M
+    units:
+      DORIATH: ["A EST"]
+      MORGOTH: ["A NEB", "A GEL"]
+      FEANORIANS: ["A THA"]
+    orders:
+      DORIATH: ["A EST DIS MORGOTH A NEB S MORGOTH A GEL - THA"]
+      MORGOTH: ["A NEB S MORGOTH A GEL - THA", "A GEL - THA"]
+    expect:
+      resolutions:
+        "A EST DIS MORGOTH A NEB S MORGOTH A GEL - THA": fails
+        "A NEB S MORGOTH A GEL - THA": fails
+        "A GEL - THA": fails
+      units:
+        DORIATH: ["A EST"]
+        MORGOTH: ["A NEB", "A GEL"]
+        FEANORIANS: ["A THA"]
+
+  - id: BATC.C.11
+    title: the same support delivers when nothing cuts it (control for C.10)
+    # Without the dislodge the NEB support carries GEL-THA to 2 > 1: the
+    # defender is dislodged -- direct evidence the NEB-THA reach
+    # feeds the strength pipeline.
+    phase: S25M
+    units:
+      MORGOTH: ["A NEB", "A GEL"]
+      FEANORIANS: ["A THA"]
+    orders:
+      MORGOTH: ["A NEB S MORGOTH A GEL - THA", "A GEL - THA"]
+    expect:
+      resolutions:
+        "A NEB S MORGOTH A GEL - THA": succeeds
+        "A GEL - THA": succeeds
+      dislodged: ["FEANORIANS A THA"]
+      units:
+        MORGOTH: ["A NEB", "A THA"]
+
+  - id: BATC.C.12
+    title: an unrelated entry from the destination nulls nothing (P10 audit fix)
+    # Prevent-nulling requires the attack from the unit's destination to BE
+    # its dislodger (docs/adjudication.tex Sec. 4.2). Here the Ossiriand army
+    # bounces off TID's last slot, stays, and is dislodged by a targeted
+    # Dislodge from MOS -- while Doriath's unrelated move from TID enters its
+    # Area (displacing nobody). Cross-attributing the two facts would null
+    # the bounced army's prevent at TID and let A WTD - TID slip in; the
+    # class of two over one slot must bounce both.
+    # (TID is the contested Area and WTD the rival entrant's origin: SOS-TID
+    # is the board's adjacent Area pair, and SEB-SOS / SEB-TID are not
+    # edges.)
+    phase: S25M
+    units:
+      OSSIRIAND: ["A SOS"]
+      DORIATH: ["A TID"]
+      FEANORIANS: ["A WTD"]
+      MORGOTH: ["2A MOS"]
+      MEN: ["A TID", "A TID", "A TID", "A TID", "A TID"]
+    orders:
+      OSSIRIAND: ["A SOS - TID"]
+      DORIATH: ["A TID - SOS"]
+      FEANORIANS: ["A WTD - TID"]
+      MORGOTH: ["2A MOS DIS OSSIRIAND A SOS"]
+    expect:
+      resolutions:
+        "A SOS - TID": fails
+        "A TID - SOS": succeeds
+        "A WTD - TID": fails
+        "2A MOS DIS OSSIRIAND A SOS": succeeds
+      dislodged: ["OSSIRIAND A SOS"]
+      units:
+        DORIATH: ["A SOS"]
+        FEANORIANS: ["A WTD"]
+        MORGOTH: ["2A SOS"]
+        MEN: ["A TID", "A TID", "A TID", "A TID", "A TID"]
+
+  - id: BATC.C.13
+    title: the dislodger from the destination does null the prevent (positive pin)
+    # The 4.A.7-choice-B analog with a targeted Dislodge: the Ossiriand army
+    # (barred, so its failure is independent of the slot count) is dislodged
+    # by the Double Army standing in TID -- an attack from its own
+    # destination -- so its prevent at TID is nulled and the Feanorian army
+    # takes the slot the dislodger vacated.
+    # (TID and WTD as in C.12.)
+    phase: S25M
+    units:
+      OSSIRIAND: ["A SOS"]
+      TELERI: ["A TID"]
+      MORGOTH: ["2A TID"]
+      FEANORIANS: ["A WTD"]
+      MEN: ["A TID", "A TID", "A TID", "A TID"]
+    orders:
+      OSSIRIAND: ["A SOS - TID"]
+      TELERI: ["A TID BAR OSSIRIAND A SOS - TID"]
+      MORGOTH: ["2A TID DIS OSSIRIAND A SOS"]
+      FEANORIANS: ["A WTD - TID"]
+    expect:
+      resolutions:
+        "A SOS - TID": fails
+        "A TID BAR OSSIRIAND A SOS - TID": succeeds
+        "2A TID DIS OSSIRIAND A SOS": succeeds
+        "A WTD - TID": succeeds
+      dislodged: ["OSSIRIAND A SOS"]
+      units:
+        TELERI: ["A TID"]
+        MORGOTH: ["2A SOS"]
+        FEANORIANS: ["A TID"]
+        MEN: ["A TID", "A TID", "A TID", "A TID"]
+
+  - id: BATC.C.14
+    title: a dislodge meets its victim's move head-to-head
+    # Rulebook ("Dislodge Order"): "If the Unit to be Dislodged is ordered to
+    # Move into, or to Dislodge a Unit in, the Province of the Dislodging
+    # Unit, the two Orders clash head-to-head, as two opposite Moves do:
+    # neither Unit can pass the other, the stronger Order may succeed, and a
+    # tie fails both."
+    # The victim cannot slip past its attacker into Rivil's Well: Gondolin's
+    # Dislodge (1 + 1 = 2) against the victim's Move, which climbs the marked
+    # ANF->RIV barrier at 1/2. The Dislodge wins and the victim resists with
+    # its Move's 1/2, so it is dislodged, Gondolin's army takes its slot, and
+    # Anfauglith stays full for the 3A. Without the clash this position had no
+    # consistent outcome at all (B.22 holds the knot that is left).
+    phase: S25M
+    units:
+      FINROD: ["A DNN"]
+      GONDOLIN: ["A RIV"]
+      MORGOTH: ["A ANF", "A ANF", "A ANF", "A ANF", "A ANF", "A ANF",
+                "3A ANG"]
+    orders:
+      FINROD: ["A DNN S A RIV DIS MORGOTH A ANF - RIV"]
+      GONDOLIN: ["A RIV DIS MORGOTH A ANF - RIV"]
+      MORGOTH: ["A ANF - RIV", "A ANF H", "A ANF H", "A ANF H", "A ANF H",
+                "A ANF H", "3A(M) ANG - ANF"]
+    expect:
+      resolutions:
+        "A RIV DIS MORGOTH A ANF - RIV": succeeds
+        "A DNN S A RIV DIS MORGOTH A ANF - RIV": succeeds
+        "A ANF - RIV": fails
+        "3A(M) ANG - ANF": fails
+      dislodged: ["MORGOTH A ANF"]
+      units:
+        FINROD: ["A DNN"]
+        GONDOLIN: ["A ANF"]
+        MORGOTH: ["A ANF", "A ANF", "A ANF", "A ANF", "A ANF", "3A ANG"]
+
+  - id: BATC.C.15
+    title: a tied clash fails both orders
+    # Rulebook ("Dislodge Order"): "... the two Orders clash head-to-head, as
+    # two opposite Moves do: ... a tie fails both."
+    # 1 against 1: the Dislodge does not get in and the victim does not get out.
+    phase: S25M
+    units:
+      FINROD: ["A DNN"]
+      MORGOTH: ["A ANF"]
+    orders:
+      FINROD: ["A DNN DIS MORGOTH A ANF"]
+      MORGOTH: ["A ANF - DNN"]
+    expect:
+      resolutions:
+        "A DNN DIS MORGOTH A ANF": fails
+        "A ANF - DNN": fails
+      dislodged: []
+      units:
+        FINROD: ["A DNN"]
+        MORGOTH: ["A ANF"]
+
+  - id: BATC.C.16
+    title: the victim wins the clash and dislodges its attacker
+    # Rulebook ("Dislodge Order"): "... the stronger Order may succeed".
+    # The victim's Move, supported from LAD (1 + 1 = 2), beats the Dislodge
+    # (1) along the edge, enters Dorthonion and dislodges the attacker, which
+    # resists with the strength of its Dislodge.
+    phase: S25M
+    units:
+      FINROD: ["A DNN"]
+      MORGOTH: ["A ANF", "A LAD"]
+    orders:
+      FINROD: ["A DNN DIS MORGOTH A ANF"]
+      MORGOTH: ["A ANF - DNN", "A LAD S A ANF - DNN"]
+    expect:
+      resolutions:
+        "A DNN DIS MORGOTH A ANF": fails
+        "A ANF - DNN": succeeds
+        "A LAD S A ANF - DNN": succeeds
+      dislodged: ["FINROD A DNN"]
+      units:
+        MORGOTH: ["A DNN", "A LAD"]
+
+  - id: BATC.C.17
+    title: a named support order names the supported unit too
+    # Rulebook ("Cutting Support in an Area"): "Doriath could order: A(Est)
+    # dis Morgoth's A(NEB) sup A(Gel)-Tha. If there is no Unit with such
+    # order, then no Unit's Support is cut, and the Move fails."
+    # Morgoth's army in NEB supports the army from NOS, not one from GEL, so
+    # the Dislodge names an order no unit has: it fails and cuts nothing, and
+    # the supported attack dislodges Doriath's army from Thargelion.
+    phase: S25M
+    units:
+      MORGOTH: ["A NEB", "A NOS"]
+      DORIATH: ["A THA"]
+      OSSIRIAND: ["A EST"]
+    orders:
+      MORGOTH: ["A NEB S A NOS - THA", "A NOS - THA"]
+      DORIATH: ["A THA H"]
+      OSSIRIAND: ["A EST DIS MORGOTH A NEB S A GEL - THA"]
+    expect:
+      resolutions:
+        "A EST DIS MORGOTH A NEB S A GEL - THA": fails
+        "A NEB S A NOS - THA": succeeds
+        "A NOS - THA": succeeds
+        "A THA H": fails
+      dislodged: ["DORIATH A THA"]
+      units:
+        MORGOTH: ["A NEB", "A THA"]
+        OSSIRIAND: ["A EST"]
+
+  - id: BATC.C.18
+    title: two dislodges against each other's units clash head-to-head
+    # Rulebook ("Dislodge Order"): "If the Unit to be Dislodged is ordered to
+    # Move into, or to Dislodge a Unit in, the Province of the Dislodging
+    # Unit, the two Orders clash head-to-head, as two opposite Moves do:
+    # neither Unit can pass the other, the stronger Order may succeed, and a
+    # tie fails both."
+    # FINROD's Dislodge out of Lothlann, supported from Ladros (2), meets
+    # MORGOTH's Dislodge out of Anfauglith against FINROD's army (1): FINROD
+    # wins, the Morgoth army is dislodged and FINROD's army takes its place.
+    phase: S25M
+    units:
+      FINROD: ["A LOT", "A LAD"]
+      MORGOTH: ["A ANF"]
+    orders:
+      FINROD: ["A LOT DIS MORGOTH A ANF", "A LAD S A LOT DIS MORGOTH A ANF"]
+      MORGOTH: ["A ANF DIS FINROD A LOT"]
+    expect:
+      resolutions:
+        "A LOT DIS MORGOTH A ANF": succeeds
+        "A ANF DIS FINROD A LOT": fails
+      dislodged: ["MORGOTH A ANF"]
+      units:
+        FINROD: ["A ANF", "A LAD"]
+        MORGOTH: []
+
+  - id: BATC.C.19
+    title: a dislodge clashes with its victim's dislodge of another unit there
+    # Rulebook ("Dislodge Order"), as in C.18: the victim's Dislodge enters
+    # the Dislodging Unit's Province whichever Unit there it names. MORGOTH's
+    # army names FINROD's holding army, not the dislodger, and still meets
+    # the supported Dislodge head-to-head and loses.
+    phase: S25M
+    units:
+      FINROD: ["A LOT", "A LOT", "A LAD"]
+      MORGOTH: ["A ANF"]
+    orders:
+      FINROD: ["A LOT H", "A LOT DIS MORGOTH A ANF", "A LAD S A LOT DIS MORGOTH A ANF"]
+      MORGOTH: ["A ANF DIS FINROD A LOT H"]
+    expect:
+      resolutions:
+        "A LOT DIS MORGOTH A ANF": succeeds
+        "A ANF DIS FINROD A LOT H": fails
+      dislodged: ["MORGOTH A ANF"]
+      units:
+        FINROD: ["A ANF", "A LOT", "A LAD"]
+        MORGOTH: []
+
+  - id: BATC.C.20
+    title: a dislodge that loses its clash and is dislodged stands in nobody's way
+    # Rulebook ("Dislodge Order"): "A Dislodge that loses its clash fails,
+    # and it does not stand in the way of the other Units entering the Area."
+    # MORGOTH's 2A leaves full Anfauglith for Eithel Sirion and meets
+    # FINGOLFIN's Dislodge head-to-head: 2 beats 1, the 2A enters and
+    # dislodges the dislodger. The slot it freed goes to the army from
+    # Angband, which no rival contests.
+    phase: S25M
+    units:
+      MORGOTH: ["A ANF", "A ANF", "A ANF", "A ANF", "A ANF", "2A ANF", "A ANG"]
+      FINGOLFIN: ["A EIT"]
+    orders:
+      MORGOTH: ["A ANF H", "A ANF H", "A ANF H", "A ANF H", "A ANF H",
+                "2A ANF - EIT", "A ANG - ANF"]
+      FINGOLFIN: ["A EIT DIS MORGOTH 2A ANF"]
+    expect:
+      resolutions:
+        "A EIT DIS MORGOTH 2A ANF": fails
+        "2A ANF - EIT": succeeds
+        "A ANG - ANF": succeeds
+      dislodged: ["FINGOLFIN A EIT"]
+      units:
+        MORGOTH: ["A ANF", "A ANF", "A ANF", "A ANF", "A ANF", "A ANF", "2A EIT"]
+        FINGOLFIN: []
+
+  - id: BATC.C.21
+    title: a dislodge that loses its clash stands in nobody's way while its unit stands
+    # Rulebook ("Dislodge Order"), as in C.20: "A Dislodge that loses its
+    # clash fails, and it does not stand in the way of the other Units
+    # entering the Area." The 2A wins the clash 2 > 1 and enters Lothlann,
+    # an Area, where entry dislodges nobody: FINGOLFIN's army stays in
+    # Lothlann, not dislodged. Its beaten Dislodge takes no part in the entry
+    # into Anfauglith, so the army from Angband is the only Move competing
+    # for the slot the 2A freed, and enters.
+    phase: S25M
+    units:
+      MORGOTH: ["A ANF", "A ANF", "A ANF", "A ANF", "A ANF", "2A ANF", "A ANG"]
+      FINGOLFIN: ["A LOT"]
+    orders:
+      MORGOTH: ["A ANF H", "A ANF H", "A ANF H", "A ANF H", "A ANF H",
+                "2A ANF - LOT", "A ANG - ANF"]
+      FINGOLFIN: ["A LOT DIS MORGOTH 2A ANF"]
+    expect:
+      resolutions:
+        "A LOT DIS MORGOTH 2A ANF": fails
+        "2A ANF - LOT": succeeds
+        "A ANG - ANF": succeeds
+      dislodged: []
+      units:
+        MORGOTH: ["A ANF", "A ANF", "A ANF", "A ANF", "A ANF", "A ANF", "2A LOT"]
+        FINGOLFIN: ["A LOT"]
+
+  - id: BATC.C.22
+    title: a dislodge whose victim has left moves, and loses its prevent when dislodged
+    # Rulebook ("Dislodge Order"): "If the Unit to be Dislodged leaves the
+    # Area without clashing with the Dislodge, the Dislodge becomes a Move
+    # into the Area and competes for its space as a Move does."
+    # The victim leaves Anfauglith for Lothlann, and the 2A leaves it for
+    # Eithel Sirion: two slots. The 2A from Angband takes one; FINGOLFIN's
+    # Dislodge, now a Move, and the army from Angband tie for the other and
+    # FINGOLFIN's army bounces. It is dislodged by the 2A coming from
+    # Anfauglith, so, as for any Move, it has no effect there: the army from
+    # Angband enters.
+    phase: S25M
+    units:
+      MORGOTH: ["A ANF", "A ANF", "A ANF", "A ANF", "A ANF", "2A ANF", "A ANG",
+                "2A ANG"]
+      FINGOLFIN: ["A EIT"]
+    orders:
+      MORGOTH: ["A ANF - LOT", "A ANF H", "A ANF H", "A ANF H", "A ANF H",
+                "2A ANF - EIT", "A ANG - ANF", "2A ANG - ANF"]
+      FINGOLFIN: ["A EIT DIS MORGOTH A ANF - LOT"]
+    expect:
+      resolutions:
+        "A EIT DIS MORGOTH A ANF - LOT": fails
+        "A ANF - LOT": succeeds
+        "2A ANF - EIT": succeeds
+        "A ANG - ANF": succeeds
+        "2A ANG - ANF": succeeds
+      dislodged: ["FINGOLFIN A EIT"]
+      units:
+        MORGOTH: ["A LOT", "A ANF", "A ANF", "A ANF", "A ANF", "2A EIT", "A ANF",
+                  "2A ANF"]
+        FINGOLFIN: []
+
+  - id: BATC.C.23
+    title: a dislodge passes a unit it does not name
+    # Rulebook ("Dislodge Order"): "Only the Unit named by a Dislodge is
+    # Attacked by it: any other Unit leaving the Area for the Province of the
+    # Dislodging Unit passes it, since Units moving through an Area miss each
+    # other." The named army leaves for Lothlann; the other leaves for
+    # Eithel Sirion while FINGOLFIN's army, its Dislodge now a Move, enters
+    # Anfauglith: no head-to-head, both arrive.
+    phase: S25M
+    units:
+      MORGOTH: ["A ANF", "A ANF"]
+      FINGOLFIN: ["A EIT"]
+    orders:
+      MORGOTH: ["A ANF - LOT", "A ANF - EIT"]
+      FINGOLFIN: ["A EIT DIS MORGOTH A ANF - LOT"]
+    expect:
+      resolutions:
+        "A EIT DIS MORGOTH A ANF - LOT": succeeds
+        "A ANF - LOT": succeeds
+        "A ANF - EIT": succeeds
+      dislodged: []
+      units:
+        MORGOTH: ["A LOT", "A EIT"]
+        FINGOLFIN: ["A ANF"]

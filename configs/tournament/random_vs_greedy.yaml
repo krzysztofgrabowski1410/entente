@@ -1,0 +1,14 @@
+# Reverse direction of configs/tournament/main.yaml: random is the lone
+# rotated seat, greedy fills the other six. Same fixed seed set and year cap,
+# so the pair of runs brackets the greedy>random gap from both seatings --
+# neither agent's number depends on which side of the 1-vs-6 it sits on.
+# 7 seats x 30 seeds = 210 games, clearing the 200-game floor a baseline
+# comparison is reported against.
+# Run: entente tournament configs/tournament/random_vs_greedy.yaml
+format: one_vs_six
+agents: [random, greedy]
+seeds: { start: 0, stop: 30 }
+max_year: 1910
+ruleset: standard
+map: standard
+output: docs/results/random_vs_greedy.jsonl

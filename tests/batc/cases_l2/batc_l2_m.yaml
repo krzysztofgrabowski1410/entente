@@ -1,0 +1,926 @@
+# BATC-L2 section M -- Dwarven masks (rulebook "Dwarven Masks").
+# Hand-derived from BeleriandInstruction.docx; original test data.
+section: "BATC-L2 M. Dwarven masks"
+cases:
+  - id: BATC-L2.M.1
+    title: a dwarven unit makes two masks per order in a dwarf city
+    script:
+      - phase: S25M
+        orders:
+          NAUGRIM: ["A BEL MSK"]
+    expect:
+      resolutions: {"A BEL MSK": succeeds}
+      events: ["NAUGRIM A BEL makes 2 masks"]
+      masks: {"NAUGRIM A BEL": 2}
+
+  - id: BATC-L2.M.2
+    title: only the Naugrim make masks — a non-dwarven unit in a dwarf city cannot
+    # The rulebook says so outright: "only the Naugrim may make masks" -- masks
+    # are the main dwarven diplomatic card, by design. A reading of the general
+    # clause ("When a dwarven Unit is in Belegost, Mount Dolmed or Nogrod...")
+    # that let any unit in a dwarf city make one mask would pass this order
+    # with "FEANORIANS A BEL makes 1 mask". Making is Naugrim-only; HOLDING and
+    # PASSING are untouched (M.4-M.14 still pass masks to non-dwarves).
+    start:
+      phase: S25M
+      units:
+        FEANORIANS: ["A BEL"]
+    script:
+      - phase: S25M
+        orders:
+          FEANORIANS: ["A BEL MSK"]
+    expect:
+      resolutions: {"A BEL MSK": fails}
+      masks: {}
+
+  - id: BATC-L2.M.3
+    title: make-masks outside Belegost, Mount Dolmed and Nogrod is invalid
+    start:
+      phase: S25M
+      units:
+        NAUGRIM: ["A ELA"]
+    script:
+      - phase: S25M
+        orders:
+          NAUGRIM: ["A ELA MSK"]
+    expect:
+      resolutions: {"A ELA MSK": fails}
+      masks: {}
+
+  - id: BATC-L2.M.4
+    title: a mask passes between adjacent units when both halves are ordered
+    start:
+      phase: S25M
+      units:
+        NAUGRIM: ["A BEL", "A DOL"]
+      l2:
+        masks: {"NAUGRIM A BEL": 1}
+    script:
+      - phase: S25M
+        orders:
+          NAUGRIM:
+            - "A BEL GIVES MASK TO NAUGRIM A DOL"
+            - "A DOL ACCEPTS MASK FROM NAUGRIM A BEL"
+    expect:
+      resolutions:
+        "A BEL GIVES MASK TO NAUGRIM A DOL": succeeds
+        "A DOL ACCEPTS MASK FROM NAUGRIM A BEL": succeeds
+      events: ["NAUGRIM A BEL passes a mask to NAUGRIM A DOL"]
+      masks: {"NAUGRIM A DOL": 1}
+
+  - id: BATC-L2.M.5
+    title: a give without the matching acceptance transfers nothing
+    start:
+      phase: S25M
+      units:
+        NAUGRIM: ["A BEL", "A DOL"]
+      l2:
+        masks: {"NAUGRIM A BEL": 1}
+    script:
+      - phase: S25M
+        orders:
+          NAUGRIM: ["A BEL GIVES MASK TO NAUGRIM A DOL"]
+    expect:
+      resolutions: {"A BEL GIVES MASK TO NAUGRIM A DOL": fails}
+      masks: {"NAUGRIM A BEL": 1}
+
+  - id: BATC-L2.M.6
+    title: no transfer between units that attacked each other this phase
+    # (The attack A NEL - BEL rides the free direction -- the table penalizes
+    # BEL->NEL, not this -- and bounces at a whole 1 v 1. The transfer ban
+    # keys on the attack, not its strength.)
+    start:
+      phase: S25M
+      units:
+        NAUGRIM: ["A BEL"]
+        FEANORIANS: ["A NEL"]
+      l2:
+        masks: {"NAUGRIM A BEL": 1}
+    script:
+      - phase: S25M
+        orders:
+          NAUGRIM: ["A BEL GIVES MASK TO FEANORIANS A NEL"]
+          FEANORIANS:
+            - "A NEL - BEL"
+            - "A NEL ACCEPTS MASK FROM NAUGRIM A BEL"
+    expect:
+      resolutions:
+        "A NEL - BEL": fails
+        "A BEL GIVES MASK TO FEANORIANS A NEL": fails
+        "A NEL ACCEPTS MASK FROM NAUGRIM A BEL": fails
+      masks: {"NAUGRIM A BEL": 1}
+
+  - id: BATC-L2.M.7
+    title: a dislodged giver passes nothing; its mask travels with the retreat
+    # (The dislodging attack is a whole 1 + 1 + 1 = 3 > 1 -- NEL->BEL is the
+    # free direction and neither support crosses a barrier.)
+    start:
+      phase: S25M
+      units:
+        NAUGRIM: ["A BEL", "A NOG"]
+        FEANORIANS: ["A NEL", "A ELA", "A DOL"]
+      l2:
+        masks: {"NAUGRIM A BEL": 1}
+    script:
+      - phase: S25M
+        orders:
+          NAUGRIM:
+            - "A BEL GIVES MASK TO NAUGRIM A NOG"
+            - "A NOG ACCEPTS MASK FROM NAUGRIM A BEL"
+          FEANORIANS:
+            - "A NEL - BEL"
+            - "A ELA S A NEL - BEL"
+            - "A DOL S A NEL - BEL"
+      - phase: S25R
+        orders:
+          NAUGRIM: ["A BEL - ELA"]
+    expect:
+      resolutions: {"A BEL - ELA": succeeds}
+      masks: {"NAUGRIM A ELA": 1}
+      units:
+        NAUGRIM: ["A ELA", "A NOG"]
+        FEANORIANS: ["A BEL", "A DOL", "A ELA"]
+      phase: F25M
+
+  - id: BATC-L2.M.8
+    title: a unit may move and then pass — references read end-of-phase positions
+    # (The giver's move goes DOL -> THA; DOL-ELA is not an edge of the board.
+    # THA-BEL is a real contact, so the end-of-phase pass reaches the
+    # receiver. The move rides DOL->THA, the free direction -- the table
+    # penalizes THA->DOL -- and is uncontested anyway.)
+    start:
+      phase: S25M
+      units:
+        NAUGRIM: ["A DOL", "A BEL"]
+      l2:
+        masks: {"NAUGRIM A DOL": 1}
+    script:
+      - phase: S25M
+        orders:
+          NAUGRIM:
+            - "A DOL - THA"
+            - "A DOL GIVES MASK TO NAUGRIM A BEL"
+            - "A BEL ACCEPTS MASK FROM NAUGRIM A THA"
+    expect:
+      resolutions:
+        "A DOL - THA": succeeds
+        "A DOL GIVES MASK TO NAUGRIM A BEL": succeeds
+        "A BEL ACCEPTS MASK FROM NAUGRIM A THA": succeeds
+      events: ["NAUGRIM A THA passes a mask to NAUGRIM A BEL"]
+      masks: {"NAUGRIM A BEL": 1}
+
+  - id: BATC-L2.M.9
+    title: masked twins claim devastated entries in sheet order — one mask, one entry
+    # (A NEB - AER crosses the penalized NEB->AER direction at 1/2 -- inert
+    # here: both targets are empty, and the second entry fails for want of a
+    # second mask, not of strength.)
+    start:
+      phase: S25M
+      units:
+        DORIATH: ["A NEB", "A NEB"]
+      l2:
+        devastated: [EST, AER]
+        masks: {"DORIATH A NEB": 1}
+    script:
+      - phase: S25M
+        orders:
+          DORIATH:
+            - "A NEB - EST"
+            - "A NEB - AER"
+    expect:
+      resolutions:
+        "A NEB - EST": succeeds
+        "A NEB - AER": fails
+      units:
+        DORIATH: ["A EST", "A NEB"]
+      masks: {"DORIATH A EST": 1}
+
+  - id: BATC-L2.M.10
+    title: acceptance through the Girdle grants the receiver the permission
+    start:
+      phase: S25M
+      units:
+        DORIATH: ["A FOR"]
+        MEN: ["A EST"]
+      l2:
+        masks: {"DORIATH A FOR": 1}
+    script:
+      - phase: S25M
+        orders:
+          DORIATH: ["A FOR GIVES MASK TO MEN A EST"]
+          MEN: ["A EST ACCEPTS MASK FROM DORIATH A FOR"]
+    expect:
+      resolutions:
+        "A FOR GIVES MASK TO MEN A EST": succeeds
+        "A EST ACCEPTS MASK FROM DORIATH A FOR": succeeds
+      events: ["MEN gains the Girdle of Melian permission (mask acceptance)"]
+      girdle: [DORIATH, MEN]
+      masks: {"MEN A EST": 1}
+
+  - id: BATC-L2.M.11
+    title: the Feanorians cannot gain the Girdle by accepting from an elvish giver
+    start:
+      phase: S25M
+      units:
+        DORIATH: ["A FOR"]
+        FEANORIANS: ["A EST"]
+      l2:
+        masks: {"DORIATH A FOR": 1}
+    script:
+      - phase: S25M
+        orders:
+          DORIATH: ["A FOR GIVES MASK TO FEANORIANS A EST"]
+          FEANORIANS: ["A EST ACCEPTS MASK FROM DORIATH A FOR"]
+    expect:
+      resolutions:
+        "A FOR GIVES MASK TO FEANORIANS A EST": fails
+        "A EST ACCEPTS MASK FROM DORIATH A FOR": fails
+      girdle: [DORIATH]
+      masks: {"DORIATH A FOR": 1}
+
+  # Rulebook "Doriath": a written grant of the Girdle to Morgoth is refused
+  # from an ELVISH giver only -- Men and the Naugrim may hand it over, as
+  # M.34/M.35 below and test_grant_validation_matrix's giver axis show. The
+  # attack-grant channel -- a girdle power's relocating order out of FoR/FoN
+  # against an occupied capacity-1 province -- is not Morgoth's SOLE route,
+  # but it is the only one that needs nobody's consent. The exact event text
+  # this channel emits is asserted by M.13 below (a single-phase case, so the
+  # record the loader inspects is the attack's own) -- this case's own final
+  # record is the *following* phase, so it checks the grant by its two
+  # lasting effects instead: girdle membership, and a use of it.
+  - id: BATC-L2.M.12
+    title: the sanctioned attack-grant channel -- a sortie out of the Girdle grants Morgoth the permission, usable next phase
+    start:
+      phase: S25M
+      units:
+        DORIATH: ["A FOR"]
+        MORGOTH: ["A EST", "A DDI"]
+    script:
+      - phase: S25M
+        orders:
+          DORIATH: ["A FOR - EST"]
+      - phase: F25M
+        orders:
+          MORGOTH: ["A DDI - FON"]
+    expect:
+      resolutions: {"A DDI - FON": succeeds}
+      girdle: [DORIATH, MORGOTH]
+      units:
+        DORIATH: ["A FOR"]
+        MORGOTH: ["A EST", "A FON"]
+
+  - id: BATC-L2.M.13
+    title: an attack-granted Morgoth sortie grants every victim it hits, Feanorian included
+    # (Morgoth already holds the Girdle here, standing in for a prior
+    # attack-grant: his onward compensation to an elvish victim is
+    # attacker-agnostic.)
+    #
+    # The rulebook's grant sentence is unconditional -- "the owner of the
+    # Attacked Unit gains ability to pass the Girdle of Melian - whether or
+    # not the Order succeeds" -- and the Feanorian restriction beside it
+    # governs voluntary transfer only ("No elven Power may give a written
+    # permission to enter the Girdle to Feanorian Powers."). Both bounced
+    # sorties therefore compensate their victims, the FEANORIAN one included;
+    # a Feanorian clause read as categorical across channels would skip it.
+    start:
+      phase: S25M
+      units:
+        MORGOTH: ["A FOR", "A FON"]
+        FEANORIANS: ["A EST"]
+        FINGOLFIN: ["A DDI"]
+      l2:
+        girdle: [DORIATH, MORGOTH]
+    script:
+      - phase: S25M
+        orders:
+          MORGOTH:
+            - "A FOR - EST"
+            - "A FON - DDI"
+    expect:
+      resolutions:
+        "A FOR - EST": fails
+        "A FON - DDI": fails
+      events:
+        - "FINGOLFIN gains the Girdle of Melian permission (attacked from the Girdle)"
+        - "FEANORIANS gains the Girdle of Melian permission (attacked from the Girdle)"
+      girdle: [DORIATH, FEANORIANS, FINGOLFIN, MORGOTH]
+
+  - id: BATC-L2.M.14
+    title: a mask offered to Morgoth transfers nothing
+    start:
+      phase: S25M
+      units:
+        NAUGRIM: ["A BEL"]
+        MORGOTH: ["A NEL"]
+      l2:
+        masks: {"NAUGRIM A BEL": 1}
+    script:
+      - phase: S25M
+        orders:
+          NAUGRIM: ["A BEL GIVES MASK TO MORGOTH A NEL"]
+          MORGOTH: ["A NEL ACCEPTS MASK FROM NAUGRIM A BEL"]
+    expect:
+      resolutions:
+        "A BEL GIVES MASK TO MORGOTH A NEL": fails
+        "A NEL ACCEPTS MASK FROM NAUGRIM A BEL": fails
+      masks: {"NAUGRIM A BEL": 1}
+
+  - id: BATC-L2.M.15
+    title: Morgoth can never make masks, even standing in a dwarf city
+    start:
+      phase: S25M
+      units:
+        MORGOTH: ["A BEL"]
+    script:
+      - phase: S25M
+        orders:
+          MORGOTH: ["A BEL MSK"]
+    expect:
+      resolutions: {"A BEL MSK": fails}
+      masks: {}
+
+  # Move-coupled mask passing. The RESOLUTION reads end-of-phase positions
+  # (M.8); the ENUMERATION anticipates each counterpart's reachable end, so the
+  # rulebook's "a Unit may Move and then pass a mask" is reachable from the
+  # client. Cases (a)-(d) below both resolve AND enumerate; (e) resolves but is
+  # not enumerated (convoy landings are position-dependent, see M.20).
+  # Hand-derived from BeleriandInstruction.docx, whose own examples name
+  # the counterpart at its post-move spot -- "A(NOs)->NEB (gives mask to
+  # Doriath A(FoR))" / "A(FSi)->FoR (accepts the dwarven mask from Ossiriand
+  # A(NEB))".
+  - id: BATC-L2.M.16
+    title: (a) a giver moves into a receiver's reach, then passes across powers
+    # DOL is NOT adjacent to NEB, so the pass needs the giver's DOL->THA move
+    # (THA-NEB is a real contact). The accept names the giver at its END spot
+    # THA -- the text the anticipated-position enumeration offers.
+    start:
+      phase: S25M
+      units:
+        NAUGRIM: ["A DOL"]
+        DORIATH: ["A NEB"]
+      l2:
+        masks: {"NAUGRIM A DOL": 1}
+    script:
+      - phase: S25M
+        orders:
+          NAUGRIM:
+            - "A DOL - THA"
+            - "A DOL GIVES MASK TO DORIATH A NEB"
+          DORIATH:
+            - "A NEB ACCEPTS MASK FROM NAUGRIM A THA"
+    expect:
+      resolutions:
+        "A DOL - THA": succeeds
+        "A DOL GIVES MASK TO DORIATH A NEB": succeeds
+        "A NEB ACCEPTS MASK FROM NAUGRIM A THA": succeeds
+      events: ["NAUGRIM A THA passes a mask to DORIATH A NEB"]
+      masks: {"DORIATH A NEB": 1}
+      units:
+        NAUGRIM: ["A THA"]
+        DORIATH: ["A NEB"]
+
+  - id: BATC-L2.M.17
+    title: (b) a bounced giver stays out of reach -- both halves fail on the true positions
+    # A DOL - THA and A NEL - THA bounce 1 v 1, so the giver never leaves DOL,
+    # which is not adjacent to NEB. The accept named the giver at THA, but the
+    # resolution reads DOL and the pass fails. The enumeration OFFERS both
+    # texts (the giver COULD have reached THA) -- geometry is checked on the
+    # ACTUAL end positions, not the anticipated ones.
+    start:
+      phase: S25M
+      units:
+        NAUGRIM: ["A DOL"]
+        FEANORIANS: ["A NEL"]
+        DORIATH: ["A NEB"]
+      l2:
+        masks: {"NAUGRIM A DOL": 1}
+    script:
+      - phase: S25M
+        orders:
+          NAUGRIM:
+            - "A DOL - THA"
+            - "A DOL GIVES MASK TO DORIATH A NEB"
+          FEANORIANS:
+            - "A NEL - THA"
+          DORIATH:
+            - "A NEB ACCEPTS MASK FROM NAUGRIM A THA"
+    expect:
+      resolutions:
+        "A DOL - THA": fails
+        "A DOL GIVES MASK TO DORIATH A NEB": fails
+        "A NEB ACCEPTS MASK FROM NAUGRIM A THA": fails
+      masks: {"NAUGRIM A DOL": 1}
+      units:
+        NAUGRIM: ["A DOL"]
+        FEANORIANS: ["A NEL"]
+        DORIATH: ["A NEB"]
+
+  - id: BATC-L2.M.18
+    title: (c) the receiver moves into reach; the accept names the stationary giver
+    # The mirror of (a): here the RECEIVER moves NEB->THA (THA-BEL is a real
+    # contact), and the GIVE names it at its end spot THA. The giver holds
+    # still, so the accept names it at its current BEL (also its end).
+    start:
+      phase: S25M
+      units:
+        NAUGRIM: ["A BEL"]
+        DORIATH: ["A NEB"]
+      l2:
+        masks: {"NAUGRIM A BEL": 1}
+    script:
+      - phase: S25M
+        orders:
+          NAUGRIM:
+            - "A BEL GIVES MASK TO DORIATH A THA"
+          DORIATH:
+            - "A NEB - THA"
+            - "A NEB ACCEPTS MASK FROM NAUGRIM A BEL"
+    expect:
+      resolutions:
+        "A NEB - THA": succeeds
+        "A BEL GIVES MASK TO DORIATH A THA": succeeds
+        "A NEB ACCEPTS MASK FROM NAUGRIM A BEL": succeeds
+      events: ["NAUGRIM A BEL passes a mask to DORIATH A THA"]
+      masks: {"DORIATH A THA": 1}
+      units:
+        NAUGRIM: ["A BEL"]
+        DORIATH: ["A THA"]
+
+  - id: BATC-L2.M.19
+    title: (d) a giver dislodge-advances into an Area, then passes from the new province
+    # The variant's dislodger-advance: A EST DIS FEANORIANS A NEB at 1 + two
+    # supports = 3 > 1 lands the giver in NEB carrying its mask; the accept
+    # names it at NEB, the anticipated dislodge end (NEB is an army neighbour
+    # of EST, so it is in ends(EST); THA-NEB is a real contact).
+    start:
+      phase: S25M
+      units:
+        NAUGRIM: ["A EST", "A GEL", "A FOR", "A THA"]
+        FEANORIANS: ["A NEB"]
+      l2:
+        masks: {"NAUGRIM A EST": 1}
+    script:
+      - phase: S25M
+        orders:
+          NAUGRIM:
+            - "A EST DIS FEANORIANS A NEB"
+            - "A GEL S A EST DIS FEANORIANS A NEB"
+            - "A FOR S A EST DIS FEANORIANS A NEB"
+            - "A EST GIVES MASK TO NAUGRIM A THA"
+            - "A THA ACCEPTS MASK FROM NAUGRIM A NEB"
+    expect:
+      resolutions:
+        "A EST DIS FEANORIANS A NEB": succeeds
+        "A EST GIVES MASK TO NAUGRIM A THA": succeeds
+        "A THA ACCEPTS MASK FROM NAUGRIM A NEB": succeeds
+      events: ["NAUGRIM A NEB passes a mask to NAUGRIM A THA"]
+      masks: {"NAUGRIM A THA": 1}
+      units:
+        NAUGRIM: ["A FOR", "A GEL", "A NEB", "A THA"]
+      phase: S25R
+
+  - id: BATC-L2.M.20
+    title: (e) a convoyed giver passes from its landing -- resolves, but not enumerated
+    # The RESOLUTION reads the convoy landing like any move: A BRI - VIN via
+    # convoy (F NBE convoys) lands the giver in VIN, adjacent to NFA, so the
+    # pass carries. The anticipated-position ENUMERATION does NOT anticipate
+    # convoy landings -- they depend on the phase's actual convoying fleets,
+    # and deriving them would duplicate the adjudicator's convoy paths (the
+    # hooks stay a consumer of the frozen calculus). So this pass is
+    # submittable by hand yet absent from the offered mask list -- a known
+    # scope bound, not a resolution gap.
+    start:
+      phase: S25M
+      units:
+        MEN: ["A BRI", "F NBE", "A NFA"]
+      l2:
+        masks: {"MEN A BRI": 1}
+    script:
+      - phase: S25M
+        orders:
+          MEN:
+            - "A BRI - VIN via convoy"
+            - "F NBE C A BRI - VIN"
+            - "A BRI GIVES MASK TO MEN A NFA"
+            - "A NFA ACCEPTS MASK FROM MEN A VIN"
+    expect:
+      resolutions:
+        "A BRI - VIN via convoy": succeeds
+        "A BRI GIVES MASK TO MEN A NFA": succeeds
+        "A NFA ACCEPTS MASK FROM MEN A VIN": succeeds
+      events: ["MEN A VIN passes a mask to MEN A NFA"]
+      masks: {"MEN A NFA": 1}
+      units:
+        MEN: ["A NFA", "A VIN", "F NBE"]
+
+  # Both-sides-moving mask passing: the rule restricts neither counterpart, so
+  # A(Mt. Dolmed) M Tha giving a mask to Doriath A(NEB) while A(Forest of
+  # Region) M NEB accepts it from Naugrim A(Tha) succeeds. The RESOLUTION reads
+  # end-of-phase positions (M.8/M.16); the ENUMERATION offers both halves (the
+  # cross product) so the sheet is submittable. (f) both moves carry; (g) one
+  # half bounces, so the true positions fall out of geometry and both halves
+  # fail (geometry is checked on the actual end positions of both-move pairs
+  # too).
+  - id: BATC-L2.M.21
+    title: (f) both units move at once, then pass at their new positions (the author's scenario)
+    # NAUGRIM A DOL - THA gives to DORIATH A NEB; DORIATH A FOR - NEB accepts
+    # from NAUGRIM A THA. Neither ref names a current province -- the give names
+    # the receiver at its move-end NEB, the accept the giver at its move-end THA
+    # -- yet the pass carries: THA-NEB is a real contact and the resolution reads
+    # post-move positions. FOR is a Girdle province, but the girdle check reads
+    # END positions (THA/NEB, both outside), so it is irrelevant. A
+    # one-moving-side enumeration could not offer it (DOL is not adjacent to
+    # NEB, FOR not to THA); the cross product does.
+    start:
+      phase: S25M
+      units:
+        NAUGRIM: ["A DOL"]
+        DORIATH: ["A FOR"]
+      l2:
+        masks: {"NAUGRIM A DOL": 1}
+    script:
+      - phase: S25M
+        orders:
+          NAUGRIM:
+            - "A DOL - THA"
+            - "A DOL GIVES MASK TO DORIATH A NEB"
+          DORIATH:
+            - "A FOR - NEB"
+            - "A FOR ACCEPTS MASK FROM NAUGRIM A THA"
+    expect:
+      resolutions:
+        "A DOL - THA": succeeds
+        "A FOR - NEB": succeeds
+        "A DOL GIVES MASK TO DORIATH A NEB": succeeds
+        "A FOR ACCEPTS MASK FROM NAUGRIM A THA": succeeds
+      events: ["NAUGRIM A THA passes a mask to DORIATH A NEB"]
+      masks: {"DORIATH A NEB": 1}
+      units:
+        NAUGRIM: ["A THA"]
+        DORIATH: ["A NEB"]
+
+  - id: BATC-L2.M.22
+    title: (g) a both-move pair where one half bounces -- the true positions fall out of geometry
+    # Both sides order moves; NAUGRIM's A DOL - THA bounces 1 v 1 against
+    # FEANORIANS A NEL - THA (M.17's bounce -- the free direction, the table
+    # penalizes THA->DOL/THA->NEL), so the giver never leaves DOL, while
+    # DORIATH's A FOR - NEB carries. The accept names the giver at its ACTUAL
+    # bounced end DOL, so BOTH refs match the true positions -- yet DOL is not
+    # adjacent to NEB, so the geometry check fails and both halves FAIL. Single
+    # reason: the bounce. Had A DOL - THA carried, THA-NEB clears geometry and
+    # the pass would land (M.21). No Girdle: DOL and NEB both sit outside it.
+    start:
+      phase: S25M
+      units:
+        NAUGRIM: ["A DOL"]
+        DORIATH: ["A FOR"]
+        FEANORIANS: ["A NEL"]
+      l2:
+        masks: {"NAUGRIM A DOL": 1}
+    script:
+      - phase: S25M
+        orders:
+          NAUGRIM:
+            - "A DOL - THA"
+            - "A DOL GIVES MASK TO DORIATH A NEB"
+          FEANORIANS:
+            - "A NEL - THA"
+          DORIATH:
+            - "A FOR - NEB"
+            - "A FOR ACCEPTS MASK FROM NAUGRIM A DOL"
+    expect:
+      resolutions:
+        "A DOL - THA": fails
+        "A NEL - THA": fails
+        "A FOR - NEB": succeeds
+        "A DOL GIVES MASK TO DORIATH A NEB": fails
+        "A FOR ACCEPTS MASK FROM NAUGRIM A DOL": fails
+      masks: {"NAUGRIM A DOL": 1}
+      units:
+        NAUGRIM: ["A DOL"]
+        DORIATH: ["A NEB"]
+        FEANORIANS: ["A NEL"]
+
+  # ---------------------------------------------------------------------------
+  # The attack-grant channel is UNCONDITIONAL. The rulebook's grant sentence
+  # names no source and no receiver -- "If a Unit in FoR or FoN is Ordered to
+  # Move into a Province which is not an Area and in which another Power's
+  # Unit stands, or to Dislodge a Unit in an adjacent Area, then the owner of
+  # the Attacked Unit gains ability to pass the Girdle of Melian" -- while the
+  # Feanorian restriction it sits beside is written about VOLUNTARY transfer:
+  # "No elven Power may give a written permission to enter the Girdle to
+  # Feanorian Powers." / "They must obtain this knowledge from a non-elvish
+  # Power." Being attacked is neither a written permission nor learning from
+  # anyone, so the ban is channel-scoped, and these six cases certify the
+  # resulting channel map: M.23-M.25 the grants the unconditional reading
+  # pays, M.26-M.28 the boundaries it keeps.
+  # ---------------------------------------------------------------------------
+
+  - id: BATC-L2.M.23
+    title: a Doriath sortie out of the Girdle grants its Feanorian victim the permission
+    # The attacked owner is compensated whoever the attacker is. HID is a
+    # capacity-1 province, so the move is an attack on its occupant; it bounces
+    # 1 v 1 (the grant needs the attempt, not success). The
+    # event text is asserted here, in the attack's own phase; M.24 carries the
+    # same sortie forward to pin the permission's USE.
+    start:
+      phase: S25M
+      units:
+        DORIATH: ["A FOR"]
+        FEANORIANS: ["A HID"]
+    script:
+      - phase: S25M
+        orders:
+          DORIATH: ["A FOR - HID"]
+    expect:
+      resolutions: {"A FOR - HID": fails}
+      events: ["FEANORIANS gains the Girdle of Melian permission (attacked from the Girdle)"]
+      girdle: [DORIATH, FEANORIANS]
+
+  - id: BATC-L2.M.24
+    title: the attack-granted Feanorians then walk into the Girdle themselves
+    # The M.12 shape for a Feanorian receiver: the grant is a real credential,
+    # so a DIFFERENT Feanorian unit enters FoN the next phase
+    # (entry_permission reads the power-level set).
+    start:
+      phase: S25M
+      units:
+        DORIATH: ["A FOR"]
+        FEANORIANS: ["A HID", "A DDI"]
+    script:
+      - phase: S25M
+        orders:
+          DORIATH: ["A FOR - HID"]
+      - phase: F25M
+        orders:
+          FEANORIANS: ["A DDI - FON"]
+    expect:
+      resolutions: {"A DDI - FON": succeeds}
+      girdle: [DORIATH, FEANORIANS]
+      units:
+        DORIATH: ["A FOR"]
+        FEANORIANS: ["A FON", "A HID"]
+
+  - id: BATC-L2.M.25
+    title: a walked Dislodge out of the Girdle grants the twin stack's owner
+    # The rule-6 victim walk: two same-class FINGOLFIN armies in NEB make the
+    # attack "walked", and Tables.victim_of carries no entry for those
+    # (final_walk_victims) -- so the grant has to read the walk assignment,
+    # exactly like the two sibling dislodgement consumers. The victim power
+    # here is FINGOLFIN, not FEANORIANS, so this case is blind to the source
+    # question: it isolates the walked-victim binding. Its control is M.13's
+    # FINGOLFIN victim (a statically bound attack).
+    start:
+      phase: S25M
+      units:
+        DORIATH: ["A FOR", "A EST"]
+        FINGOLFIN: ["A NEB", "A NEB"]
+    script:
+      - phase: S25M
+        orders:
+          DORIATH:
+            - "A FOR DIS FINGOLFIN A NEB"
+            - "A EST S A FOR DIS FINGOLFIN A NEB"
+    expect:
+      resolutions: {"A FOR DIS FINGOLFIN A NEB": succeeds}
+      events: ["FINGOLFIN gains the Girdle of Melian permission (attacked from the Girdle)"]
+      girdle: [DORIATH, FINGOLFIN]
+
+  - id: BATC-L2.M.26
+    title: moving out of the Girdle into an OCCUPIED Area is coexistence, not an attack
+    # NEB has capacity 6, so A FOR - NEB simply joins the Feanorian army
+    # there -- nobody is attacked and nothing is granted. Dislodge stays the
+    # only attack inside an Area (M.25 is the Dislodge counterpart).
+    start:
+      phase: S25M
+      units:
+        DORIATH: ["A FOR"]
+        FEANORIANS: ["A NEB"]
+    script:
+      - phase: S25M
+        orders:
+          DORIATH: ["A FOR - NEB"]
+    expect:
+      resolutions: {"A FOR - NEB": succeeds}
+      girdle: [DORIATH]
+      units:
+        DORIATH: ["A NEB"]
+        FEANORIANS: ["A NEB"]
+
+  - id: BATC-L2.M.27
+    title: a support issued from inside the Girdle is not a sortie and grants nothing
+    # The channel's other edge: it is the relocating order's own, so a unit
+    # that stays in FoR and merely supports someone else's attack grants the
+    # victim nothing -- even though the attack succeeds and the victim is
+    # dislodged out of a capacity-1 province.
+    start:
+      phase: S25M
+      units:
+        DORIATH: ["A FOR"]
+        MEN: ["A EST"]
+        FEANORIANS: ["A HID"]
+    script:
+      - phase: S25M
+        orders:
+          DORIATH: ["A FOR S MEN A EST - HID"]
+          MEN: ["A EST - HID"]
+    expect:
+      resolutions:
+        "A EST - HID": succeeds
+        "A FOR S MEN A EST - HID": succeeds
+      girdle: [DORIATH]
+
+  - id: BATC-L2.M.28
+    title: mask acceptance across the Girdle still obeys the Feanorian source rule
+    # The voluntary channel, in its permitted direction: a MEN giver inside
+    # FoR passes a mask out, and the Feanorian acceptor gains the permission
+    # with it (source in {MEN, NAUGRIM}). M.11 shows the same channel refusing
+    # an elvish giver -- together they show the Feanorian ban standing where
+    # the attack channel does not reach.
+    start:
+      phase: S25M
+      units:
+        MEN: ["A FOR"]
+        FEANORIANS: ["A EST"]
+      l2:
+        girdle: [DORIATH, MEN]
+        masks: {"MEN A FOR": 1}
+    script:
+      - phase: S25M
+        orders:
+          MEN: ["A FOR GIVES MASK TO FEANORIANS A EST"]
+          FEANORIANS: ["A EST ACCEPTS MASK FROM MEN A FOR"]
+    expect:
+      resolutions:
+        "A FOR GIVES MASK TO FEANORIANS A EST": succeeds
+        "A EST ACCEPTS MASK FROM MEN A FOR": succeeds
+      events: ["FEANORIANS gains the Girdle of Melian permission (mask acceptance)"]
+      girdle: [DORIATH, FEANORIANS, MEN]
+      masks: {"FEANORIANS A EST": 1}
+
+  # ---------------------------------------------------------------------------
+  # The channel pays for an attack that LANDED on a unit, and it pays the
+  # power, not a unit. Both follow the rulebook's own sentences: "If the
+  # Attacked Unit successfully Moves away in the same Phase, it was not
+  # Attacked, and its owner gains nothing." and the grant's "the owner of the
+  # Attacked Unit". A unit that successfully left was never standing there
+  # when the sortie arrived; a stack of identical twins has an owner even when
+  # no single twin can be named.
+  # ---------------------------------------------------------------------------
+
+  - id: BATC-L2.M.29
+    title: a victim that successfully moves away was never attacked, and gains nothing
+    # The sortie succeeds -- into an EMPTY province, because the occupant left
+    # in the same phase. Nobody was attacked, so nobody is compensated. M.23 is
+    # the control: identical order, occupant holds, grant fires.
+    start:
+      phase: S25M
+      units:
+        DORIATH: ["A FOR"]
+        FINGOLFIN: ["A HID"]
+    script:
+      - phase: S25M
+        orders:
+          DORIATH: ["A FOR - HID"]
+          FINGOLFIN: ["A HID - EGO"]
+    expect:
+      resolutions:
+        "A FOR - HID": succeeds
+        "A HID - EGO": succeeds
+      girdle: [DORIATH]
+      units:
+        DORIATH: ["A HID"]
+        FINGOLFIN: ["A EGO"]
+
+  - id: BATC-L2.M.30
+    title: the same for a Dislodge whose named victim vacates
+    # The Dislodge binds its victim statically, before adjudication knows the
+    # victim is leaving; the grant must read the resolved phase, not the
+    # written intent. Same law as the two sibling dislodgement consumers,
+    # which have always skipped a victim that relocated.
+    start:
+      phase: S25M
+      units:
+        DORIATH: ["A FOR"]
+        FINGOLFIN: ["A NEB"]
+    script:
+      - phase: S25M
+        orders:
+          DORIATH: ["A FOR DIS FINGOLFIN A NEB"]
+          FINGOLFIN: ["A NEB - AER"]
+    expect:
+      resolutions:
+        "A FOR DIS FINGOLFIN A NEB": succeeds
+        "A NEB - AER": succeeds
+      girdle: [DORIATH]
+
+  - id: BATC-L2.M.31
+    title: a failed walked Dislodge still names its victim's owner, who gains
+    # The walked-attack corner M.25 does not reach: two same-class FINGOLFIN
+    # armies in NEB make the attack "walked", and a walked attack that FAILS
+    # gets no victim assignment from either binding table -- the twins are
+    # interchangeable and the adjudicator declines to name one. The OWNER is
+    # never in doubt: the order says FINGOLFIN, so poking two identical armies
+    # grants exactly as poking one does.
+    start:
+      phase: S25M
+      units:
+        DORIATH: ["A FOR"]
+        FINGOLFIN: ["A NEB", "A NEB"]
+    script:
+      - phase: S25M
+        orders:
+          DORIATH: ["A FOR DIS FINGOLFIN A NEB"]
+    expect:
+      resolutions: {"A FOR DIS FINGOLFIN A NEB": fails}
+      events: ["FINGOLFIN gains the Girdle of Melian permission (attacked from the Girdle)"]
+      girdle: [DORIATH, FINGOLFIN]
+
+  - id: BATC-L2.M.33
+    title: a twin stack that only half empties was still occupied, and its owner gains
+    # Decided on the rulebook sentence
+    # itself: one FINGOLFIN army leaves NEB, the other holds, so the province
+    # the sortie attacked IS still "Occupied by another Unit" and its owner is
+    # compensated. Test the POSITION, not which twin the adjudicator happened
+    # to bind -- the walk assignment can land on the departing one, and that is
+    # an artifact of victim selection, not a statement about who was attacked.
+    start:
+      phase: S25M
+      units:
+        DORIATH: ["A FOR"]
+        FINGOLFIN: ["A NEB", "A NEB"]
+    script:
+      - phase: S25M
+        orders:
+          DORIATH: ["A FOR DIS FINGOLFIN A NEB"]
+          FINGOLFIN: ["A NEB - AER"]
+    expect:
+      resolutions: {"A NEB - AER": succeeds}
+      events: ["FINGOLFIN gains the Girdle of Melian permission (attacked from the Girdle)"]
+      girdle: [DORIATH, FINGOLFIN]
+
+  - id: BATC-L2.M.32
+    title: a twin stack that empties out entirely grants nothing
+    # The two rulings meeting: the attack is walked (so no single victim is
+    # named) AND every twin successfully leaves (so nothing was attacked). The
+    # owner-level fallback must not fire on an empty province -- otherwise it
+    # would mint a credential out of a written order alone.
+    start:
+      phase: S25M
+      units:
+        DORIATH: ["A FOR"]
+        FINGOLFIN: ["A NEB", "A NEB"]
+    script:
+      - phase: S25M
+        orders:
+          DORIATH: ["A FOR DIS FINGOLFIN A NEB"]
+          FINGOLFIN:
+            - "A NEB - AER"
+            - "A NEB - AND"
+    expect:
+      resolutions:
+        "A NEB - AER": succeeds
+        "A NEB - AND": succeeds
+      girdle: [DORIATH]
+
+  - id: BATC-L2.M.34
+    title: the non-elvish written channel — Men hand Morgoth the Girdle passage, usable the next phase
+    # The rulebook's "Doriath" rule reads "via being attacked from its inside
+    # or from a non-elvish Power (via written statement)". MEN hold the
+    # passage here by exactly the written grant Doriath may always make, and
+    # hand it on: the betrayal chain the rule opens. The non-elvish givers are
+    # Men and the Naugrim, as for the Feanorian source rule.
+    #
+    # Like M.12 this case's final record is the *following* phase, so the
+    # grant is checked by its two lasting effects instead of its event text:
+    # girdle membership, and a use of it.
+    start:
+      phase: S25M
+      units:
+        MORGOTH: ["A DDI"]
+      l2:
+        girdle: [DORIATH, MEN]
+    script:
+      - phase: S25M
+        grants:
+          - [MEN, MORGOTH, girdle-permission]
+      - phase: F25M
+        orders:
+          MORGOTH: ["A DDI - FON"]
+    expect:
+      resolutions: {"A DDI - FON": succeeds}
+      girdle: [DORIATH, MEN, MORGOTH]
+      units:
+        MORGOTH: ["A FON"]
+
+  - id: BATC-L2.M.35
+    title: an elvish written grant of the Girdle to Morgoth is still refused
+    # The other half: the giver decides. Doriath owns the Girdle and still
+    # cannot hand it to Morgoth directly -- the rulebook's "non-elvish Power"
+    # read strictly, every elven power refused.
+    script:
+      - phase: S25M
+        grants_refused:
+          - [DORIATH, MORGOTH, girdle-permission]
+    expect:
+      girdle: [DORIATH]

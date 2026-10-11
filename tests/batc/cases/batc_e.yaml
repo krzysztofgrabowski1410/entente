@@ -1,0 +1,190 @@
+# BATC section E -- mountain barriers (exact halving) and fortresses.
+# Rulebook: "Mountain Barriers", "Fortresses" -- modifiers in exact
+# Fractions, retention unaffected, fortress bonus forfeited by relocating.
+# The penalty is DIRECTIONAL (the 84-directed-pair table in beleriand.json):
+# every crossing below is annotated with its direction, and the outcomes
+# here hold under a symmetric reading as well. Section H certifies the
+# directional semantics themselves.
+section: "BATC E. Mountain barriers and fortresses"
+ruleset: beleriand
+cases:
+  - id: BATC.E.1
+    title: a halved single cannot take a defended peak
+    # A(DLN) climbs the Ered Wethrim in the penalized DLN->SEW direction at
+    # strength 1/2 against a hold of 1 -- exact rational arithmetic, no
+    # rounding to 0 or 1. (The descent SEW->DLN is free: BATC.H.1.)
+    phase: S25M
+    units:
+      FINGOLFIN: ["A DLN"]
+      MORGOTH: ["A SEW"]
+    orders:
+      FINGOLFIN: ["A DLN - SEW"]
+    expect:
+      resolutions:
+        "A DLN - SEW": fails
+      units:
+        FINGOLFIN: ["A DLN"]
+        MORGOTH: ["A SEW"]
+
+  - id: BATC.E.2
+    title: the Morgoth unit crosses at three halves and still dislodges
+    # 3 x 1/2 = 3/2 > 1: the halved giant beats a single defender --
+    # the comparison only works with exact Fractions. (HIT->NEW is the
+    # penalized direction; the reverse is free.)
+    phase: S25M
+    units:
+      MORGOTH: ["3A HIT"]
+      FINGOLFIN: ["A NEW"]
+    orders:
+      MORGOTH: ["3A HIT - NEW"]
+    expect:
+      resolutions:
+        "3A HIT - NEW": succeeds
+      dislodged: ["FINGOLFIN A NEW"]
+      units:
+        MORGOTH: ["3A NEW"]
+
+  - id: BATC.E.3
+    title: a double army halves to exactly one and bounces off a single
+    # 2 x 1/2 = 1 is not strictly greater than the defender's 1.
+    # (ELA->NEL is the penalized ascent into Neldoreth.)
+    phase: S25M
+    units:
+      MEN: ["2A ELA"]
+      NAUGRIM: ["A NEL"]
+    orders:
+      MEN: ["2A ELA - NEL"]
+    expect:
+      resolutions:
+        "2A ELA - NEL": fails
+      units:
+        MEN: ["2A ELA"]
+        NAUGRIM: ["A NEL"]
+
+  - id: BATC.E.4
+    title: support through a mountain barrier is halved too
+    # The same attack with a single army supporting through the Belegost
+    # barrier: 1 + 1/2 = 3/2 > 1 -- the halved support tips the contest
+    # (the defender belongs to a third power, so no role filter bites).
+    # Both crossings run in their penalized directions (ELA->NEL and the
+    # supporter's BEL->NEL -- supports read supporter -> subject target).
+    # BATC.H.2 certifies the free-direction support.
+    phase: S25M
+    units:
+      MEN: ["2A ELA"]
+      NAUGRIM: ["A BEL"]
+      FEANORIANS: ["A NEL"]
+    orders:
+      MEN: ["2A ELA - NEL"]
+      NAUGRIM: ["A BEL S MEN 2A ELA - NEL"]
+    expect:
+      resolutions:
+        "2A ELA - NEL": succeeds
+        "A BEL S MEN 2A ELA - NEL": succeeds
+      dislodged: ["FEANORIANS A NEL"]
+      units:
+        MEN: ["2A NEL"]
+        NAUGRIM: ["A BEL"]
+
+  - id: BATC.E.5
+    title: a failed crossing defends its own province at full strength
+    # "They remain the same Strength for the purpose of retaining their
+    # original position if they are unsuccessful in Move": the penalized
+    # DLN->SEW crossing fails at 1/2, but the home defense against the
+    # flat MIT->DLN attack is 1 v 1 (retention takes no modifier; the
+    # direction convention is the barrier table's).
+    phase: S25M
+    units:
+      FINGOLFIN: ["A DLN"]
+      MORGOTH: ["A SEW", "A MIT"]
+    orders:
+      FINGOLFIN: ["A DLN - SEW"]
+      MORGOTH: ["A MIT - DLN"]
+    expect:
+      resolutions:
+        "A DLN - SEW": fails
+        "A MIT - DLN": fails
+      units:
+        FINGOLFIN: ["A DLN"]
+        MORGOTH: ["A SEW", "A MIT"]
+
+  - id: BATC.E.6
+    title: a fortress adds one to an unmoved defender
+    # Hold 1 + 1 (Tol Sirion) against a supported attack of 2: the
+    # garrison survives (without the fortress it would fall). Neither
+    # crossing is penalized: FSE->TOL carries no barrier at all, and the
+    # supporter's NEW->TOL rides the free direction of an edge whose
+    # penalty points the other way (TOL->NEW) -- the arithmetic stays flat.
+    # (The attacker stands in FSE and the supporter in NEW: both are
+    # neighbours of TOL on the board, DNN is not.)
+    phase: S25M
+    units:
+      FINROD: ["A TOL"]
+      MORGOTH: ["A FSE", "A NEW"]
+    orders:
+      MORGOTH: ["A FSE - TOL", "A NEW S A FSE - TOL"]
+    expect:
+      resolutions:
+        "A FSE - TOL": fails
+        "A NEW S A FSE - TOL": succeeds
+      units:
+        FINROD: ["A TOL"]
+        MORGOTH: ["A FSE", "A NEW"]
+
+  - id: BATC.E.7
+    title: a unit that moved forfeits its fortress bonus
+    # "The Unit given a failed Move order ... will not get the bonus
+    # defensive Strength from Fortress." The garrison's sally bounces off
+    # Gondolin's occupied fortress (halved to 1/2 by the penalized TOL->GON
+    # ascent against a garrisoned hold of 2; it fails at any strength),
+    # then defends home at base 1 without the bonus and falls to the 2
+    # (the supporter's NEW->TOL is the free direction, as in E.6).
+    # (The attacker stands in FSE and the supporter in NEW, as in E.6; the
+    # sally must FAIL for the forfeit to show -- TOL's free neighbours
+    # SEW/TAL would admit it and vacate TOL -- so it points at the naturally
+    # garrisoned GON.)
+    phase: S25M
+    units:
+      FINROD: ["A TOL"]
+      GONDOLIN: ["A GON"]
+      MORGOTH: ["A FSE", "A NEW"]
+    orders:
+      FINROD: ["A TOL - GON"]
+      MORGOTH: ["A FSE - TOL", "A NEW S A FSE - TOL"]
+    expect:
+      resolutions:
+        "A TOL - GON": fails
+        "A FSE - TOL": succeeds
+        "A NEW S A FSE - TOL": succeeds
+      dislodged: ["FINROD A TOL"]
+      units:
+        MORGOTH: ["A TOL", "A NEW"]
+        GONDOLIN: ["A GON"]
+
+  - id: BATC.E.8
+    title: a dislodge across a barrier is halved
+    # Under the directed table BOTH dislodges cross in the free direction
+    # (the penalties read MOS->SEL and HIT->NEW), so nothing is halved and
+    # the title names the symmetric reading's arithmetic. The outcomes are
+    # direction-robust: 3A SEL DIS at a whole 3 > 1 wins (as 3/2 > 1
+    # would), and A NEW DIS at a whole 1 is not strictly greater than the
+    # hold of 1 (nor would 1/2 be). A halved Dislodge is UNREACHABLE on this
+    # board -- Dislodge victims stand in capacity-6 Areas and no penalized
+    # edge enters an Area -- so no seat can produce the halving; Dislodge
+    # attacks still run through the same modifier pipeline as moves (the
+    # ruleset test covers the hook).
+    phase: S25M
+    units:
+      MORGOTH: ["3A SEL", "A NEW"]
+      OSSIRIAND: ["A MOS"]
+      FINGOLFIN: ["A HIT"]
+    orders:
+      MORGOTH: ["3A SEL DIS OSSIRIAND A MOS", "A NEW DIS FINGOLFIN A HIT"]
+    expect:
+      resolutions:
+        "3A SEL DIS OSSIRIAND A MOS": succeeds
+        "A NEW DIS FINGOLFIN A HIT": fails
+      dislodged: ["OSSIRIAND A MOS"]
+      units:
+        MORGOTH: ["3A MOS", "A NEW"]
+        FINGOLFIN: ["A HIT"]

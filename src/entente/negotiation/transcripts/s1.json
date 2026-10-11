@@ -1,0 +1,45 @@
+{
+  "ally": "RUSSIA",
+  "incoming_message": "PROPOSAL from GERMANY to RUSSIA for S1901M: GERMANY orders [A BER - SIL, F KIE - DEN, A MUN H]; RUSSIA orders [A WAR - GAL, A MOS - UKR, F STP/SC - BOT, F SEV H]. Silesia is mine this year -- take Galicia and we stay out of each other's way.",
+  "note": "Truthful: GERMANY's announced move is its actual scripted move. The classic Silesia bounce point -- GERMANY claims it, asks RUSSIA to redirect to Galicia.",
+  "parsed_intent": {
+    "ally": "RUSSIA",
+    "ally_action": [
+      "A WAR - GAL",
+      "A MOS - UKR",
+      "F STP/SC - BOT",
+      "F SEV H"
+    ],
+    "phase": "S1901M",
+    "proposer": "GERMANY",
+    "proposer_action": [
+      "A BER - SIL",
+      "F KIE - DEN",
+      "A MUN H"
+    ],
+    "rationale": "Silesia is mine this year -- take Galicia and we stay out of each other's way."
+  },
+  "phase": "S1901M",
+  "prediction": {
+    "baseline_mean_strategy": [
+      0.28010778829200705,
+      0.4110510888136265,
+      0.3088411228943664
+    ],
+    "baseline_probability_of_true_move": 0.28010778829200705,
+    "conditioned_mean_strategy": [
+      0.6076765344199274,
+      0.22398902670440118,
+      0.16833443887567137
+    ],
+    "conditioned_probability_of_true_move": 0.6076765344199274,
+    "true_move_index": 0
+  },
+  "proposer": "GERMANY",
+  "regenerated_message": {
+    "provider": "stub",
+    "text": "PROPOSAL from GERMANY to RUSSIA for S1901M: GERMANY orders [A BER - SIL, F KIE - DEN, A MUN H]; RUSSIA orders [A WAR - GAL, A MOS - UKR, F STP/SC - BOT, F SEV H]. Silesia is mine this year -- take Galicia and we stay out of each other's way."
+  },
+  "scenario": "s1",
+  "self_power": "FRANCE"
+}

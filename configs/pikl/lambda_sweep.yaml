@@ -1,0 +1,46 @@
+# The headline lambda sweep (docs/pikl.tex Sec. 7-Sec. 8): piKL(lambda) against
+# six BC-anchor opponents over the grid {0, 0.3, 1, 3, inf}, which spans pure
+# equilibrium play through pure anchor imitation. With rotate_seats each lambda
+# plays 7 x games = 105 games, clearing the 100-game floor a search agent's
+# numbers are reported against.
+#
+#   uv run --group ml python scripts/run_lambda_sweep.py --config configs/pikl/lambda_sweep.yaml
+#
+# A tiny CPU wiring check (always runnable, docs/pikl.tex Sec. 8) -- scratch output:
+#   ... --set games=1 --set rotate_seats=false --set max_year=1902 \
+#       --set agent.search.k=2 --set agent.search.attempts=4 \
+#       --set agent.search.iterations=4 --set 'lambdas=[0.0, 1.0, .inf]' \
+#       --set agent.checkpoint=checkpoints/bc_smoke/bc_smoke.pt \
+#       --set output=pikl_sweep_wiring.jsonl
+# The committed smoke artifact, docs/results/pikl_lambda_sweep_smoke.jsonl, is this
+# wiring check run over the CPU smoke checkpoint; configs/press/smoke.yaml lists the
+# commands that rebuild that checkpoint from synthetic data.
+agent:
+  checkpoint: checkpoints/bc/bc.pt
+  device: cpu
+  fallback: greedy
+  seed: 0
+  search:
+    k: 12
+    attempts: 48
+    iterations: 128
+    lam: 1.0 # overridden per sweep point by `lambdas`
+    eta:
+      mode: adaptive
+      scale: 3.3333333333333335
+    temperature: 0.5
+    top_p: 0.95
+    include_greedy: true
+    play: sample
+lambdas: [0.0, 0.3, 1.0, 3.0, .inf]
+games: 15
+seat: FRANCE
+rotate_seats: true
+max_year: 1910
+ruleset: standard
+map_name: standard
+output: docs/results/pikl_lambda_sweep.jsonl
+# Held-out human shards for the human-agreement curve; null records the
+# anchor-agreement proxy only, which is a weaker claim and is labelled as one.
+agreement_shards: null
+agreement_rows: 200

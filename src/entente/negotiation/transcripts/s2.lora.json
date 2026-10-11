@@ -1,0 +1,24 @@
+{
+  "adapter_dir": "checkpoints/dialogue_lora/dialogue_lora",
+  "base_model": "HuggingFaceTB/SmolLM3-3B",
+  "incoming_message": "PROPOSAL from FRANCE to GERMANY for S1901M: FRANCE orders [A PAR - BUR, F BRE - MAO, A MAR - SPA]; GERMANY orders [A MUN - RUH, F KIE - HOL, A BER H]. Burgundy's mine -- Ruhr keeps you flexible without the two of us bouncing there.",
+  "parsed_intent": {
+    "ally": "GERMANY",
+    "ally_action": [
+      "A MUN - RUH",
+      "F KIE - HOL",
+      "A BER H"
+    ],
+    "phase": "S1901M",
+    "proposer": "FRANCE",
+    "proposer_action": [
+      "A PAR - BUR",
+      "F BRE - MAO",
+      "A MAR - SPA"
+    ],
+    "rationale": "Burgundy's mine -- Ruhr keeps you flexible without the two of us bouncing there."
+  },
+  "provider": "lora",
+  "regenerated_message": "",
+  "scenario": "s2"
+}

@@ -1,0 +1,222 @@
+# BATC section G -- retreats under Area capacity.
+# Rulebook: "Stopping a Unit from entering an Area" ... "During Retreats
+# this rule also applies"; "Retreat Orders always have 0 Strength", so all
+# retreats form ONE admission class (order strengths key the classes, as
+# in movement) and the stronger-first ladder is inert (G.3 is the
+# mixed-strength case).
+section: "BATC G. Retreats into Areas"
+ruleset: beleriand
+cases:
+  - id: BATC.G.1
+    title: two retreats overflow the last slot and both disband
+    # One free slot in North East Beleriand; the strength-0 class of two
+    # does not wholly fit, so both retreats fail (capacity-aware greedy at
+    # retreat strength 0 -- every retreat is one class).
+    # (The EST attacker stands in GEL: GEL-EST is an edge of the board,
+    # DDI-EST is not. GEL is not the retreat target NEB, so the
+    # dislodger-origin ban stays untriggered.)
+    phase: S25M
+    units:
+      OSSIRIAND: ["A NEB", "A NEB", "A NEB"]
+      FEANORIANS: ["A NEB", "A NEB"]
+      DORIATH: ["A EST", "A FOR"]
+      MORGOTH: ["A GEL", "A HID", "A FON", "A A-U"]
+    orders:
+      MORGOTH:
+        - "A GEL - EST"
+        - "A HID S A GEL - EST"
+        - "A FON - FOR"
+        - "A A-U S A FON - FOR"
+    retreats:
+      DORIATH: ["A EST - NEB", "A FOR - NEB"]
+    expect:
+      resolutions:
+        "A GEL - EST": succeeds
+        "A FON - FOR": succeeds
+      dislodged: ["DORIATH A EST", "DORIATH A FOR"]
+      retreat_resolutions:
+        "A EST - NEB": fails
+        "A FOR - NEB": fails
+      disbanded: ["DORIATH A EST", "DORIATH A FOR"]
+      units:
+        DORIATH: []
+        MORGOTH: ["A EST", "A FOR", "A HID", "A A-U"]
+
+  - id: BATC.G.2
+    title: two retreats fit two free slots side by side
+    # (The attacker stands in GEL, as in G.1.)
+    phase: S25M
+    units:
+      OSSIRIAND: ["A NEB", "A NEB"]
+      FEANORIANS: ["A NEB", "A NEB"]
+      DORIATH: ["A EST", "A FOR"]
+      MORGOTH: ["A GEL", "A HID", "A FON", "A A-U"]
+    orders:
+      MORGOTH:
+        - "A GEL - EST"
+        - "A HID S A GEL - EST"
+        - "A FON - FOR"
+        - "A A-U S A FON - FOR"
+    retreats:
+      DORIATH: ["A EST - NEB", "A FOR - NEB"]
+    expect:
+      resolutions:
+        "A GEL - EST": succeeds
+        "A FON - FOR": succeeds
+      dislodged: ["DORIATH A EST", "DORIATH A FOR"]
+      retreat_resolutions:
+        "A EST - NEB": succeeds
+        "A FOR - NEB": succeeds
+      disbanded: []
+      units:
+        DORIATH: ["A NEB", "A NEB"]
+
+  - id: BATC.G.3
+    title: mixed-strength retreats are still one class (pinned reading)
+    # A 2A and a 1A both retreat into NEB's single free slot. "Retreat
+    # Orders always have 0 Strength", and admission classes are order
+    # strengths (prevent classes, not the units' base strengths), so both
+    # retreats form one strength-0 class of two, overflow the slot, and
+    # disband -- the ladder's stronger-first priority is inert during
+    # retreats. The alternative reading by base strength of "During Retreats this
+    # rule also applies" would let the 2A in and disband only the 1A.
+    # (The attacker stands in GEL, as in G.1.)
+    phase: S25M
+    units:
+      OSSIRIAND: ["A NEB", "A NEB", "A NEB"]
+      FEANORIANS: ["A NEB", "A NEB"]
+      DORIATH: ["2A EST", "A FOR"]
+      MORGOTH: ["2A GEL", "A HID", "A FON", "A A-U"]
+    orders:
+      MORGOTH:
+        - "2A GEL - EST"
+        - "A HID S 2A GEL - EST"
+        - "A FON - FOR"
+        - "A A-U S A FON - FOR"
+    retreats:
+      DORIATH: ["2A EST - NEB", "A FOR - NEB"]
+    expect:
+      resolutions:
+        "2A GEL - EST": succeeds
+        "A FON - FOR": succeeds
+      dislodged: ["DORIATH 2A EST", "DORIATH A FOR"]
+      retreat_resolutions:
+        "2A EST - NEB": fails
+        "A FOR - NEB": fails
+      disbanded: ["DORIATH 2A EST", "DORIATH A FOR"]
+      units:
+        DORIATH: []
+        MORGOTH: ["2A EST", "A FOR", "A HID", "A A-U"]
+
+  - id: BATC.G.4
+    title: twins written alike retreat side by side
+    # Rulebook ("Indistinguishable Units (twins)"): "During Retreats and
+    # Builds the same holds: identically worded Retreat Orders of twins go to
+    # different twins, each to a twin for which it is valid where one is
+    # free, and identically worded Disband Orders remove different twins."
+    # Two MORGOTH twins are dislodged from Anfauglith, one from DNN and one
+    # from LAD; both are ordered "A ANF - LOT", Lothlann has room for both,
+    # and both retreat.
+    phase: S25M
+    units:
+      MORGOTH: ["A ANF", "A ANF"]
+      FINROD: ["A DNN", "A RIV", "A LAD", "A EIT"]
+    orders:
+      MORGOTH: ["A ANF H", "A ANF H"]
+      FINROD:
+        - "A DNN DIS MORGOTH A ANF"
+        - "A RIV S A DNN DIS MORGOTH A ANF"
+        - "A LAD DIS MORGOTH A ANF"
+        - "A EIT S A LAD DIS MORGOTH A ANF"
+    retreats:
+      MORGOTH: ["A ANF - LOT", "A ANF - LOT"]
+    expect:
+      resolutions:
+        "A DNN DIS MORGOTH A ANF": succeeds
+        "A LAD DIS MORGOTH A ANF": succeeds
+      dislodged: ["MORGOTH A ANF"]
+      retreat_resolutions:
+        "A ANF - LOT": succeeds
+      disbanded: []
+      units:
+        MORGOTH: ["A LOT", "A LOT"]
+
+  - id: BATC.G.5
+    title: each retreat goes to a twin it is valid for
+    # Rulebook ("Indistinguishable Units (twins)"), as in G.4: "... each to a
+    # twin for which it is valid where one is free". Two FEANORIAN twins are
+    # dislodged from South Ossiriand, one by the army from SEL and one by the
+    # army from TGA, so each may not retreat where its own attacker came
+    # from. Written "- SEL" first, the first order goes to the twin whose
+    # attacker came from TGA, and both twins retreat.
+    phase: S25M
+    units:
+      FEANORIANS: ["A SOS", "A SOS"]
+      DORIATH: ["A SEL", "A TGA", "A ETD", "A TID"]
+    orders:
+      FEANORIANS: ["A SOS H", "A SOS H"]
+      DORIATH:
+        - "A SEL DIS FEANORIANS A SOS"
+        - "A ETD S A SEL DIS FEANORIANS A SOS"
+        - "A TGA DIS FEANORIANS A SOS"
+        - "A TID S A TGA DIS FEANORIANS A SOS"
+    retreats:
+      FEANORIANS: ["A SOS - SEL", "A SOS - TGA"]
+    expect:
+      resolutions:
+        "A SEL DIS FEANORIANS A SOS": succeeds
+        "A TGA DIS FEANORIANS A SOS": succeeds
+      dislodged: ["FEANORIANS A SOS"]
+      retreat_resolutions:
+        "A SOS - SEL": succeeds
+        "A SOS - TGA": succeeds
+      disbanded: []
+      units:
+        FEANORIANS: ["A SEL", "A TGA"]
+
+  - id: BATC.G.6
+    title: a dislodge whose unit is dislodged from the area contests nothing for the retreats
+    # Rulebook ("Dislodge Order"): "If the Unit to be Dislodged leaves the
+    # Area without clashing with the Dislodge, the Dislodge becomes a Move
+    # into the Area and competes for its space as a Move does." Like a Move
+    # whose unit is dislodged by an attack from where it was going, it then
+    # has no effect on that Area -- for the standoff the retreats read, too.
+    # Both entries into Anfauglith are barred; FINGOLFIN's army is
+    # dislodged by the 2A coming out of Anfauglith, DORIATH's army by the
+    # FEANORIANS' supported 2A. Only one live entry is left, so Anfauglith
+    # is not contested, and DORIATH's army retreats into one of its two
+    # free slots.
+    phase: S25M
+    units:
+      MORGOTH: ["A ANF", "A ANF", "A ANF", "A ANF", "A ANF", "2A ANF"]
+      FINGOLFIN: ["A EIT"]
+      DORIATH: ["A DNN"]
+      FEANORIANS: ["2A AEL", "A LAD"]
+    orders:
+      MORGOTH:
+        - "A ANF - LOT"
+        - "A ANF BAR DORIATH A DNN - ANF"
+        - "A ANF BAR FINGOLFIN A EIT - ANF"
+        - "A ANF H"
+        - "A ANF H"
+        - "2A ANF - EIT"
+      FINGOLFIN: ["A EIT DIS MORGOTH A ANF - LOT"]
+      DORIATH: ["A DNN - ANF"]
+      FEANORIANS: ["2A AEL - DNN", "A LAD S 2A AEL - DNN"]
+    retreats:
+      DORIATH: ["A DNN - ANF"]
+    expect:
+      resolutions:
+        "A EIT DIS MORGOTH A ANF - LOT": fails
+        "A DNN - ANF": fails
+        "2A ANF - EIT": succeeds
+        "2A AEL - DNN": succeeds
+      dislodged: ["DORIATH A DNN", "FINGOLFIN A EIT"]
+      retreat_resolutions:
+        "A DNN - ANF": succeeds
+      disbanded: ["FINGOLFIN A EIT"]
+      units:
+        MORGOTH: ["A LOT", "A ANF", "A ANF", "A ANF", "A ANF", "2A EIT"]
+        FINGOLFIN: []
+        DORIATH: ["A ANF"]
+        FEANORIANS: ["2A DNN", "A LAD"]

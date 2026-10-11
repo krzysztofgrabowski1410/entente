@@ -1,0 +1,742 @@
+# DATC section 6.F — Convoys.
+# Hand-encoded from the DATC v3.3 document (docs/references/, git-ignored).
+# The choices this suite certifies: 4.A.1-b (disruption needs
+# ALL routes broken), 4.A.2-f (Szykman: paradox-implicated convoyed moves
+# fail and deliver no cut; fleets treated as holding), 4.A.3 written-form
+# (unflagged adjacent moves are overland; no land/convoy fallback either
+# way), 4.A.4-a (cut exception covers convoyed attacks from the
+# directed-against province), 4.A.7-b (prevent-nulling spares convoyed
+# dislodgers). Convoy orders are asserted with the route-used
+# semantics: succeeds iff the fleet is safe and lies on a viable used chain
+# (a bounced-but-viable cargo still uses its route);
+# a szykmaned cargo chose no route, so its fleets' convoy orders fail.
+# 6.F.7's retreat half (Holland not contested) is encoded in 6.H.
+section: 6.F Convoys
+ruleset: standard
+cases:
+  - id: 6.F.1
+    title: no convoy in coastal provinces
+    phase: S1901M
+    units:
+      TURKEY: [A GRE, F AEG, F CON, F BLA]
+    orders:
+      TURKEY:
+        - A GRE - SEV
+        - F AEG C A GRE - SEV
+        - F CON C A GRE - SEV
+        - F BLA C A GRE - SEV
+    expect:
+      resolutions:
+        A GRE - SEV: fails
+        F AEG C A GRE - SEV: fails
+        F CON C A GRE - SEV: fails
+        F BLA C A GRE - SEV: fails
+
+  - id: 6.F.2
+    title: an army being convoyed can bounce as normal
+    phase: S1901M
+    units:
+      ENGLAND: [F ENG, A LON]
+      FRANCE: [A PAR]
+    orders:
+      ENGLAND: [F ENG C A LON - BRE, A LON - BRE]
+      FRANCE: [A PAR - BRE]
+    expect:
+      resolutions:
+        F ENG C A LON - BRE: succeeds
+        A LON - BRE: fails
+        A PAR - BRE: fails
+
+  - id: 6.F.3
+    title: an army being convoyed can receive support
+    phase: S1901M
+    units:
+      ENGLAND: [F ENG, A LON, F MAO]
+      FRANCE: [A PAR]
+    orders:
+      ENGLAND: [F ENG C A LON - BRE, A LON - BRE, F MAO S A LON - BRE]
+      FRANCE: [A PAR - BRE]
+    expect:
+      resolutions:
+        F ENG C A LON - BRE: succeeds
+        A LON - BRE: succeeds
+        F MAO S A LON - BRE: succeeds
+        A PAR - BRE: fails
+
+  - id: 6.F.4
+    title: an attacked convoy is not disrupted
+    phase: S1901M
+    units:
+      ENGLAND: [F NTH, A LON]
+      GERMANY: [F SKA]
+    orders:
+      ENGLAND: [F NTH C A LON - HOL, A LON - HOL]
+      GERMANY: [F SKA - NTH]
+    expect:
+      resolutions:
+        F NTH C A LON - HOL: succeeds
+        A LON - HOL: succeeds
+        F SKA - NTH: fails
+
+  - id: 6.F.5
+    title: a beleaguered convoy is not disrupted
+    phase: S1901M
+    units:
+      ENGLAND: [F NTH, A LON]
+      FRANCE: [F ENG, F BEL]
+      GERMANY: [F SKA, F DEN]
+    orders:
+      ENGLAND: [F NTH C A LON - HOL, A LON - HOL]
+      FRANCE: [F ENG - NTH, F BEL S F ENG - NTH]
+      GERMANY: [F SKA - NTH, F DEN S F SKA - NTH]
+    expect:
+      resolutions:
+        F NTH C A LON - HOL: succeeds
+        A LON - HOL: succeeds
+        F ENG - NTH: fails
+        F BEL S F ENG - NTH: succeeds
+        F SKA - NTH: fails
+        F DEN S F SKA - NTH: succeeds
+      dislodged: []
+
+  - id: 6.F.6
+    title: dislodged convoy does not cut support
+    phase: S1901M
+    units:
+      ENGLAND: [F NTH, A LON]
+      GERMANY: [A HOL, A BEL, F HEL, F SKA]
+      FRANCE: [A PIC, A BUR]
+    orders:
+      ENGLAND: [F NTH C A LON - HOL, A LON - HOL]
+      GERMANY: [A HOL S A BEL, A BEL S A HOL, F HEL S F SKA - NTH, F SKA - NTH]
+      FRANCE: [A PIC - BEL, A BUR S A PIC - BEL]
+    expect:
+      resolutions:
+        F NTH C A LON - HOL: fails
+        A LON - HOL: fails
+        A HOL S A BEL: succeeds
+        A BEL S A HOL: fails
+        F HEL S F SKA - NTH: succeeds
+        F SKA - NTH: succeeds
+        A PIC - BEL: fails
+        A BUR S A PIC - BEL: succeeds
+      dislodged: [ENGLAND F NTH]
+
+  - id: 6.F.7
+    title: dislodged convoy does not cause contested province
+    phase: S1901M
+    units:
+      ENGLAND: [F NTH, A LON]
+      GERMANY: [F HEL, F SKA]
+    orders:
+      ENGLAND: [F NTH C A LON - HOL, A LON - HOL]
+      GERMANY: [F HEL S F SKA - NTH, F SKA - NTH]
+    expect:
+      resolutions:
+        F NTH C A LON - HOL: fails
+        A LON - HOL: fails
+        F HEL S F SKA - NTH: succeeds
+        F SKA - NTH: succeeds
+      dislodged: [ENGLAND F NTH]
+
+  - id: 6.F.8
+    title: dislodged convoy does not cause a bounce
+    phase: S1901M
+    units:
+      ENGLAND: [F NTH, A LON]
+      GERMANY: [F HEL, F SKA, A BEL]
+    orders:
+      ENGLAND: [F NTH C A LON - HOL, A LON - HOL]
+      GERMANY: [F HEL S F SKA - NTH, F SKA - NTH, A BEL - HOL]
+    expect:
+      resolutions:
+        F NTH C A LON - HOL: fails
+        A LON - HOL: fails
+        F HEL S F SKA - NTH: succeeds
+        F SKA - NTH: succeeds
+        A BEL - HOL: succeeds
+      dislodged: [ENGLAND F NTH]
+
+  - id: 6.F.9
+    title: dislodge of multi-route convoy
+    phase: S1901M
+    units:
+      ENGLAND: [F ENG, F NTH, A LON]
+      FRANCE: [F BRE, F MAO]
+    orders:
+      ENGLAND: [F ENG C A LON - BEL, F NTH C A LON - BEL, A LON - BEL]
+      FRANCE: [F BRE S F MAO - ENG, F MAO - ENG]
+    expect:
+      resolutions:
+        F ENG C A LON - BEL: fails
+        F NTH C A LON - BEL: succeeds
+        A LON - BEL: succeeds
+        F BRE S F MAO - ENG: succeeds
+        F MAO - ENG: succeeds
+      dislodged: [ENGLAND F ENG]
+
+  - id: 6.F.10
+    title: dislodge of multi-route convoy with foreign fleet
+    phase: S1901M
+    units:
+      ENGLAND: [F NTH, A LON]
+      GERMANY: [F ENG]
+      FRANCE: [F BRE, F MAO]
+    orders:
+      ENGLAND: [F NTH C A LON - BEL, A LON - BEL]
+      GERMANY: [F ENG C A LON - BEL]
+      FRANCE: [F BRE S F MAO - ENG, F MAO - ENG]
+    expect:
+      resolutions:
+        F NTH C A LON - BEL: succeeds
+        A LON - BEL: succeeds
+        F ENG C A LON - BEL: fails
+        F BRE S F MAO - ENG: succeeds
+        F MAO - ENG: succeeds
+      dislodged: [GERMANY F ENG]
+
+  - id: 6.F.11
+    title: dislodge of multi-route convoy with only foreign fleets
+    phase: S1901M
+    units:
+      ENGLAND: [A LON]
+      GERMANY: [F ENG]
+      RUSSIA: [F NTH]
+      FRANCE: [F BRE, F MAO]
+    orders:
+      ENGLAND: [A LON - BEL]
+      GERMANY: [F ENG C A LON - BEL]
+      RUSSIA: [F NTH C A LON - BEL]
+      FRANCE: [F BRE S F MAO - ENG, F MAO - ENG]
+    expect:
+      resolutions:
+        A LON - BEL: succeeds
+        F ENG C A LON - BEL: fails
+        F NTH C A LON - BEL: succeeds
+        F BRE S F MAO - ENG: succeeds
+        F MAO - ENG: succeeds
+      dislodged: [GERMANY F ENG]
+
+  - id: 6.F.12
+    title: dislodged convoying fleet not on route
+    phase: S1901M
+    units:
+      ENGLAND: [F ENG, A LON, F IRI]
+      FRANCE: [F NAO, F MAO]
+    orders:
+      ENGLAND: [F ENG C A LON - BEL, A LON - BEL, F IRI C A LON - BEL]
+      FRANCE: [F NAO S F MAO - IRI, F MAO - IRI]
+    expect:
+      resolutions:
+        F ENG C A LON - BEL: succeeds
+        A LON - BEL: succeeds
+        F IRI C A LON - BEL: fails
+        F NAO S F MAO - IRI: succeeds
+        F MAO - IRI: succeeds
+      dislodged: [ENGLAND F IRI]
+
+  - id: 6.F.13
+    title: the unwanted alternative
+    phase: S1901M
+    units:
+      ENGLAND: [A LON, F NTH]
+      FRANCE: [F ENG]
+      GERMANY: [F HOL, F DEN]
+    orders:
+      ENGLAND: [A LON - BEL, F NTH C A LON - BEL]
+      FRANCE: [F ENG C A LON - BEL]
+      GERMANY: [F HOL S F DEN - NTH, F DEN - NTH]
+    expect:
+      resolutions:
+        A LON - BEL: succeeds
+        F NTH C A LON - BEL: fails
+        F ENG C A LON - BEL: succeeds
+        F HOL S F DEN - NTH: succeeds
+        F DEN - NTH: succeeds
+      dislodged: [ENGLAND F NTH]
+
+  - id: 6.F.14
+    title: simple convoy paradox
+    phase: S1901M
+    units:
+      ENGLAND: [F LON, F WAL]
+      FRANCE: [A BRE, F ENG]
+    orders:
+      ENGLAND: [F LON S F WAL - ENG, F WAL - ENG]
+      FRANCE: [A BRE - LON, F ENG C A BRE - LON]
+    expect:
+      resolutions:
+        F LON S F WAL - ENG: succeeds
+        F WAL - ENG: succeeds
+        A BRE - LON: fails
+        F ENG C A BRE - LON: fails
+      dislodged: [FRANCE F ENG]
+
+  - id: 6.F.15
+    title: simple convoy paradox with additional convoy
+    phase: S1901M
+    units:
+      ENGLAND: [F LON, F WAL]
+      FRANCE: [A BRE, F ENG]
+      ITALY: [F IRI, F MAO, A NAF]
+    orders:
+      ENGLAND: [F LON S F WAL - ENG, F WAL - ENG]
+      FRANCE: [A BRE - LON, F ENG C A BRE - LON]
+      ITALY: [F IRI C A NAF - WAL, F MAO C A NAF - WAL, A NAF - WAL]
+    expect:
+      resolutions:
+        F LON S F WAL - ENG: succeeds
+        F WAL - ENG: succeeds
+        A BRE - LON: fails
+        F ENG C A BRE - LON: fails
+        F IRI C A NAF - WAL: succeeds
+        F MAO C A NAF - WAL: succeeds
+        A NAF - WAL: succeeds
+      dislodged: [FRANCE F ENG]
+
+  - id: 6.F.16
+    title: pandin's paradox
+    phase: S1901M
+    units:
+      ENGLAND: [F LON, F WAL]
+      FRANCE: [A BRE, F ENG]
+      GERMANY: [F NTH, F BEL]
+    orders:
+      ENGLAND: [F LON S F WAL - ENG, F WAL - ENG]
+      FRANCE: [A BRE - LON, F ENG C A BRE - LON]
+      GERMANY: [F NTH S F BEL - ENG, F BEL - ENG]
+    expect:
+      resolutions:
+        F LON S F WAL - ENG: succeeds
+        F WAL - ENG: fails
+        A BRE - LON: fails
+        F ENG C A BRE - LON: fails
+        F NTH S F BEL - ENG: succeeds
+        F BEL - ENG: fails
+      dislodged: []
+
+  - id: 6.F.17
+    title: pandin's extended paradox
+    phase: S1901M
+    units:
+      ENGLAND: [F LON, F WAL]
+      FRANCE: [A BRE, F ENG, F YOR]
+      GERMANY: [F NTH, F BEL]
+    orders:
+      ENGLAND: [F LON S F WAL - ENG, F WAL - ENG]
+      FRANCE: [A BRE - LON, F ENG C A BRE - LON, F YOR S A BRE - LON]
+      GERMANY: [F NTH S F BEL - ENG, F BEL - ENG]
+    expect:
+      resolutions:
+        F LON S F WAL - ENG: succeeds
+        F WAL - ENG: fails
+        A BRE - LON: fails
+        F ENG C A BRE - LON: fails
+        F YOR S A BRE - LON: succeeds
+        F NTH S F BEL - ENG: succeeds
+        F BEL - ENG: fails
+      dislodged: []
+
+  - id: 6.F.18
+    title: betrayal paradox
+    phase: S1901M
+    units:
+      ENGLAND: [F NTH, A LON, F ENG]
+      FRANCE: [F BEL]
+      GERMANY: [F HEL, F SKA]
+    orders:
+      ENGLAND: [F NTH C A LON - BEL, A LON - BEL, F ENG S A LON - BEL]
+      FRANCE: [F BEL S F NTH]
+      GERMANY: [F HEL S F SKA - NTH, F SKA - NTH]
+    expect:
+      resolutions:
+        F NTH C A LON - BEL: fails
+        A LON - BEL: fails
+        F ENG S A LON - BEL: succeeds
+        F BEL S F NTH: succeeds
+        F HEL S F SKA - NTH: succeeds
+        F SKA - NTH: fails
+      dislodged: []
+
+  - id: 6.F.19
+    title: multi-route convoy disruption paradox
+    phase: S1901M
+    units:
+      FRANCE: [A TUN, F TYS, F ION]
+      ITALY: [F NAP, F ROM]
+    orders:
+      FRANCE: [A TUN - NAP, F TYS C A TUN - NAP, F ION C A TUN - NAP]
+      ITALY: [F NAP S F ROM - TYS, F ROM - TYS]
+    expect:
+      resolutions:
+        A TUN - NAP: fails
+        F TYS C A TUN - NAP: succeeds
+        F ION C A TUN - NAP: succeeds
+        F NAP S F ROM - TYS: fails
+        F ROM - TYS: fails
+      dislodged: []
+
+  - id: 6.F.20
+    title: unwanted multi-route convoy paradox
+    phase: S1901M
+    units:
+      FRANCE: [A TUN, F TYS]
+      ITALY: [F NAP, F ION]
+      TURKEY: [F AEG, F EAS]
+    orders:
+      FRANCE: [A TUN - NAP, F TYS C A TUN - NAP]
+      ITALY: [F NAP S F ION, F ION C A TUN - NAP]
+      TURKEY: [F AEG S F EAS - ION, F EAS - ION]
+    expect:
+      resolutions:
+        A TUN - NAP: fails
+        F TYS C A TUN - NAP: succeeds
+        F NAP S F ION: fails
+        F ION C A TUN - NAP: fails
+        F AEG S F EAS - ION: succeeds
+        F EAS - ION: succeeds
+      dislodged: [ITALY F ION]
+
+  - id: 6.F.21
+    title: dad's army convoy
+    phase: S1901M
+    units:
+      RUSSIA: [A EDI, F NWG, A NWY]
+      FRANCE: [F IRI, F MAO]
+      ENGLAND: [A LVP, F NAO, F CLY]
+    orders:
+      RUSSIA: [A EDI S A NWY - CLY, F NWG C A NWY - CLY, A NWY - CLY]
+      FRANCE: [F IRI S F MAO - NAO, F MAO - NAO]
+      ENGLAND: [A LVP - CLY via convoy, F NAO C A LVP - CLY, F CLY S F NAO]
+    expect:
+      resolutions:
+        A EDI S A NWY - CLY: succeeds
+        F NWG C A NWY - CLY: succeeds
+        A NWY - CLY: succeeds
+        F IRI S F MAO - NAO: succeeds
+        F MAO - NAO: succeeds
+        A LVP - CLY via convoy: fails
+        F NAO C A LVP - CLY: fails
+        F CLY S F NAO: fails
+      dislodged: [ENGLAND F NAO, ENGLAND F CLY]
+
+  - id: 6.F.22
+    title: second order paradox with two resolutions
+    phase: S1901M
+    units:
+      ENGLAND: [F EDI, F LON]
+      FRANCE: [A BRE, F ENG]
+      GERMANY: [F BEL, F PIC]
+      RUSSIA: [A NWY, F NTH]
+    orders:
+      ENGLAND: [F EDI - NTH, F LON S F EDI - NTH]
+      FRANCE: [A BRE - LON, F ENG C A BRE - LON]
+      GERMANY: [F BEL S F PIC - ENG, F PIC - ENG]
+      RUSSIA: [A NWY - BEL, F NTH C A NWY - BEL]
+    expect:
+      resolutions:
+        F EDI - NTH: succeeds
+        F LON S F EDI - NTH: succeeds
+        A BRE - LON: fails
+        F ENG C A BRE - LON: fails
+        F BEL S F PIC - ENG: succeeds
+        F PIC - ENG: succeeds
+        A NWY - BEL: fails
+        F NTH C A NWY - BEL: fails
+      dislodged: [FRANCE F ENG, RUSSIA F NTH]
+
+  - id: 6.F.23
+    title: second order paradox with two exclusive convoys
+    phase: S1901M
+    units:
+      ENGLAND: [F EDI, F YOR]
+      FRANCE: [A BRE, F ENG]
+      GERMANY: [F BEL, F LON]
+      ITALY: [F MAO, F IRI]
+      RUSSIA: [A NWY, F NTH]
+    orders:
+      ENGLAND: [F EDI - NTH, F YOR S F EDI - NTH]
+      FRANCE: [A BRE - LON, F ENG C A BRE - LON]
+      GERMANY: [F BEL S F ENG, F LON S F NTH]
+      ITALY: [F MAO - ENG, F IRI S F MAO - ENG]
+      RUSSIA: [A NWY - BEL, F NTH C A NWY - BEL]
+    expect:
+      resolutions:
+        F EDI - NTH: fails
+        F YOR S F EDI - NTH: succeeds
+        A BRE - LON: fails
+        F ENG C A BRE - LON: fails
+        F BEL S F ENG: succeeds
+        F LON S F NTH: succeeds
+        F MAO - ENG: fails
+        F IRI S F MAO - ENG: succeeds
+        A NWY - BEL: fails
+        F NTH C A NWY - BEL: fails
+      dislodged: []
+
+  - id: 6.F.24
+    title: second order paradox with no resolution
+    phase: S1901M
+    units:
+      ENGLAND: [F EDI, F LON, F IRI, F MAO]
+      FRANCE: [A BRE, F ENG, F BEL]
+      RUSSIA: [A NWY, F NTH]
+    orders:
+      ENGLAND: [F EDI - NTH, F LON S F EDI - NTH, F IRI - ENG, F MAO S F IRI - ENG]
+      FRANCE: [A BRE - LON, F ENG C A BRE - LON, F BEL S F ENG]
+      RUSSIA: [A NWY - BEL, F NTH C A NWY - BEL]
+    expect:
+      resolutions:
+        F EDI - NTH: succeeds
+        F LON S F EDI - NTH: succeeds
+        F IRI - ENG: fails
+        F MAO S F IRI - ENG: succeeds
+        A BRE - LON: fails
+        F ENG C A BRE - LON: fails
+        F BEL S F ENG: succeeds
+        A NWY - BEL: fails
+        F NTH C A NWY - BEL: fails
+      dislodged: [RUSSIA F NTH]
+
+  - id: 6.F.25
+    title: cut support last
+    phase: S1901M
+    units:
+      GERMANY: [A RUH, A HOL, A DEN, F SKA, A FIN]
+      ENGLAND: [A YOR, F NTH, F HEL, A BEL]
+      RUSSIA: [F NWG, F NWY, F SWE]
+    orders:
+      GERMANY: [A RUH - BEL, A HOL S A RUH - BEL, A DEN - NWY, F SKA C A DEN - NWY, A FIN S A DEN - NWY]
+      ENGLAND: [A YOR - HOL, F NTH C A YOR - HOL, F HEL S A YOR - HOL, A BEL H]
+      RUSSIA: [F NWG - NTH, F NWY S F NWG - NTH, F SWE - SKA]
+    expect:
+      resolutions:
+        A RUH - BEL: fails
+        A HOL S A RUH - BEL: fails
+        A DEN - NWY: succeeds
+        F SKA C A DEN - NWY: succeeds
+        A FIN S A DEN - NWY: succeeds
+        A YOR - HOL: succeeds
+        F NTH C A YOR - HOL: succeeds
+        F HEL S A YOR - HOL: succeeds
+        A BEL H: succeeds
+        F NWG - NTH: fails
+        F NWY S F NWG - NTH: fails
+        F SWE - SKA: fails
+      dislodged: [GERMANY A HOL, RUSSIA F NWY]
+
+  - id: 6.F.26
+    title: convoy paradox with additional related convoys
+    phase: S1901M
+    units:
+      ENGLAND: [F LON, F WAL]
+      FRANCE: [A BRE, F ENG]
+      ITALY: [A GAS, A SPA, F MAO]
+      RUSSIA: [A CLY, F NAO, F IRI]
+    orders:
+      ENGLAND: [F LON S F WAL - ENG, F WAL - ENG]
+      FRANCE: [A BRE - LON, F ENG C A BRE - LON]
+      ITALY: [A GAS S A SPA - BRE, A SPA - BRE, F MAO C A SPA - BRE]
+      RUSSIA: [A CLY - WAL, F NAO C A CLY - WAL, F IRI C A CLY - WAL]
+    expect:
+      resolutions:
+        F LON S F WAL - ENG: succeeds
+        F WAL - ENG: succeeds
+        A BRE - LON: fails
+        F ENG C A BRE - LON: fails
+        A GAS S A SPA - BRE: succeeds
+        A SPA - BRE: succeeds
+        F MAO C A SPA - BRE: succeeds
+        A CLY - WAL: succeeds
+        F NAO C A CLY - WAL: succeeds
+        F IRI C A CLY - WAL: succeeds
+      dislodged: [FRANCE F ENG, FRANCE A BRE]
+
+  - id: 6.F.27
+    title: two independent paradoxes
+    phase: S1901M
+    units:
+      ENGLAND: [F NTH, A LON, F ENG]
+      FRANCE: [F BEL]
+      GERMANY: [F HEL, F SKA]
+      ITALY: [A TUN, F ION]
+      TURKEY: [F AEG, F GRE]
+    orders:
+      ENGLAND: [F NTH C A LON - BEL, A LON - BEL, F ENG S A LON - BEL]
+      FRANCE: [F BEL S F NTH]
+      GERMANY: [F HEL S F SKA - NTH, F SKA - NTH]
+      ITALY: [A TUN - GRE, F ION C A TUN - GRE]
+      TURKEY: [F AEG - ION, F GRE S F AEG - ION]
+    expect:
+      resolutions:
+        F NTH C A LON - BEL: fails
+        A LON - BEL: fails
+        F ENG S A LON - BEL: succeeds
+        F BEL S F NTH: succeeds
+        F HEL S F SKA - NTH: succeeds
+        F SKA - NTH: fails
+        A TUN - GRE: fails
+        F ION C A TUN - GRE: fails
+        F AEG - ION: succeeds
+        F GRE S F AEG - ION: succeeds
+      dislodged: [ITALY F ION]
+
+  - id: 6.F.28
+    title: sixth order paradox
+    phase: S1901M
+    units:
+      RUSSIA: [F FIN, F STP/SC, F PRU, F SWE, F SKA, F DEN, F NWY, F CLY]
+      GERMANY: [A LVN, F BOT, A BER, F BAL, A HOL, F NTH, A BEL, F ENG]
+      ENGLAND: [F WAL, F LON, A NAF, F MAO, F NAO, A EDI, F NWG, F BAR]
+      FRANCE: [F SPA/NC, F BRE]
+    orders:
+      RUSSIA:
+        - F FIN - BOT
+        - F STP/SC S F FIN - BOT
+        - F PRU - BAL
+        - F SWE S F PRU - BAL
+        - F SKA - NTH
+        - F DEN S F SKA - NTH
+        - F NWY - NWG
+        - F CLY S F NWY - NWG
+      GERMANY:
+        - A LVN - SWE
+        - F BOT C A LVN - SWE
+        - A BER - DEN
+        - F BAL C A BER - DEN
+        - A HOL - LON
+        - F NTH C A HOL - LON
+        - A BEL - BRE
+        - F ENG C A BEL - BRE
+      ENGLAND:
+        - F WAL - ENG
+        - F LON S F WAL - ENG
+        - A NAF - CLY
+        - F MAO C A NAF - CLY
+        - F NAO C A NAF - CLY
+        - A EDI - STP
+        - F NWG C A EDI - STP
+        - F BAR C A EDI - STP
+      FRANCE:
+        - F SPA/NC - MAO
+        - F BRE S F SPA/NC - MAO
+    expect:
+      resolutions:
+        F FIN - BOT: succeeds
+        F STP/SC S F FIN - BOT: succeeds
+        F PRU - BAL: succeeds
+        F SWE S F PRU - BAL: succeeds
+        F SKA - NTH: succeeds
+        F DEN S F SKA - NTH: succeeds
+        F NWY - NWG: succeeds
+        F CLY S F NWY - NWG: succeeds
+        A LVN - SWE: fails
+        F BOT C A LVN - SWE: fails
+        A BER - DEN: fails
+        F BAL C A BER - DEN: fails
+        A HOL - LON: fails
+        F NTH C A HOL - LON: fails
+        A BEL - BRE: fails
+        F ENG C A BEL - BRE: fails
+        F WAL - ENG: succeeds
+        F LON S F WAL - ENG: succeeds
+        A NAF - CLY: fails
+        F MAO C A NAF - CLY: fails
+        F NAO C A NAF - CLY: fails
+        A EDI - STP: fails
+        F NWG C A EDI - STP: fails
+        F BAR C A EDI - STP: fails
+        F SPA/NC - MAO: succeeds
+        F BRE S F SPA/NC - MAO: succeeds
+      dislodged:
+        [GERMANY F BOT, GERMANY F BAL, GERMANY F NTH, GERMANY F ENG,
+         ENGLAND F MAO, ENGLAND F NWG]
+
+  - id: 6.F.29
+    title: sixth order butterfly effect
+    phase: S1901M
+    units:
+      RUSSIA: [F FIN, F STP/SC, F PRU, F SWE, F SKA, F DEN, F NWY, F CLY]
+      GERMANY: [A LVN, F BOT, A BER, F BAL, A HOL, F NTH, A BEL, F ENG]
+      ENGLAND: [F WAL, F LON, A NAF, F MAO, F NAO, A EDI, F NWG, F BAR, F POR]
+      FRANCE: [F SPA/NC, F BRE]
+    orders:
+      RUSSIA:
+        - F FIN - BOT
+        - F STP/SC S F FIN - BOT
+        - F PRU - BAL
+        - F SWE S F PRU - BAL
+        - F SKA - NTH
+        - F DEN S F SKA - NTH
+        - F NWY - NWG
+        - F CLY S F NWY - NWG
+      GERMANY:
+        - A LVN - SWE
+        - F BOT C A LVN - SWE
+        - A BER - DEN
+        - F BAL C A BER - DEN
+        - A HOL - LON
+        - F NTH C A HOL - LON
+        - A BEL - BRE
+        - F ENG C A BEL - BRE
+      ENGLAND:
+        - F WAL - ENG
+        - F LON S F WAL - ENG
+        - A NAF - CLY
+        - F MAO C A NAF - CLY
+        - F NAO C A NAF - CLY
+        - A EDI - STP
+        - F NWG C A EDI - STP
+        - F BAR C A EDI - STP
+        - F POR S F MAO
+      FRANCE:
+        - F SPA/NC - MAO
+        - F BRE S F SPA/NC - MAO
+    expect:
+      resolutions:
+        F FIN - BOT: fails
+        F STP/SC S F FIN - BOT: fails
+        F PRU - BAL: fails
+        F SWE S F PRU - BAL: fails
+        F SKA - NTH: fails
+        F DEN S F SKA - NTH: fails
+        F NWY - NWG: fails
+        F CLY S F NWY - NWG: fails
+        A LVN - SWE: fails
+        F BOT C A LVN - SWE: succeeds
+        A BER - DEN: fails
+        F BAL C A BER - DEN: succeeds
+        A HOL - LON: fails
+        F NTH C A HOL - LON: succeeds
+        A BEL - BRE: fails
+        F ENG C A BEL - BRE: succeeds
+        F WAL - ENG: fails
+        F LON S F WAL - ENG: fails
+        A NAF - CLY: fails
+        F MAO C A NAF - CLY: succeeds
+        F NAO C A NAF - CLY: succeeds
+        A EDI - STP: fails
+        F NWG C A EDI - STP: succeeds
+        F BAR C A EDI - STP: succeeds
+        F POR S F MAO: succeeds
+        F SPA/NC - MAO: fails
+        F BRE S F SPA/NC - MAO: fails
+      dislodged: []
+
+  - id: 6.F.30
+    title: the attack comes from the starting position
+    phase: S1901M
+    units:
+      ENGLAND: [A LON, F ENG, F NTH]
+      FRANCE: [F BEL, F BRE]
+    orders:
+      ENGLAND: [A LON - BEL, F ENG C A LON - BEL, F NTH S A LON - BEL]
+      FRANCE: [F BEL - ENG, F BRE S F BEL - ENG]
+    expect:
+      resolutions:
+        A LON - BEL: fails
+        F ENG C A LON - BEL: fails
+        F NTH S A LON - BEL: succeeds
+        F BEL - ENG: succeeds
+        F BRE S F BEL - ENG: succeeds
+      dislodged: [ENGLAND F ENG]

@@ -1,0 +1,28 @@
+{
+  "phase": "S1901M",
+  "self_power": "RUSSIA",
+  "proposer": "AUSTRIA",
+  "ally": "ITALY",
+  "true_move_index": 1,
+  "note": "Deceptive: AUSTRIA's announced move (index 0, peaceful Balkans) does NOT match its actual scripted move (index 1, repositioning toward the Italian border). Demonstrates that conditioning on an untruthful proposal can mislead prediction.",
+  "message": "PROPOSAL from AUSTRIA to ITALY for S1901M: AUSTRIA orders [A VIE - GAL, A BUD - SER, F TRI - ALB]; ITALY orders [F NAP - ION, A ROM - APU, A VEN H]. Nothing but the Balkans from me this year -- go ahead and develop south.",
+  "candidates": {
+    "AUSTRIA": {
+      "order_sets": [
+        ["A VIE - GAL", "A BUD - SER", "F TRI - ALB"],
+        ["A VIE - TYR", "A BUD - SER", "F TRI H"],
+        ["A VIE H", "A BUD H", "F TRI H"]
+      ],
+      "anchor": [0.3, 0.4, 0.3]
+    },
+    "ITALY": {
+      "order_sets": [
+        ["F NAP - ION", "A ROM - APU", "A VEN H"],
+        ["F NAP - ION", "A ROM - APU", "A VEN - TRI"],
+        ["F NAP H", "A ROM H", "A VEN H"]
+      ],
+      "anchor": [0.34, 0.33, 0.33]
+    }
+  },
+  "pikl": {"lam": 1.0, "iterations": 64}
+}

@@ -1,0 +1,29 @@
+# CPU smoke config: overfit a few synthetic games to prove the loop learns.
+# Not a quality run -- the >=50% held-out top-1 target needs base.yaml on a GPU
+# (docs/setup.md). Tiny model, no dropout (memorize), short schedule. The smoke
+# test overrides data.shards_dir with a freshly-preprocessed synthetic tmp dir.
+model:
+  d_model: 64
+  n_layers: 2
+  n_heads: 4
+  ff_mult: 4
+  dropout: 0.0
+optim:
+  lr: 1.0e-3
+  weight_decay: 0.0
+  warmup_steps: 10
+  max_steps: 300
+  batch_size: 16
+  grad_clip: 1.0
+  value_loss_weight: 0.5
+data:
+  shards_dir: data/processed_synth
+  val_fraction: 0.0
+  num_workers: 0
+  shuffle: true
+seed: 0
+out_dir: checkpoints/bc_smoke
+run_name: bc_smoke
+device: auto
+log_every: 10
+eval_every: 150
