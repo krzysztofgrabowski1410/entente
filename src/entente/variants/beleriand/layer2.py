@@ -2375,9 +2375,10 @@ class BeleriandHooks(GameHooks):
         identities that retreat still stand in limbo beside it, so a death
         among twins frees the centre owned longest (the rulebook's "Double
         Units": *"of two twins, the point of the Supply Centre owned
-        longer"*, :meth:`_release_older_centre`) and the twin that retreats
-        keeps the newer one -- unless the twins carry different numbers of
-        masks, which tells them apart: each then keeps its own centre.
+        longer"*, :meth:`_release_older_centre`) and the twin that retreats,
+        or that never left the board, keeps the newer one -- unless the twins
+        carry different numbers of masks, which tells them apart: each then
+        keeps its own centre.
         """
         classes: dict[tuple[Unit, str | None], list[tuple[Dislodgement, Location]]] = {}
         for dislodgement, landing in result.retreated:
@@ -2768,6 +2769,14 @@ class BeleriandHooks(GameHooks):
         so the double that dies is the one bound to the centre held longest.
         A double disbanded because its own centre was captured is no such
         choice: :meth:`_double_disbands` kills it without this trade.
+
+        The twins of an identity are the other identities of its
+        :attr:`LedgerUnit.group` -- the same power, kind, base strength,
+        province and coast -- where the location of a dislodged identity
+        (``limbo``) is the place it stood when it was dislodged. A dislodged
+        identity that dies therefore trades with every twin of its class,
+        the twin that still stands on the board included; an identity that
+        dies on the board trades with the twins on the board only.
         """
         if entry.special is not None or entry.supplied_by is None:
             return
@@ -2781,7 +2790,7 @@ class BeleriandHooks(GameHooks):
             and other.supplied_by is not None
             and other.group == entry.group
             and other.masks == entry.masks
-            and other.limbo == entry.limbo
+            and (entry.limbo or not other.limbo)
         ]
         if not twins:
             return

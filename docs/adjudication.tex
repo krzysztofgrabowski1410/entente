@@ -11,7 +11,7 @@
 
 \section*{The generalized adjudication calculus}
 
-Version 1.38.
+Version 1.39.
 
 \textbf{Scope.}
 This document specifies \textbf{movement-phase adjudication} in full; retreats and builds I specify in outline (\cref{sec:9}).
@@ -1294,7 +1294,7 @@ The game layer's ledger, which the game keeps beside the state (\cref{sec:1}), r
 A Double Unit is supplied by the point of the centre it is bound to; its build may name that centre, as in \order{Build 2A FOR BOUND NEB}, and otherwise takes the first centre in canonical order (\cref{sec:1}) that may bind it.
 A starting unit is supplied by the centre it starts on where its power owns that centre with a point to spare.
 Every other unit -- the specials aside, which need no supply -- is supplied by the newest centre that its power owns with a point to spare; ties between equally new centres are broken in canonical order, and a Men unit takes first the centre it is built in where that centre has one.
-A dead unit frees its point; where one of two identical twins dies, it is the one that frees the older centre.
+A dead unit frees its point; where one of two identical twins dies, it is the one that frees the older centre, and the twins of a dislodged unit that dies in the retreats are the identical units that stood in its province, those dislodged with it and those that were not dislodged.
 Twins that carry different numbers of Dwarven masks are told apart, so that each keeps its own point and none trades it, and where the game layer chooses which of several matching units a removal takes, it takes one with the fewest masks.
 A unit whose centre is lost takes another in the same way, at the Autumn boundary and again after the winter's disbands, while a Double Unit whose centre is captured is disbanded at the Autumn boundary, as soon as the centre passes to its captor and before the adjustment counts the power's units.
 Where no centre of its power has a point to spare, a unit whose centre is lost stands unsupplied until a point frees: the adjustment removes units by its quota alone, never for want of a point.

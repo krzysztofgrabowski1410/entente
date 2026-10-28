@@ -241,6 +241,110 @@ def test_of_two_dislodged_twins_with_equal_masks_the_one_that_dies_frees_the_old
     assert survivor.supplied_by == "RON", centres
 
 
+# -- a twin dislodged alone is traded with the twin that stays ---------------------------
+
+
+def _one_twin_dislodged(
+    spec: str, centres: tuple[str, str], masks: tuple[int, int] = (0, 0)
+) -> tuple[Game, BeleriandHooks]:
+    """Dislodge one of FINROD's two twin ``spec`` units from Lothlann; the other stays.
+
+    The twins hold ``centres`` and carry ``masks`` in uid order, as in
+    :func:`_twins_dislodged`. One Feanorian Dislodge with one support removes
+    a single twin, so the retreat phase opens with one twin in limbo and its
+    twin still standing in LOT; AEL holds the supporter, so ``- AEL`` fails.
+    """
+    graph = load_map("beleriand")
+    hooks = BeleriandHooks(graph, seed=0)
+    phase = Phase(25, Season.SPRING, PhaseKind.MOVEMENT, year_step=-1)
+    attacker = spec.split()[0]
+    units = [Unit("FINROD", *parse_unit_spec(spec)) for _ in centres] + [
+        Unit("FEANORIANS", *parse_unit_spec(text)) for text in (f"{attacker} HIG", "A AEL")
+    ]
+    state = State.of("beleriand", phase.tag, units)
+    ownership = {"NAR": "FINROD", "RON": "FINROD"}
+    ownership.update(dict.fromkeys(graph.home_centers["FEANORIANS"], "FEANORIANS"))
+    hooks.register_start(state, ownership)
+    hooks.owner_since["RON"] = 2
+    twins = [entry for entry in hooks.ledger.alive() if entry.power == "FINROD"]
+    for entry, centre, carried in zip(twins, centres, masks, strict=True):
+        entry.bound_to = centre if entry.strength == 2 else None
+        entry.supplied_by = centre
+        entry.masks = carried
+    hooks._reconcile_spent(state, ownership)
+    assert [entry.supplied_by for entry in twins] == list(centres)
+    game = Game(RULESETS["beleriand"], graph, state, ownership, phase, hooks=hooks)
+    attacks = [f"{attacker} HIG DIS FINROD {spec}", f"A AEL S {attacker} HIG DIS FINROD {spec}"]
+    game.submit("FEANORIANS", [parse_order(text) for text in attacks])
+    game.adjudicate()
+    assert game.phase_kind is PhaseKind.RETREAT
+    assert len(game.pending_dislodgements) == 1
+    assert [entry.limbo for entry in twins].count(True) == 1
+    return game, hooks
+
+
+@pytest.mark.parametrize("spec", ["2A LOT", "A LOT"], ids=["doubles", "singles"])
+@pytest.mark.parametrize("centres", CENTRES, ids=["NAR-1st", "RON-1st"])
+@pytest.mark.parametrize("masks", [(0, 0), (1, 1)], ids=["no-masks", "equal-masks"])
+def test_of_two_twins_dislodged_alone_the_one_that_dies_frees_the_older_centre(
+    spec: str, centres: tuple[str, str], masks: tuple[int, int]
+) -> None:
+    """Free NAR, the centre owned longer, when the dislodged twin dies and its twin stays.
+
+    The dislodged twin has no way out (``- AEL`` fails), so it dies in the
+    retreats while its twin still stands in LOT. The two cannot be told apart
+    -- equal masks leave them alike -- so whichever identity the ledger
+    dislodged, the one that dies frees NAR and the twin on the board holds RON
+    (a double its binding as well).
+    """
+    game, hooks = _one_twin_dislodged(spec, centres, masks)
+    game.submit("FINROD", [parse_retreat_order(f"{spec} - AEL")])
+    record = game.adjudicate()
+    assert [row.resolution for row in record.resolutions] == [Resolution.FAILS]
+    (survivor,) = [entry for entry in hooks.ledger.alive() if entry.power == "FINROD"]
+    assert survivor.location == Location("LOT") and not survivor.limbo
+    assert survivor.supplied_by == "RON", (centres, masks)
+    assert survivor.bound_to == ("RON" if survivor.strength == 2 else None), (centres, masks)
+
+
+@pytest.mark.parametrize("spec", ["2A LOT", "A LOT"], ids=["doubles", "singles"])
+@pytest.mark.parametrize("centres", CENTRES, ids=["NAR-1st", "RON-1st"])
+@pytest.mark.parametrize("masks", MASKS, ids=["mask-1st", "mask-2nd"])
+def test_twins_with_different_masks_trade_no_centre_when_one_is_dislodged_alone(
+    spec: str, centres: tuple[str, str], masks: tuple[int, int]
+) -> None:
+    """The twin that stays keeps the centre it held, whichever twin died.
+
+    The twins carry different numbers of masks, so a player can tell them
+    apart: the dead one frees its own centre and trades nothing with the twin
+    on the board.
+    """
+    game, hooks = _one_twin_dislodged(spec, centres, masks)
+    held = {
+        entry.uid: (entry.supplied_by, entry.bound_to)
+        for entry in hooks.ledger.alive()
+        if entry.power == "FINROD"
+    }
+    game.submit("FINROD", [parse_retreat_order(f"{spec} - AEL")])
+    game.adjudicate()
+    (survivor,) = [entry for entry in hooks.ledger.alive() if entry.power == "FINROD"]
+    assert survivor.location == Location("LOT") and not survivor.limbo
+    assert (survivor.supplied_by, survivor.bound_to) == held[survivor.uid], (centres, masks)
+
+
+@pytest.mark.parametrize("centres", CENTRES, ids=["NAR-1st", "RON-1st"])
+def test_a_twin_that_retreats_is_not_traded_with_the_twin_that_stays(
+    centres: tuple[str, str],
+) -> None:
+    """A dislodged twin that retreats lives, so nobody dies and no centre moves."""
+    game, hooks = _one_twin_dislodged("A LOT", centres)
+    game.submit("FINROD", [parse_retreat_order("A LOT - LAD")])
+    game.adjudicate()
+    alive = [entry for entry in hooks.ledger.alive() if entry.power == "FINROD"]
+    assert sorted(entry.location.province for entry in alive) == ["LAD", "LOT"]
+    assert sorted(entry.supplied_by or "" for entry in alive) == ["NAR", "RON"]
+
+
 @pytest.mark.parametrize("bindings", CENTRES, ids=["NAR-1st", "RON-1st"])
 @pytest.mark.parametrize("masks", MASKS, ids=["mask-1st", "mask-2nd"])
 def test_a_winter_disband_of_two_twin_doubles_removes_the_unmasked_one(
