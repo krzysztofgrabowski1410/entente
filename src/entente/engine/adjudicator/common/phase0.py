@@ -460,7 +460,9 @@ def _validate_support(
         support.subject_power,
         slot,
         received_subject,
-        fits=lambda occurrence: _ref_special_ok(subject.special, work.designator(occurrence)),
+        fits=lambda occurrence: _ref_special_ok(
+            subject.special, work.designator(occurrence), work.ruleset.strict_designation
+        ),
     )
     if subject_slot is None or not received_subject(subject_slot):
         return None

@@ -53,8 +53,13 @@ def ref_matches_unit(ref: UnitRef, unit: Unit) -> bool:
     )
 
 
-def _ref_special_ok(ref_special: str | None, record_special: str | None) -> bool:
+def _ref_special_ok(
+    ref_special: str | None, record_special: str | None, strict: bool = True
+) -> bool:
     """Whether a reference's designator fits a record's effective one: equal, or neither written.
+
+    ``strict`` is the ruleset's ``strict_designation``: without it (the standard
+    map) a designator means nothing, so every reference fits every record.
 
     On the board both specials are a plain ``3A``, so the adjudicator knows a
     special only by the designator its own order writes: a reference written
@@ -69,7 +74,7 @@ def _ref_special_ok(ref_special: str | None, record_special: str | None) -> bool
     without the game layer, a ``3A`` whose order writes no designator, or
     that has no order, is an unnamed ``3A``, which only a bare reference fits.
     """
-    return ref_special == record_special
+    return not strict or ref_special == record_special
 
 
 def _spec_matches_unit(order: Order, unit: Unit) -> bool:

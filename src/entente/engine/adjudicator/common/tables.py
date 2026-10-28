@@ -198,7 +198,7 @@ def _subject_record(
         for r in records
         if r.unit.location.province == subject.location.province
         and r.index != supporter
-        and _ref_special_ok(subject.special, r.effective.special)
+        and _ref_special_ok(subject.special, r.effective.special, strict)
     ]
     if support.subject_power is not None:
         candidates = [r for r in candidates if r.power == support.subject_power]

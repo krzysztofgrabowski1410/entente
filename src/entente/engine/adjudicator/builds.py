@@ -211,7 +211,6 @@ def adjudicate_adjustments(
 
     Of the post-Autumn state, the center ownership, and the adjustment sheets.
     """
-    del ruleset  # Sec. 9: standard adjustment reads map data only; variant build rules are L2
     powers = sorted({unit.power for unit in state.units} | set(sheets) | set(ownership.values()))
 
     resolutions: list[OrderResolution] = []
@@ -251,7 +250,13 @@ def adjudicate_adjustments(
                     remaining -= 1
             elif quota < 0:
                 resolution = _resolve_removal(
-                    state, power, order, remaining, removed_slots, disbanded
+                    ruleset.strict_designation,
+                    state,
+                    power,
+                    order,
+                    remaining,
+                    removed_slots,
+                    disbanded,
                 )
                 if resolution is Resolution.SUCCEEDS:
                     remaining -= 1
@@ -323,6 +328,7 @@ def _resolve_entitled(
 
 
 def _resolve_removal(
+    strict: bool,
     state: State,
     power: str,
     order: AnyOrder,
@@ -336,12 +342,12 @@ def _resolve_removal(
     Occurrences are consumed by slot so duplicate orders on a stacked province
     remove one unit each (Sec. 1 multiset occupancy).
 
-    The written base strength is exact, an unwritten one meaning base strength 1
-    (the rulebook reads a bare "A" as "1A"), so ``Disband A NOG`` never removes a
-    lone 2A. There is no advisory province-only fallback here, and on the
-    standard column every unit has base strength 1, so the base-strength test is
-    invisible there.
-    Written KIND is not read.
+    Under ``strict_designation`` the written base strength is exact, an unwritten
+    one meaning base strength 1 (the rulebook reads a bare "A" as "1A"), so
+    ``Disband A NOG`` never removes a lone 2A. There is no advisory province-only
+    fallback there. Without it (the standard map) the written base strength is
+    advisory, as in a movement or retreat order: ``Disband 2A MAR`` removes the
+    unit standing in MAR. Written KIND is not read.
     """
     if not isinstance(order, Disband) or remaining <= 0:
         return Resolution.FAILS
@@ -351,7 +357,7 @@ def _resolve_removal(
             for i, u in enumerate(state.units)
             if u.power == power
             and u.location.province == order.location.province
-            and (order.strength or 1) == u.strength
+            and (not strict or (order.strength or 1) == u.strength)
             and i not in removed_slots
         ),
         None,
